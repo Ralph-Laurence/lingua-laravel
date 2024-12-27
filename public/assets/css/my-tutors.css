@@ -1,0 +1,35 @@
+.big-title {
+    font-size: 54px;
+    font-weight: bold;
+    font-family: 'Poppins-SemiBold';
+}
+
+section.section-learn-faster {
+    background: var(--accent-primary);
+    padding: 50px 128px;
+}
+
+section.section-learn-faster img {
+    border-radius: 6px;
+}
+
+section.section-learn-faster .caption-try-another
+{
+    font-weight: 700;
+}
+
+section.tutors-list .tutors-list-item .card {
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+section.tutors-list .tutors-list-item h6 {
+    color: var(--base-dark);
+}
+
+section.tutors-list .tutors-list-item:hover .card {
+    background-color: #fafafa;
+    color: white;
+    transform: scale(1.075); /* Slightly enlarge the card */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow effect on hover */
+    border: 1px solid #d4d4d4;
+}

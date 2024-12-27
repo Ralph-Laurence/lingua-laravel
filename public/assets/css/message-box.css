@@ -1,0 +1,11 @@
+.message-box .message-box-icon .fas,
+.message-box .message-box-icon.info .fas {
+    color: #0B52FC;
+}
+
+.message-box .message-box-icon.error .fas {
+    color: #F44336;
+}
+.message-box .message-box-icon.warn .fas {
+    color: #FB8C00;
+}

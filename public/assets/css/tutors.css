@@ -1,0 +1,93 @@
+section.section-choose-tutors {
+    background: var(--accent-dark);
+    color: white;
+    padding: 50px 128px;
+}
+
+section.section-choose-tutors img {
+    border-radius: 6px;
+}
+
+section.section-choose-tutors h4 {
+    color: #FF9525;
+}
+
+section.tutors-list .tutors-list-view {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 20px;
+}
+
+@media (max-width: 992px) { /* For tablets and smaller screens */
+    section.tutors-list .tutors-list-view {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) { /* For phones and smaller screens */
+    section.tutors-list .tutors-list-view {
+        grid-template-columns: 1fr;
+    }
+}
+
+section.tutors-list .tutors-list-view .card {
+    border-radius: 0.5rem;
+}
+
+section.tutors-list .tutors-list-view .card .profile-photo {
+    border-radius: 50%;
+    border: 2px solid #f1f4f7;
+    width: 90px;
+    height: 90px;
+}
+
+section.tutors-list .tutors-list-view .card .tutor-name {
+    font-family: 'Poppins-SemiBold';
+    color: var(--accent-dark);
+}
+
+section.tutors-list .tutors-list-view .card .tutor-bio {
+    height: 72px;
+    font-size: 16px;
+    line-height: 24px; /* Adjust line height to ensure proper spacing (16px font size * 1.5) */
+    overflow: hidden;
+    display: -webkit-box; /* Required for -webkit-line-clamp */
+    -webkit-box-orient: vertical; /* Required for -webkit-line-clamp */
+    -webkit-line-clamp: 3; /* Limit to 3 lines */
+    white-space: normal; /* Ensure normal white-space behavior */
+    text-overflow: ellipsis;
+}
+
+section.tutors-list .tutors-list-view .card .btn-more-details {
+    background: #F1F2F3;
+    border: 1px solid #dee6ee;
+    color:#616161;
+    width: 110px;
+}
+
+section.tutors-list .tutors-list-view .card .btn-more-details:hover,
+section.tutors-list .tutors-list-view .card .btn-more-details:active,
+section.tutors-list .tutors-list-view .card .btn-more-details:focus {
+    background: #FDC057;
+    border: 1px solid #FDAF3C;
+    outline: 0;
+    color:#4F1E05;
+    box-shadow: 0 0 0 4px rgba(246, 179, 33, 0.25);
+    font-family: 'Poppins-Medium';
+    width: 110px;
+}
+
+section.control-ribbon .search-button{
+    background-color: var(--accent-tertiary);
+    border: none;
+    color: white;
+    transition: background 0.12s ease-in-out;
+}
+
+section.control-ribbon .search-button:hover {
+    background-color: var(--accent-primary);
+    color: white;
+    outline: 0;
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 0 4px rgba(246, 33, 85, 0.25);
+}

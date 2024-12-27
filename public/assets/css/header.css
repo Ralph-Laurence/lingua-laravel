@@ -1,0 +1,31 @@
+header .nav .nav-link {
+    font-size: 14px;
+    min-width: 100px;
+    text-align: center;
+    color: #6f6e75;
+}
+
+header .nav .nav-link.link-active {
+    font-weight: 600;
+    border: 2px solid #FB6339;
+    border-radius: 2rem;
+    color: var(--accent-dark);
+}
+
+footer {
+    /* border-top: 2px solid var(--accent-secondary); */
+    background-color: #110D19;
+    /* background-color: #0D1226; */
+    color: white;
+}
+
+header .role-badge {
+    font-family: 'Poppins-SemiBold';
+    color: white;
+    border-radius: 2rem;
+    letter-spacing: 1px;
+}
+
+.role-badge.role-admin { background-color: #FF7701; }
+.role-badge.role-tutor { background-color: darkslateblue; }
+.role-badge.role-learner { background-color: #00CF73; }

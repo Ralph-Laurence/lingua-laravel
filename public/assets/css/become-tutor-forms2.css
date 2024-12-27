@@ -1,0 +1,27 @@
+.ui-selectmenu-menu .ui-menu {max-height: 185px;}
+
+.forms-entry-container {
+    border-radius: 1px solid #C9CFD5;
+}
+
+.btn-remove-entry {
+    background-color: #FAE4E8;
+    color: #B03D50;
+}
+
+.btn-add-entry {
+    background-color: rgb(225.6, 233.7, 247.05);
+    color: rgb(47.2, 90.4, 161.6);
+}
+
+.entry-buttons {
+    border: none;
+    font-family: 'Poppins-SemiBold';
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+/* .entry-card-title {
+    font-weight: normal;
+    font-family: 'Poppins-SemiBold';
+} */

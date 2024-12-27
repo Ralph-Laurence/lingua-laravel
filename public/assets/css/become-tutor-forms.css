@@ -1,0 +1,73 @@
+.content-wrapper {
+    display: grid;
+    grid-template-columns: auto 320px;
+    position: relative;
+}
+
+aside .card {
+    position: sticky;
+    top: 20px;
+}
+
+section.forms-section .card {
+    border-radius: .5rem;
+}
+
+.invalid-feedback {
+    font-size: 12px;
+}
+
+.form-control:valid {
+    border-color: #9A7FB7 !important;
+    box-shadow: 0 0 0 .25rem rgba(44, 26, 78, .25) !important;
+    /* box-shadow: 0 0 0 .25rem rgba(25, 135, 84, .25); */
+    /* padding-right: calc(1.5em + .75rem); */
+    /* background-image: url(data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e); */
+    /* background-repeat: no-repeat; */
+    /* background-position: right calc(.375em + .1875rem) center;
+    background-size: calc(.75em + .375rem) calc(.75em + .375rem); */
+}
+
+.bio-input-group, .about-input-group {
+    position: relative;
+}
+
+#about-me {
+    min-height: 301px;
+    border: 1px solid #CCC;
+}
+
+#about-me.is-invalid {
+    border: 1px solid #F62434;
+}
+
+#about-me ~ #about-input-group .invalid-feedback {
+    display: none;
+}
+
+#about-me.is-invalid ~ #about-input-group .invalid-feedback {
+    display: block;
+}
+
+#about-me.ql-snow, #about-char-counter, #bio-char-counter
+{
+    font-size: 14px !important;
+    font-family: 'Poppins', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+#bio-char-counter,
+#about-char-counter {
+    color: #6C757D;
+}
+
+#bio.is-invalid ~ #bio-char-counter,
+#about-me.is-invalid ~ #about-input-group #about-char-counter {
+    bottom: 0;
+}
+
+#bio-char-counter,
+#about-char-counter {
+    position: absolute;
+    bottom: -20px;
+    right: 0;
+}

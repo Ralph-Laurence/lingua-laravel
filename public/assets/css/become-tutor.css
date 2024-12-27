@@ -1,0 +1,33 @@
+.big-title {
+    font-size: 54px;
+    font-weight: bold;
+    font-family: 'Poppins-SemiBold';
+}
+
+section.section-content {
+    padding: 50px 128px;
+}
+
+section.section-tutor-responsibilities,
+section.section-become-tutor {
+    background: #F0E9FE;
+}
+
+section.section-content img {
+    border-radius: 6px;
+}
+
+.easy-steps {
+    margin-left: auto;
+    margin-right: auto;
+    width: fit-content;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 20px;
+}
+
+.easy-steps .card .card-body {
+    display: grid;
+    grid-template-columns: 90px auto;
+    grid-gap: 4px;
+}
