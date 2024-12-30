@@ -1,5 +1,7 @@
 @php
     use App\Models\User;
+
+    $includeFooterDefault = true;
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -35,9 +37,11 @@
     @stack('dialogs')
     @yield('content')
 
+    @if($includeFooter ?? true)
     <footer class="px-3 py-4 text-center">
         &copy; {{ date('Y') }}  SignLingua All rights reserved
     </footer>
+    @endif
 
     <script src="{{ asset('assets/lib/jquery3.7.1/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ asset('assets/lib/popper2.9.2/popper.min.js') }}"></script>

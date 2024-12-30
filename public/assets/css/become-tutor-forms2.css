@@ -25,3 +25,21 @@
     font-weight: normal;
     font-family: 'Poppins-SemiBold';
 } */
+
+#skillsPickerModal .btn-close {
+    background: none;
+    padding-bottom: 16px;
+}
+
+.skill-item {
+    font-family: 'Poppins-SemiBold';
+    background-color: #E2E3E5 !important;
+    border: 1px solid #D3D6D8 !important;
+    color: #636970;
+}
+
+.skill-item button {
+    background: none;
+    border: none;
+    color: #636970 !important;
+}

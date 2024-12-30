@@ -1,65 +1,100 @@
-$(() => {
-    var carouselElem = document.querySelector('#form-carousel')
-    var carousel = new bootstrap.Carousel(carouselElem, {
+$(document).ready(function()
+{
+    const form = document.getElementById('main-form');
+    const carouselElem = document.querySelector('#form-carousel');
+    const carousel     = new bootstrap.Carousel(carouselElem, {
         interval: false,
         wrap: false
     });
 
-    $('.btn-next-step').on('click', function(e)
+    // Scroll to the target invalid input
+    const focusInvalidInput = function()
     {
-        if (!validateFields(e.currentTarget))
+        if ($('.form-control.is-invalid').length)
         {
-            MsgBox.showError("It looks like you forgot to fill out a field. Please double-check your entries.", "Oops!")
-            return;
+            let elementId = '#' + $('.form-control.is-invalid').attr('id');
+
+            if (elementId == '#about')
+                elementId = '#about-me';
+
+            console.log(elementId);
+            focusInto(elementId);
         }
 
-        var targetFrame = $(e.currentTarget).data('next-frame');
-        carousel.to(targetFrame);
+        MsgBox.showError("It looks like you forgot to fill out a field. Please double-check your entries.", "Oops!");
+    };
+
+    const validateSlide = function(slideElement)
+    {
+        let isValid  = true;
+        const inputs = slideElement.querySelectorAll('input, select, textarea');
+
+        inputs.forEach(input => {
+            if (!input.checkValidity())
+            {
+                isValid = false;
+                input.classList.add('is-invalid');
+
+                if ($(input).attr('id') == 'about')
+                    $('#about-me').addClass('is-invalid');
+            }
+            else
+            {
+                input.classList.remove('is-invalid');
+
+                if ($(input).attr('id') == 'about')
+                    $('#about-me').remove('is-invalid');
+            }
+        });
+
+        return isValid;
+    };
+
+    // Handle next button clicks
+    document.querySelectorAll('.btn-next-slide').forEach(button => {
+
+        button.addEventListener('click', function()
+        {
+            const currentSlide = document.querySelector('.carousel-item.active');
+
+            if (validateSlide(currentSlide))
+                carousel.next();
+
+            else
+                focusInvalidInput();
+        });
     });
 
-    $('.btn-prev-step').on('click', function(e)
+    // Handle previous button clicks
+    document.querySelectorAll('.btn-prev-slide').forEach(button => {
+        button.addEventListener('click', function() {
+            carousel.prev();
+        });
+    });
+
+    // Reset validation state when switching slides
+    document.getElementById('form-carousel').addEventListener('slide.bs.carousel', function() {
+        document.querySelectorAll('.is-invalid').forEach(element => {
+            element.classList.remove('is-invalid');
+        });
+    });
+
+    // Handle form submission
+    form.addEventListener('submit', function(event)
     {
-        var targetFrame = $(e.currentTarget).data('prev-frame');
-        carousel.to(targetFrame);
+        event.preventDefault();
+
+        const currentSlide = document.querySelector('.carousel-item.active');
+
+        if (!validateSlide(currentSlide))
+            return;
+
+        // If all validations pass, you can submit the form
+        console.log('Form is valid, submitting...');
+        form.submit();
     });
 });
 
-function validateFields(sender)
-{
-    // If step1's next button was clicked..,
-    // we validate the step1's fields
-    if ($(sender).attr('id') === 'step1-next-button')
-    {
-        if (!$('#bio').get(0).checkValidity())
-        {
-            $('#bio').addClass('is-invalid');
-            scrollToTarget("#bio");
-            return false;
-        }
-
-        if (!$('#about').get(0).checkValidity())
-        {
-            $('#about').addClass('is-invalid');
-            scrollToTarget("#about-me");
-            return false;
-        }
-    }
-
-    if ($(sender).attr('id') === 'step2-submit-button')
-    {
-        if ($('.form-control:invalid').length)
-        {
-            let firstOccurrence = $('.form-control:invalid').get(0);
-            scrollToTarget('#' + $(firstOccurrence).attr('id'));
-
-            return false;
-        }
-    }
-
-    return true;
-}
-
-function scrollToTarget(el)
-{
-    $('html, body').animate({ scrollTop: $(el).offset().top - 120 }, 100);
+function focusInto(elementId) {
+    $('html, body').animate({ scrollTop: $(elementId).offset().top - 120 }, 100);
 }

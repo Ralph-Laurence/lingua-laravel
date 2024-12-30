@@ -1,3 +1,4 @@
+@php $includeFooter = false; @endphp
 @extends('partials.base')
 
 @push('styles')
@@ -14,79 +15,156 @@
 @endpush
 
 @section('content')
-    <form action="{{ route('become-tutor.forms.submit') }}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+    <form method="post" id="main-form" novalidate
+          action="{{ route('become-tutor.forms.submit') }}"
+          enctype="multipart/form-data"
+          class="needs-validation @if($errors->any()) was-validated @endif">
+
         <div id="form-carousel" class="carousel slide" data-interval="false">
             <div class="carousel-inner">
-                <div class="carousel-item active" id="step1">
+                <div class="carousel-item active">
                     @include('learner.become-tutor-forms-step1')
                 </div>
-                <div class="carousel-item" id="step2">
+                <div class="carousel-item">
                     @include('learner.become-tutor-forms-step2')
+                </div>
+                <div class="carousel-item">
+                    @include('learner.become-tutor-forms-step3')
                 </div>
             </div>
         </div>
+
         @csrf
     </form>
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('assets/js/bootstrap5-form-novalidate.js') }}"></script>
+    <script src="{{ asset('assets/lib/jquery-ui-1.14.1/jquery-ui.min.js') }}"></script>
+    {{-- <script src="{{ asset('assets/js/bootstrap5-form-novalidate.js') }}"></script> --}}
+    <script src="{{ asset('assets/lib/katex0.16.9/js/katex.min.js') }}"></script>
+    <script src="{{ asset('assets/lib/quilljs2.0.3/js/quill.min.js') }}"></script>
+    <script src="{{ asset('assets/lib/maxlength/maxlength.js') }}"></script>
     <script src="{{ asset('assets/js/become-tutor-forms.js') }}"></script>
+    <script src="{{ asset('assets/js/become-tutor-forms-step1.js') }}"></script>
+    <script src="{{ asset('assets/js/become-tutor-forms-step2.js') }}"></script>
+    <script src="{{ asset('assets/js/become-tutor-forms-step3.js') }}"></script>
+    <script>
+        $(document).ready(function()
+        {
+            initStep1();
 
+            if (typeof repopulateOldInput !== 'undefined' && typeof repopulateOldInput === 'function')
+            {
+                repopulateOldInput();
+            }
+        });
+    </script>
     @if ($errors->any())
     <script>
         // Repopulate form fields with old input data
         const oldInput = @json(session()->getOldInput());
 
-        for (const key in oldInput)
+        function repopulateOldInput()
         {
-            if (oldInput.hasOwnProperty(key))
+            $('#fluency-level').val(oldInput['fluency-level']).selectmenu('refresh');
+
+            if ('education-year-from-0' in oldInput)
             {
-                const input = oldInput[key];
-                const matches = key.match(/(education|work|certification)-(.*)-(\d+)/);
+                let currentYr = new Date().getFullYear();
+                let fromYr = oldInput['education-year-from-0'];
+                let toYr   = oldInput['education-year-to-0'];
 
-                if (matches)
+                $('#education-year-from-0').html(generateYearOptions(currentYr, 1980));
+                $('#education-year-to-0').html(generateYearOptions(currentYr, fromYr));
+
+                buildYearRangeSelect('#education-year-from-0', '#education-year-to-0');
+                $('#education-year-from-0').val(fromYr).selectmenu('refresh')
+                $('#education-year-to-0').val(toYr).selectmenu('refresh')
+            }
+
+            if (typeof quill !== 'undefined')
+            {
+                // Only when there are errors returned
+                quill.root.innerHTML = $('#about').val();
+            }
+
+            for (const key in oldInput)
+            {
+                if (oldInput.hasOwnProperty(key))
                 {
-                    const [fullMatch, category, field, index] = matches;
-                    const entryFieldName = `${category}-${field}-${index}`;
+                    const input = oldInput[key];
+                    const matches = key.match(/(education|work|certification)-(.*)-(\d+)/);
 
-                    if (!$(`#${entryFieldName}`).length)
+                    if (matches)
                     {
-                        switch (category)
+                        const [fullMatch, category, field, index] = matches;
+                        const entryFieldName = `${category}-${field}-${index}`;
+
+                        if (!$(`#${entryFieldName}`).length)
                         {
-                            case 'education':
-                            let educationEntry = new EntryItem({
-                                    fieldPrefix:    'education',
-                                    container:      '#education-entries',
-                                    yearEntryMode:  'range',
-                                    field1:         'Institution',
-                                    field2:         'Degree'
-                                });
+                            switch (category)
+                            {
+                                case 'education':
 
-                                educationEntry.add();
-                                break;
+                                    // Exlucde the default entry from dynamic entries
+                                    if (entryFieldName == 'education-year-from-0')
+                                        continue;
 
-                            case 'work':
-                                workEntry.add();
-                                break;
+                                    // Add the dynamic entries
+                                    let educationEntry = new EntryItem({
+                                        fieldPrefix:    'education',
+                                        container:      '#education-entries',
+                                        yearEntryMode:  'range',
+                                        field1:         'Institution',
+                                        field2:         'Degree',
 
-                            case 'certification':
-                                certificationEntry.add();
-                                break;
+                                        'repopulateFromYear' : oldInput[`education-year-from-${index}`],
+                                        'repopulateToYear'   : oldInput[`education-year-to-${index}`],
+                                    });
+
+                                    educationEntry.add();
+                                    break;
+
+                                case 'work':
+                                    let workEntry = new EntryItem({
+                                        fieldPrefix:    'work',
+                                        container:      '#work-entries',
+                                        yearEntryMode:  'range',
+                                        field1:         'Company',
+                                        field2:         'Role',
+
+                                        'repopulateFromYear' : oldInput[`work-year-from-${index}`],
+                                        'repopulateToYear'   : oldInput[`work-year-to-${index}`],
+                                    });
+
+                                    workEntry.add();
+                                    break;
+
+                                case 'certification':
+                                    let certEntry = new EntryItem({
+                                        fieldPrefix:    'certification',
+                                        container:      '#cert-entries',
+                                        field1:         'Title',
+                                        field2:         'Description',
+
+                                        'repopulateFromYear' : oldInput[`certification-year-from-${index}`]
+                                    });
+
+                                    certEntry.add();
+                                    break;
+                            }
                         }
-                    }
 
-                    $(`#${entryFieldName}`).val(input);
+                        $(`#${entryFieldName}`).val(input);
+                    }
                 }
             }
-        }
 
-        $(() => {
             if (Object.keys(oldInput).length > 0)
             {
                 MsgBox.showError('Please double check your entries and fill out all fields!', 'Registration Failed');
             }
-        });
+        }
     </script>
     @endif
 @endpush

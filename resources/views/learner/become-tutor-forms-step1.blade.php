@@ -25,12 +25,13 @@
     </div>
 </section>
 
-<section id="section-basic-details" class="forms-section w-50 mx-auto mb-4">
+<section id="section-basic-details" class="forms-section w-50 mx-auto mb-5">
     <div class="card shadow mx-auto p-4">
         <div class="card-body">
             <h5 class="fw-bold darker-text">Introduce Yourself</h5>
             <small class="text-secondary mb-3 d-block">All fields with <strong>*</strong> are required.</small>
-            <label for="bio" class="form-label d-block">My Bio *</label>
+            <p for="bio" class="form-label fw-bold">My Bio *</p>
+            <p for="bio" class="darker-text text-14">Write a short note about yourself.</p>
             <div class="input-group has-validation bio-input-group mb-3">
                 <textarea class="form-control p-3 text-14 no-resize mb-1 {{ $errors->has('bio') ? 'is-invalid' : '' }}" id="bio" name="bio" rows="4"
                     placeholder="Write a short catchy note that serves as an opportunity for you to showcase your professional background, competencies, aspirations, and areas of expertise."
@@ -41,8 +42,9 @@
                 <div id="bio-char-counter">0/0</div>
             </div>
 
-            <div>
-                <label for="about-me" class="form-label">About Me *</label>
+            <div id="about-me-editor">
+                <p for="bio" class="form-label fw-bold">About Me *</p>
+                <p class="darker-text text-14">Share what makes you unique and what you're most proud of.</p>
                 <div id="about-me" class="mb-1 {{ $errors->has('about') ? 'is-invalid' : '' }}"></div>
                 <div class="input-group has-validation mb-3" id="about-input-group">
                     <textarea class="form-control d-none" id="about" name="about" rows="4"
@@ -53,17 +55,34 @@
                     <div id="about-char-counter">0/0</div>
                 </div>
             </div>
+
+            <div class="fluency-options mb-3">
+                <p class="form-label fw-bold">ASL Fluency *</p>
+                <p for="fluency-level" class="text-14">How fluent are you with American Sign Language?</p>
+                <div class="alert alert-secondary text-12 px-1">
+                    <ul class="mb-0">
+                        @foreach ($fluencyOptions as $key => $obj)
+                            <li>
+                                <span class="fw-bold" style="width: 90px; display: inline-block;">{{ $obj['Level'] }}</span> - {{ $obj['Description'] }}
+                            </li>
+                        @endforeach
+
+                    </ul>
+                </div>
+                <select id="fluency-level" name="fluency-level">
+                    @foreach ($fluencyOptions as $key => $obj)
+                        <option data-description="{{ $obj['Description'] }}" value="{{ $key }}">{{ $obj['Level'] }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
 
         <div class="p-2 text-end">
-            <button class="btn btn-primary btn-next-step" id="step1-next-button" data-next-frame="1" type="button">Next</button>
+            <button class="btn btn-primary btn-sm btn-next-slide" type="button">
+                <span class="me-2">Next</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
         </div>
 
     </div>
 </section>
-@push('scripts')
-    <script src="{{ asset('assets/lib/katex0.16.9/js/katex.min.js') }}"></script>
-    <script src="{{ asset('assets/lib/quilljs2.0.3/js/quill.min.js') }}"></script>
-    <script src="{{ asset('assets/lib/maxlength/maxlength.js') }}"></script>
-    <script src="{{ asset('assets/js/become-tutor-forms-step1.js') }}"></script>
-@endpush

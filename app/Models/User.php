@@ -30,6 +30,36 @@ class User extends Authenticatable
         self::ROLE_LEARNER   => self::ROLE_STR_LEARNER,
     ];
 
+    const SOFT_SKILLS = [
+        '0'  => 'Accepting Criticism',
+        '1'  => 'Adaptability',
+        '2'  => 'Analytical Thinking',
+        '3'  => 'Assertivenes',
+        '4'  => 'Attitude',
+        '5'  => 'Communication',
+        '6'  => 'Confidence',
+        '7'  => 'Creative Thinking',
+        '8'  => 'Critical Thinking',
+        '9'  => 'Decision Making',
+        '10' => 'Discipline',
+        '11' => 'Empathy',
+        '12' => 'Flexibility',
+        '13' => 'Innovation',
+        '14' => 'Listening',
+        '15' => 'Negotation',
+        '16' => 'Organization',
+        '17' => 'Persuasion',
+        '18' => 'Problem Solving',
+        '19' => 'Responsibility',
+        '20' => 'Self Assessment',
+        '21' => 'Self Management',
+        '22' => 'Stress Management',
+        '23' => 'Team Building',
+        '24' => 'Tolerance',
+        '25' => 'Time Management',
+        '26' => 'Willing to Learn',
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -68,8 +98,7 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-
-    // Other model methods and properties
+    // Relationships
 
     public function bookingsAsTutor() {
         return $this->hasMany(Booking::class, BookingFields::TutorId);
@@ -81,5 +110,16 @@ class User extends Authenticatable
 
     public function profile() {
         return $this->hasOne(Profile::class, ProfileFields::UserId);
+    }
+
+    // Other model methods and properties
+
+    /* Get the short abbreviated name */
+    public static function toShortName($firstName, $lastName)
+    {
+        // Take the first character of the last name
+        $lastNameInitial = strtoupper(mb_substr($lastName, 0, 1)) . '.';
+
+        return "{$firstName} {$lastNameInitial}";
     }
 }

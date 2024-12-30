@@ -1,14 +1,16 @@
-let educationEntryCount     = 0;    // only the premade education entry should start with 0
-let workEntryCount          = -1;   // dynamic entries must start at "-0"
-let certificationEntryCount = -1;
+let educationEntryCount = 0;
+let workEntryCount = 0;
+let certificationEntryCount = 0;
 
 $(document).ready(function()
 {
-    buildYearRangeSelect('#education-year-from-0', '#education-year-to-0');
+    buildYearRangeSelect('#education-year-from', '#education-year-to');
 
     $('#add-education').click(function()
     {
         let educationEntry = new EntryItem({
+
+            //entryOffset: 1, // begin at 1 because of the premade entry
 
             fieldPrefix:    'education',
             container:      '#education-entries',
@@ -140,6 +142,30 @@ const buildYearRangeSelect = function(elemFrom, elemTo, options = {})
             }
 
             toYearSelect.selectmenu('refresh');
+            // if ('repopulateFromYear' in options)
+            // {
+            //     if ('repopulateFromYear' in options)
+            //     {
+            //         selectedYear = options['repopulateFromYear'][0];
+
+            //         $(elemFrom)
+            //             .html(generateYearOptions(currentYear, 1980))
+            //             .val()
+            //             .selectmenu('refresh');
+            //     }
+
+            //     if ('repopulateToYear' in options)
+            //     {
+            //         $(elemTo)
+            //             .html(generateYearOptions(currentYear, selectedYear))
+            //             .val(options['repopulateToYear'])
+            //             .selectmenu('refresh');
+            //     }
+            // }
+            // else
+            // {
+
+            // }
         }
     });
 }
@@ -164,9 +190,10 @@ const EntryItem = function(options)
 
     const addEntry = function()
     {
-        //entryCount++;
-        const field1Name     = `${options.fieldPrefix}-${options.field1.toLowerCase()}-${entryCount}`;
-        const field2Name     = `${options.fieldPrefix}-${options.field2.toLowerCase()}-${entryCount}`;
+        entryCount++;
+
+        const field1Name = `${options.fieldPrefix}-${options.field1.toLowerCase()}-${entryCount}`;
+        const field2Name = `${options.fieldPrefix}-${options.field2.toLowerCase()}-${entryCount}`;
         const fileUploadName = `${options.fieldPrefix}-file-upload-${entryCount}`;
 
         let currentYear = new Date().getFullYear();
@@ -209,30 +236,15 @@ const EntryItem = function(options)
                 </div>
                 <div class="row mb-3">
                     <div class="col">
-                        <div class="input-group has-validation">
-                            <input type="text" id="${field1Name}" name="${field1Name}" class="form-control" placeholder="${options.field1}" required>
-                            <div class="invalid-feedback">
-                                Please provide a valid ${options.field1.toLowerCase()}.
-                            </div>
-                        </div>
+                        <input type="text" id="${field1Name}" name="${field1Name}" class="form-control" placeholder="${options.field1}" required>
                     </div>
                     <div class="col">
-                        <div class="input-group has-validation">
-                            <input type="text" id="${field2Name}" name="${field2Name}" class="form-control" placeholder="${options.field2}" required>
-                            <div class="invalid-feedback">
-                                Please provide a valid ${options.field2.toLowerCase()}.
-                            </div>
-                        </div>
+                        <input type="text" id="${field2Name}" name="${field2Name}" class="form-control" placeholder="${options.field2}" required>
                     </div>
                 </div>
                 <div class="file-upload mb-3">
                         <label for="${fileUploadName}" class="form-label text-secondary text-14">Upload Documentary Proof (PDF only):</label>
-                        <div class="input-group has-validation">
-                            <input type="file" id="${fileUploadName}" name="${fileUploadName}" class="form-control text-14" accept="application/pdf" required>
-                            <div class="invalid-feedback">
-                                Please provide a documentary proof you claim to hold. (PDF max 5MB)
-                            </div>
-                        </div>
+                        <input type="file" id="${fileUploadName}" name="${fileUploadName}" class="form-control text-14" accept="application/pdf" required>
                     </div>
                 <button type="button" class="btn btn-sm btn-danger remove-btn entry-buttons btn-remove-entry">
                     <i class="fas fa-times me-1"></i>Remove
@@ -258,6 +270,24 @@ const EntryItem = function(options)
                    .val(options['repopulateToYear'])
                    .selectmenu('refresh');
         }
+
+        // if ('repopulateFromYear' in options)
+        // {
+        //     if ('repopulateToYear' in options)
+        //         pickerRangeFrom = generateYearOptions('repopulateFromYear', 'repopulateToYear');
+        //     else
+        //         pickerRangeFrom = generateYearOptions('repopulateFromYear', 'repopulateFromYear');
+        // }
+        // else
+        // {
+        //     pickerRangeFrom = generateYearOptions(currentYear, 1980);
+        // }
+        // {
+        //     'repopulateFromYear' : options['repopulateFromYear'],
+        //     'repopulateToYear' : options['repopulateToYear']
+        // });
+
+        console.log(options)
     }
 
     $(() => {

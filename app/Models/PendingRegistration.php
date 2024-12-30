@@ -6,7 +6,7 @@ use App\Models\FieldNames\ProfileFields;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Profile extends Model
+class PendingRegistration extends Model
 {
     use HasFactory;
 
@@ -28,8 +28,4 @@ class Profile extends Model
         ProfileFields::Certifications   => 'array',
         ProfileFields::Skills           => 'array',
     ];
-
-    public function user() {
-        return $this->belongsTo(User::class, ProfileFields::UserId);
-    }
 }

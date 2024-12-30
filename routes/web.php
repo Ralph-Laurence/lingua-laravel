@@ -3,7 +3,6 @@
 use App\Http\Controllers\LearnerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TutorController;
-use App\Models\FieldNames\UserRoles;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
@@ -49,9 +48,10 @@ Route::middleware(['auth', $RoleMw . User::ROLE_LEARNER])->group(function ()
         Route::get('/learner', 'index')->name('index');
         Route::get('/learner/my-tutors', 'myTutors')->name('mytutors');
 
-        Route::get('/sign-lingua/become-tutor', 'becomeTutor')->name('become-tutor');
-        Route::get('/sign-lingua/become-tutor/forms', 'becomeTutorFormsPage')->name('become-tutor.forms');
-        Route::post('/sign-lingua/become-tutor/forms/submit', 'becomeTutorOnSubmit')->name('become-tutor.forms.submit');
+        Route::get('/sign-lingua/become-tutor',                 'becomeTutor')->name('become-tutor');
+        Route::get('/sign-lingua/become-tutor/forms',           'becomeTutorFormsPage')->name('become-tutor.forms');
+        Route::get('/sign-lingua/become-tutor/success',         'becomeTutorSuccess')->name('become-tutor.success');
+        Route::post('/sign-lingua/become-tutor/forms/submit',   'becomeTutorOnSubmit')->name('become-tutor.forms.submit');
     });
 
     Route::controller(TutorController::class)->group(function()
@@ -70,14 +70,25 @@ Route::middleware(['auth', $RoleMw . User::ROLE_TUTOR])->group(function ()
     });
 });
 
-
 Route::get('/generate-password', function () {
     $password = 'Joy_021428';
     $hashedPassword = Hash::make($password);
     echo $hashedPassword;
 });
 
+use App\Mail\TestMail;
+use Illuminate\Support\Facades\Mail;
 
+Route::get('/send-test-email', function ()
+{
+    // Disable AVAST Mail Shield "Outbound SMTP"
+    Mail::to('bluescreen512@gmail.com')->send(new TestMail());
+    return 'Test email sent!';
+});
+
+Route::get('/success', function() {
+    return view('shared.registration-success');
+});
 /*
 ---------------------------------------------------------------------------
 Verb	    URI	                    Typical Method Name	    Route Name

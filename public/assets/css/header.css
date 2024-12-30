@@ -6,9 +6,10 @@ header .nav .nav-link {
 }
 
 header .nav .nav-link.link-active {
-    font-weight: 600;
+    font-family: 'Poppins-SemiBold';
     border: 2px solid #FB6339;
     border-radius: 2rem;
+    padding: 6px 8px;
     color: var(--accent-dark);
 }
 

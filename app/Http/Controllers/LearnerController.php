@@ -2,19 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Utils\HashSalts;
-use App\Models\Booking;
-use App\Models\FieldNames\BookingFields;
+use App\Http\Utils\FluencyLevels;
+use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
+use App\Models\PendingRegistration;
 use App\Models\User;
-use Hashids\Hashids;
+use App\Services\LearnerService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 
 class LearnerController extends Controller
 {
+    protected $learnerService;
+
+    public function __construct(LearnerService $service)
+    {
+        $this->learnerService = $service;
+    }
+
     public function index()
     {
         return view('learner.index');
@@ -22,123 +30,127 @@ class LearnerController extends Controller
 
     public function myTutors()
     {
-        $myTutorsIds = Booking::where(BookingFields::LearnerId, Auth::user()->id)
-                        ->pluck(BookingFields::TutorId)
-                        ->toArray();
-
-        $myTutors = [];
-
-        if (!empty($myTutorsIds))
-        {
-            $hashids = new Hashids(HashSalts::Tutors, 10);
-            $tutors  = User::whereIn('id', $myTutorsIds)->get();
-
-            foreach ($tutors as $key => $obj)
-            {
-                $photo = $obj->{UserFields::Photo};
-
-                if (empty($photo))
-                    $photo = asset('assets/img/default_avatar.png');
-
-                else
-                    $photo = Storage::url("public/uploads/profiles/$photo");
-
-                $myTutors[] = [
-                    'tutorId'   => $hashids->encode($obj['id']),
-                    'shortName' => $this->getShortNameAttribute($obj->{UserFields::Firstname}, $obj->{UserFields::Lastname}),
-                    'photo'     => $photo
-                ];
-            }
-        }
+        $myTutors = $this->learnerService->getConnectedTutors(Auth::user()->id);
 
         return view('learner.my-tutors')->with('myTutors', $myTutors);
     }
 
     public function becomeTutor()
     {
+        // Check if we have a pending registration
+        if ($this->isPendingRegistration())
+            return response()->view('shared.pending-registration', [], 301);
+
+        // Show the landing page otherwise
         return view('learner.become-tutor');
     }
 
     public function becomeTutorFormsPage()
     {
-        $currentYear = date('Y');
-        return view('learner.become-tutor-forms', compact('currentYear'));
+        // Check if we have a pending registration
+        if ($this->isPendingRegistration())
+            return response()->view('shared.pending-registration', [], 301);
+
+        // Show the forms page otherwise ...
+
+        $softSkills     = User::SOFT_SKILLS;
+        $currentYear    = date('Y');
+        $fluencyOptions = FluencyLevels::Tutor;
+
+        // If the user is currently a learner, we warn them
+        // about their account being converted to tutor account
+        $showConvertAccWarning = Auth::user()->{UserFields::Role} == User::ROLE_LEARNER;
+        $returnData = compact('currentYear', 'softSkills', 'fluencyOptions', 'showConvertAccWarning');
+
+        return view('learner.become-tutor-forms', $returnData);
     }
+
+    public function becomeTutorSuccess(Request $request)
+    {
+        if ($request->session()->has('registration_success'))
+        {
+            // Remove the session variable to prevent access after the first visit
+            $request->session()->forget('registration_success');
+
+            return view('shared.registration-success');
+        }
+
+        // Redirect to home if the session variable is not set
+        return redirect('/');
+    }
+
+            // $inputs = $model;
+        // return view('test.test', compact('inputs'));
 
     public function becomeTutorOnSubmit(Request $request)
     {
-        // return print_r($request->input());
-        $rules = [
+        $data = $this->learnerService->buildProfilePayloadData($request);
 
-            // All input files
-            '*-file-upload-*' => 'nullable|file|mimetypes:application/pdf|max:2048',
+        // If the validation fails ... we go back
+        if ($data instanceof \Illuminate\Http\RedirectResponse)
+            return $data;
 
-            // Non dynamic entries
-            'bio'   => 'required|string|max:180',
-            'about' => 'required|string|max:2000',
+        // Otherwise, we get the processed data.
+        $model  = $data['model'];
+        $upload = $data['upload'];
 
-            // Education
-            'education-institution.*'   => 'required|string|max:255',
-            'education-degree.*'        => 'required|string|max:255',
-            'education-year-from.*'     => 'required|integer|min:1900|max:' . date('Y'),
-            'education-year-to.*'       => 'required|integer|min:1900|max:' . date('Y'),
-        ];
+        $uploadedFiles = [];
 
-        if ($request->has('work-company.0'))
+        DB::beginTransaction();
+
+        try
         {
-            $rules = array_merge($rules, [
-                'work-company.*'            => 'required|string|max:255',
-                'work-role.*'               => 'required|string|max:255',
-                'work-year-from.*'          => 'required|integer|min:1900|max:' . date('Y'),
-                'work-year-to.*'            => 'required|integer|min:1900|max:' . date('Y'),
-            ]);
-        }
+            // Save to the database
+            $registration = $this->learnerService->buildRegistrationData(Auth::user()->id, $model);
+            PendingRegistration::create($registration);
 
-        if ($request->has('certification-title.0'))
+            // Process uploads...
+            foreach ($upload as $category => $uploadData)
+            {
+                foreach ($uploadData as $data)
+                {
+                    // Ensure $data['file'] is an instance of UploadedFile and not treated as an array
+                    if ($data['file'] instanceof \Illuminate\Http\UploadedFile)
+                    {
+                        // Generate a unique file name
+                        $fileName = $data['filename'];
+                        $path     = $data['file']->storeAs($data['filepath'], $fileName);
+
+                        $uploadedFiles[$category][] = $path;
+                    }
+                }
+            }
+
+            DB::commit();
+
+            //Set session variable to indicate successful registration
+            $request->session()->put('registration_success', true);
+
+            // Redirect to the registration success screen
+            return redirect()->route('become-tutor.success');
+        }
+        catch(Exception $e)
         {
-            $rules = array_merge($rules, [
-                'certification-title.*'         => 'required|string|max:255',
-                'certification-description.*'   => 'required|string|max:255',
-                'certification-year-from.*'     => 'required|integer|min:1900|max:' . date('Y'),
-            ]);
+            // Rollback the transaction
+            DB::rollBack();
+
+            // Delete uploaded files if any
+            foreach ($uploadedFiles as $files)
+            {
+                foreach ($files as $file)
+                {
+                    Storage::delete($file);
+                }
+            }
+
+            return response()->view('errors.500', [], 500);
         }
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails())
-        {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        return var_dump($validator->validated());
     }
 
-    private function getShortNameAttribute($firstName, $lastName)
+    private function isPendingRegistration()
     {
-        // Take the first character of the last name
-        $lastNameInitial = strtoupper(mb_substr($lastName, 0, 1)) . '.';
-
-        return "{$firstName} {$lastNameInitial}";
-    }
-
-    public function updateEducation(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
-
-        $educationEntries = [];
-        for ($i = 0; $i < count($request->input('year-from')); $i++) {
-            $educationEntries[] = [
-                'from' => $request->input("year-from.$i"),
-                'to' => $request->input("year-to.$i"),
-                'degree' => $request->input("degree.$i"),
-                'institution' => $request->input("institution.$i"),
-            ];
-        }
-
-        $user->education = $educationEntries;
-        $user->save();
-
-        return redirect()->back()->with('success', 'Education background updated successfully.');
+        $exists = PendingRegistration::where(ProfileFields::UserId, Auth::user()->id)->exists();
+        return $exists;
     }
 }
 
