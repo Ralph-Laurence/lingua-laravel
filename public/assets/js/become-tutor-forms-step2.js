@@ -175,7 +175,7 @@ const EntryItem = function(options)
         let yearEntry = `
             <div class="col">
                 <label for="${options.fieldPrefix}-year-from-${entryCount}" class="text-14 text-secondary">From Year</label>
-                <select id="${options.fieldPrefix}-year-from-${entryCount}" name="${options.fieldPrefix}-year-from-${entryCount}">
+                <select data-field-prefix="${options.fieldPrefix}-year-from-" id="${options.fieldPrefix}-year-from-${entryCount}" name="${options.fieldPrefix}-year-from-${entryCount}">
                     ${pickerFromRangeTemplate}
                 </select>
             </div>
@@ -187,30 +187,31 @@ const EntryItem = function(options)
             yearEntry = `
                 <div class="col">
                     <label for="${options.fieldPrefix}-year-from-${entryCount}" class="text-14 text-secondary">From Year</label>
-                    <select id="${options.fieldPrefix}-year-from-${entryCount}" name="${options.fieldPrefix}-year-from-${entryCount}">
+                    <select data-field-prefix="${options.fieldPrefix}-year-from-" id="${options.fieldPrefix}-year-from-${entryCount}" name="${options.fieldPrefix}-year-from-${entryCount}">
                         ${pickerFromRangeTemplate}
                     </select>
                 </div>
                 <div class="col">
                     <label for="${options.fieldPrefix}-year-to-${entryCount}" class="text-14 text-secondary">To Year</label>
-                    <select id="${options.fieldPrefix}-year-to-${entryCount}" name="${options.fieldPrefix}-year-to-${entryCount}">
+                    <select data-field-prefix="${options.fieldPrefix}-year-to-" id="${options.fieldPrefix}-year-to-${entryCount}" name="${options.fieldPrefix}-year-to-${entryCount}">
                         ${generateYearOptions(currentYear, currentYear)}
                     </select>
                 </div>
             `;
         }
 
-        let entryId = `${options.container.replace('#', '')}-${entryCount}`;
+        let entrySuffix = options.container.replace('#', '');
+        let entryId = `${entrySuffix}-${entryCount}`;
 
         const entryHtml = `
-            <div id="${entryId}" class="entry mt-3 p-3 border border-1 rounded rounded-3">
+            <div id="${entryId}" data-entry-suffix="${entrySuffix}-" class="entry mt-3 p-3 border border-1 rounded rounded-3">
                 <div class="row mb-2">
                     ${yearEntry}
                 </div>
                 <div class="row mb-3">
                     <div class="col">
                         <div class="input-group has-validation">
-                            <input type="text" id="${field1Name}" name="${field1Name}" class="form-control" placeholder="${options.field1}" required>
+                            <input data-field-prefix="${options.fieldPrefix}-${options.field1.toLowerCase()}-" type="text" id="${field1Name}" name="${field1Name}" class="form-control" placeholder="${options.field1}" required>
                             <div class="invalid-feedback">
                                 Please provide a valid ${options.field1.toLowerCase()}.
                             </div>
@@ -218,7 +219,7 @@ const EntryItem = function(options)
                     </div>
                     <div class="col">
                         <div class="input-group has-validation">
-                            <input type="text" id="${field2Name}" name="${field2Name}" class="form-control" placeholder="${options.field2}" required>
+                            <input data-field-prefix="${options.fieldPrefix}-${options.field2.toLowerCase()}-" type="text" id="${field2Name}" name="${field2Name}" class="form-control" placeholder="${options.field2}" required>
                             <div class="invalid-feedback">
                                 Please provide a valid ${options.field2.toLowerCase()}.
                             </div>
@@ -264,7 +265,24 @@ const EntryItem = function(options)
         $(options.container).on('click', '.remove-btn', function()
         {
             $(this).closest('.entry').remove();
-            entryCount--;
+            //entryCount--;
+
+            // Determine the entry count based on the category
+            if (options.fieldPrefix === 'education' && educationEntryCount > 0)
+            {
+                entryCount = --educationEntryCount;
+                reIndexEntries('#education-entries', true);
+            }
+            else if (options.fieldPrefix === 'work' && workEntryCount > -1)
+            {
+                entryCount = --workEntryCount;
+                reIndexEntries('#work-entries');
+            }
+            else if (options.fieldPrefix === 'certification' && certificationEntryCount > -1)
+            {
+                entryCount = --certificationEntryCount;
+                reIndexEntries('#cert-entries');
+            }
         });
     });
 
@@ -273,3 +291,36 @@ const EntryItem = function(options)
         toSelectMenu
     };
 };
+
+function reIndexEntries(container, options)
+{
+    let excludeFirst = options?.excludeFirst || false;
+
+    $(`${container} .entry`).each(function(index, element)
+    {
+        if (excludeFirst && index == 0)
+            return true; // continue;
+
+        // The 'entry' element
+        let entry = $(element);
+
+        // Set the entry's id with incremental suffix
+        let entrySuffix = entry.data('entry-suffix');
+
+        entry.attr('id', `${entrySuffix}${index}`);
+
+        // For every fields that belong to the entry, rename their ID
+        entry.find('[data-field-prefix]').each(function(i, e)
+        {
+            let field = $(e);
+
+            let fieldPrefix = field.data('field-prefix');
+            let newNameId   = `${fieldPrefix}${index}`;
+
+            field.attr('id',   newNameId);
+            field.attr('name', newNameId);
+
+            console.log(i + ' : ' + newNameId);
+        });
+    });
+}

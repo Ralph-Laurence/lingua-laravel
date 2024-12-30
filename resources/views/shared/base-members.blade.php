@@ -1,3 +1,8 @@
+{{--
+    ------------------------------------------------------
+    BASE MEMBERS LAYOUT IS USED BY BOTH TUTOR AND LEARNER
+    ------------------------------------------------------
+--}}
 @php
     use App\Models\User;
 
@@ -28,11 +33,7 @@
 
     @yield('before-header')
 
-    @if (Auth::check() && Auth::user()->role === User::ROLE_ADMIN)
-        @include('partials.header-admin')
-    @else
-        @include('partials.header-learner-tutor')
-    @endif
+    @include('partials.header-learner-tutor')
 
     @stack('dialogs')
     @yield('content')
@@ -46,7 +47,6 @@
     <script src="{{ asset('assets/lib/jquery3.7.1/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ asset('assets/lib/popper2.9.2/popper.min.js') }}"></script>
     <script src="{{ asset('assets/lib/bootstrap5/bootstrap.min.js') }}"></script>
-    {{-- <script src="{{ asset('assets/lib/waitingfor/bootstrap-waitingfor.min.js') }}"></script> --}}
 
     @stack('scripts')
 </body>

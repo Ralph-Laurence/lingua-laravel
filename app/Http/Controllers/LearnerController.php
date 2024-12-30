@@ -35,7 +35,7 @@ class LearnerController extends Controller
         return view('learner.my-tutors')->with('myTutors', $myTutors);
     }
 
-    public function becomeTutor()
+    public function becomeTutor_index()
     {
         // Check if we have a pending registration
         if ($this->isPendingRegistration())
@@ -45,7 +45,7 @@ class LearnerController extends Controller
         return view('learner.become-tutor');
     }
 
-    public function becomeTutorFormsPage()
+    public function becomeTutor_create()
     {
         // Check if we have a pending registration
         if ($this->isPendingRegistration())
@@ -65,24 +65,10 @@ class LearnerController extends Controller
         return view('learner.become-tutor-forms', $returnData);
     }
 
-    public function becomeTutorSuccess(Request $request)
-    {
-        if ($request->session()->has('registration_success'))
-        {
-            // Remove the session variable to prevent access after the first visit
-            $request->session()->forget('registration_success');
-
-            return view('shared.registration-success');
-        }
-
-        // Redirect to home if the session variable is not set
-        return redirect('/');
-    }
-
             // $inputs = $model;
         // return view('test.test', compact('inputs'));
 
-    public function becomeTutorOnSubmit(Request $request)
+    public function becomeTutor_store(Request $request)
     {
         $data = $this->learnerService->buildProfilePayloadData($request);
 
@@ -145,6 +131,20 @@ class LearnerController extends Controller
 
             return response()->view('errors.500', [], 500);
         }
+    }
+
+    public function becomeTutor_success(Request $request)
+    {
+        if ($request->session()->has('registration_success'))
+        {
+            // Remove the session variable to prevent access after the first visit
+            $request->session()->forget('registration_success');
+
+            return view('shared.registration-success');
+        }
+
+        // Redirect to home if the session variable is not set
+        return redirect('/');
     }
 
     private function isPendingRegistration()

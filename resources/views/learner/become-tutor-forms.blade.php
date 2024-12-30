@@ -1,5 +1,5 @@
 @php $includeFooter = false; @endphp
-@extends('partials.base')
+@extends('shared.base-members')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/lib/katex0.16.9/css/katex.min.css') }}">
@@ -40,7 +40,7 @@
 
 @push('scripts')
     <script src="{{ asset('assets/lib/jquery-ui-1.14.1/jquery-ui.min.js') }}"></script>
-    {{-- <script src="{{ asset('assets/js/bootstrap5-form-novalidate.js') }}"></script> --}}
+    <script src="{{ asset('assets/lib/waitingfor/bootstrap-waitingfor.min.js') }}"></script>
     <script src="{{ asset('assets/lib/katex0.16.9/js/katex.min.js') }}"></script>
     <script src="{{ asset('assets/lib/quilljs2.0.3/js/quill.min.js') }}"></script>
     <script src="{{ asset('assets/lib/maxlength/maxlength.js') }}"></script>

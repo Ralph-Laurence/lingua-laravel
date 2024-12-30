@@ -179,6 +179,17 @@ class TutorController extends Controller
             if (!empty($photo))
                 $profilePic = Storage::url("public/uploads/profiles/$photo");
 
+
+            $skills = [];
+
+            if ($tutor->profile->{ProfileFields::Skills})
+            {
+                foreach($tutor->profile->{ProfileFields::Skills} as $skill)
+                {
+                    $skills[] = User::SOFT_SKILLS[$skill];
+                }
+            }
+
             $tutorDetails = [
                 'hashedId'           => $id,
                 'firstname'          => $tutor->{UserFields::Firstname},
@@ -192,7 +203,7 @@ class TutorController extends Controller
                 'about'              => $tutor->profile->{ProfileFields::About},
                 'education'          => $tutor->profile->{ProfileFields::Education},
                 'certs'              => $tutor->profile->{ProfileFields::Certifications},
-                'skills'             => $tutor->profile->{ProfileFields::Skills},
+                'skills'             => $skills,
                 'photo'              => $profilePic,
                 'isHired'            => $isHired,
                 'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],

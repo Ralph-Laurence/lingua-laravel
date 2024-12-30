@@ -1,4 +1,4 @@
-@extends('partials.base')
+@extends('shared.base-members')
 @section('content')
     @push('styles')
         <link rel="stylesheet" href="{{ asset('assets/css/tutors.css') }}">

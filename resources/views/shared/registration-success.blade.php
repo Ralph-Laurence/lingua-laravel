@@ -1,5 +1,5 @@
 @php $includeFooter = false; @endphp
-@extends('partials.base')
+@extends('shared.base-members')
 @section('content')
 <section id="section-banner" class="forms-section w-50 mx-auto">
     <div class="card border-0">

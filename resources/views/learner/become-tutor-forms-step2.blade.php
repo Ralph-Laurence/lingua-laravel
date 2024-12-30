@@ -84,7 +84,7 @@
                     style="color: #FE233A;">required.</span> You may add more as necessary.</small>
             <div class="mb-4" id="education-entries">
                 {{-- BEGIN: USE THIS AS ENTRY TEMPLATE --}}
-                <div id="education-entries-1" class="entry mt-3 p-3 border border-1 rounded rounded-3">
+                <div id="education-entries-0" class="entry mt-3 p-3 border border-1 rounded rounded-3">
                     <div class="row mb-2">
                         <div class="col">
                             <label for="education-year-from-0" class="text-14 text-secondary">From Year</label>

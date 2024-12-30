@@ -36,82 +36,176 @@ $(document).ready(function()
     });
 });
 
-function validateCaptcha()
+// function validateCaptcha()
+// {
+//     waitingDialog.show('Loading ASL Test', { headerSize: 6 });
+
+//     $.ajax({
+//         url: '/api/validate-captcha',
+//         method: 'POST',
+//         data: {
+//             '_token': $('#captcha_csrf').val(),
+//             'captchaText' : $('#captcha_text').val(),
+//             'userInput' : getCaptchaInput(),
+//         },
+//         success: function(data)
+//         {
+//             if (data)
+//             {
+//                 if (data.status == '200')
+//                 {
+//                     $('.captcha-error').addClass('d-none');
+//                     $('.captcha-passed').removeClass('d-none');
+//                     $('.asl-input').prop('readonly', true);
+
+//                     $('.submit-target').each(function()
+//                     {
+//                         // The submit target can be enclosed in an alert box,
+//                         // if the user is a learner registering as a tutor
+//                         if (this.tagName.toLowerCase() === 'div')
+//                         {
+//                             $('.submit-target').show();
+//                         }
+
+//                         // Otherwise just enable the button
+//                         else if (this.tagName.toLowerCase() === 'button')
+//                         {
+//                             $('.submit-target').prop('disabled', false);
+//                         }
+//                     });
+
+//                     focusInto('#btn-submit');
+//                 }
+//             }
+//             console.log(data)
+//         },
+//         error: function(xhr)
+//         {
+//             if (xhr.status == '422')
+//             {
+//                 $('.captcha-error').removeClass('d-none');
+
+//                 let response = JSON.parse(xhr.responseText);
+
+//                 if (response.newcaptcha)
+//                 {
+//                     let data = {
+//                         'captchaImages' : response.newcaptcha.captchaImages,
+//                         'captchaText' : response.newcaptcha.captchaText
+//                     };
+//                     buildCaptchaCards(data);
+//                 }
+
+//                 MsgBox.showError('That was a mistake. Please try again.', 'Oops!');
+//             }
+//             else
+//             {
+//                 MsgBox.showError('The system is having issues. Please try again later.', 'Fatal Error');
+//             }
+//         },
+//         complete: function() {
+//             waitingDialog.hide();
+//         }
+//     });
+// }
+
+async function validateCaptcha()
 {
-    $.ajax({
-        url: '/api/validate-captcha',
-        method: 'POST',
-        data: {
-            '_token': $('#captcha_csrf').val(),
-            'captchaText' : $('#captcha_text').val(),
-            'userInput' : getCaptchaInput(),
-        },
-        success: function(data)
-        {
-            if (data)
-            {
-                if (data.status == '200')
-                {
-                    $('.captcha-error').addClass('d-none');
-                    $('.captcha-passed').removeClass('d-none');
-                    $('.asl-input').prop('readonly', true);
+    waitingDialog.show('Loading ASL Test', { headerSize: 6 });
 
-                    $('.submit-target').each(function()
-                    {
-                        // The submit target can be enclosed in an alert box,
-                        // if the user is a learner registering as a tutor
-                        if (this.tagName.toLowerCase() === 'div')
-                        {
-                            $('.submit-target').show();
-                        }
-
-                        // Otherwise just enable the button
-                        else if (this.tagName.toLowerCase() === 'button')
-                        {
-                            $('.submit-target').prop('disabled', false);
-                        }
-                    });
-
-                    focusInto('#btn-submit');
-                }
+    try
+    {
+        const data = await $.ajax({
+            url: '/api/validate-captcha',
+            method: 'POST',
+            data: {
+                '_token': $('#captcha_csrf').val(),
+                'captchaText': $('#captcha_text').val(),
+                'userInput': getCaptchaInput(),
             }
-            console.log(data)
-        },
-        error: function(xhr)
+        });
+
+        waitingDialog.hide();
+        await sleep(1000);
+
+        if (data)
         {
-            if (xhr.status == '422')
+            if (data.status == '200')
             {
-                $('.captcha-error').removeClass('d-none');
+                $('.captcha-error').addClass('d-none');
+                $('.captcha-passed').removeClass('d-none');
+                $('.asl-input').prop('readonly', true);
 
-                let response = JSON.parse(xhr.responseText);
-
-                if (response.newcaptcha)
+                $('.submit-target').each(function ()
                 {
-                    let data = {
-                        'captchaImages' : response.newcaptcha.captchaImages,
-                        'captchaText' : response.newcaptcha.captchaText
-                    };
-                    buildCaptchaCards(data);
-                }
+                    // The submit target can be enclosed in an alert box,
+                    // if the user is a learner registering as a tutor
+                    if (this.tagName.toLowerCase() === 'div')
+                        $('.submit-target').show();
 
-                MsgBox.showError('That was a mistake. Please try again.', 'Oops!');
-            }
-            else
-            {
-                MsgBox.showError('The system is having issues. Please try again later.', 'Fatal Error');
+                    // Otherwise just enable the button
+                    else if (this.tagName.toLowerCase() === 'button')
+                        $('.submit-target').prop('disabled', false);
+                });
+
+                focusInto('#btn-submit');
             }
         }
-    });
+    }
+    catch (xhr)
+    {
+        if (xhr.status == '422')
+        {
+            $('.captcha-error').removeClass('d-none');
+
+            let response = JSON.parse(xhr.responseText);
+
+            if (response.newcaptcha)
+            {
+                let data = {
+                    'captchaImages': response.newcaptcha.captchaImages,
+                    'captchaText': response.newcaptcha.captchaText
+                };
+                buildCaptchaCards(data);
+            }
+
+            waitingDialog.hide();
+            await sleep(1000);
+            MsgBox.showError('That was a mistake. Please try again.', 'Oops!');
+        }
+        else
+        {
+            waitingDialog.hide();
+            await sleep(1000);
+            MsgBox.showError('The system is having issues. Please try again later.', 'Fatal Error');
+        }
+    }
+    // finally
+    // {
+    //     waitingDialog.hide();
+    //     await sleep(1300);
+    // }
 }
+
+// Helper function to pause execution
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 
 function getNewCaptcha()
 {
+    $('.asl-input').prop('disabled', true);
+
     $.ajax({
         url: '/api/recaptcha',
         method: 'GET',
         success: function(data)
         {
             buildCaptchaCards(data);
+        },
+        complete: function() {
+            $('.asl-input').prop('disabled', false);
         }
     });
 }

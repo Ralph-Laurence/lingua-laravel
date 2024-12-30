@@ -1,4 +1,4 @@
-@extends('partials.base')
+@extends('shared.base-members')
 @section('content')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/tutor-details.css') }}">
@@ -183,7 +183,7 @@
                         <div class="row mb-3">
                             <div class="col-2 text-secondary">{{ $obj['from'] }} - {{ $obj['to'] }}</div>
                             <div class="col">
-                                <p class="mb-1">{{ $obj['institution'] }}</p>
+                                <p class="mb-1">{{ $obj['company'] }}</p>
                                 <small class="text-secondary">{{ $obj['role'] }}</small>
                             </div>
                         </div>
