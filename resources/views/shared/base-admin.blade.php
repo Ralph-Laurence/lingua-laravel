@@ -24,7 +24,8 @@
 
     <!-- MAIN STYLES -->
     <link rel="stylesheet" href="{{ asset('assets/css/root.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/header.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/header-admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin-workspace.css') }}">
 
     @stack('styles')
 </head>
@@ -32,7 +33,7 @@
 <body>
 
     @yield('before-header')
-    @include('partials.header-admin')
+    @include('shared.header-admin')
 
     @stack('dialogs')
     @yield('content')

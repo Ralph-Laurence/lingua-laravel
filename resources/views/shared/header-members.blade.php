@@ -19,6 +19,7 @@
                 @endif
             </ul>
 
+
             <div class="dropdown text-end d-flex align-items-center gap-2">
                 <div class="badge role-badge px-3 py-2 text-center {{ $headerData['roleBadge'] }}">
                     {{ $headerData['roleStr'] }}

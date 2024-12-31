@@ -26,28 +26,26 @@ class ViewComposerServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        View::composer(['partials.header-admin', 'partials.header-learner-tutor'], function ($view)
+        View::composer(['shared.header-admin', 'shared.header-members'], function ($view)
         {
-            $user    = Auth::user();
-            $hashids = new Hashids('a8F3kL9zQ2', 10);
-            $userId  = $hashids->encode($user->id);
+            $user = Auth::user();
+            $role = $user->{UserFields::Role};
 
             $profilePic = asset('assets/img/default_avatar.png');
 
-            if (!empty($user->photo)) {
+            if (!empty($user->photo))
+            {
                 $profilePic = Storage::url("public/uploads/profiles/$user->photo");
             }
 
-            $role    = Auth::user()->{UserFields::Role};
             $roleStr = User::ROLE_MAPPING[$role];
 
             $headerData = [
                 'fullname'          => implode(' ', [$user->firstname, $user->lastname]),
                 'profilePic'        => $profilePic,
-                'hashedUserId'      => $userId,
                 'showBecomeTutor'   => $role == User::ROLE_LEARNER,
                 'roleBadge'         => Str::lower('role-' . $roleStr),
-                'roleStr'           => $roleStr,
+                'roleStr'           => $roleStr
             ];
 
             $view->with('headerData', $headerData);

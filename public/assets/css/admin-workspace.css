@@ -1,0 +1,121 @@
+html {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.workspace-wrapper {
+    display: flex;
+    height: calc(100vh - 109px);
+    overflow: auto;
+    position: relative;
+}
+
+.workspace-sidepane {
+    width: 260px;
+    position: fixed;
+    left: 120px;
+    bottom: 0;
+    top: 108px;
+    height: calc(100vh - 108px);
+}
+
+.workspace-sidepane .action-pane {
+    background: #F6F6FA;
+    border: 1px solid #E7E8F2;
+    width: 260px;
+    border-radius: 4px;
+    padding: 14px;
+}
+
+.workspace-sidepane .action-pane .action-pane-title {
+    font-family: 'Poppins-SemiBold';
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.workspace-workarea {
+    margin-left: 400px;
+    margin-right: 100px;
+    height: fit-content;
+    flex-grow: 1;
+}
+
+.workspace-workarea .workarea-table-header {
+    position: sticky;
+    top: 0;
+    height: 50px;
+    background: white;
+    background: #FCFCFE;
+    font-family: 'Poppins-SemiBold';
+}
+
+.rect-mask {
+    position: sticky;
+}
+
+.rect-mask::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 24px; /* Adjust the height of the fading effect */
+    background: linear-gradient(to bottom, rgb(255, 255, 255), rgba(255, 255, 255, 0));
+    pointer-events: none;
+}
+
+.table-content-item.row {
+    margin: auto;
+    padding: 14px;
+    font-size: 13px;
+    border-radius: 4px;
+    border: 1px solid #E7E8F2;
+}
+
+.btn-find-results {
+    background-color: #F23B2F;
+}
+
+/*------------------------------------*/
+.profile-info .profile-pic {
+    width: 50px;
+    height: 50px;
+}
+
+.profile-info .profile-name {
+    font-family: 'Poppins-SemiBold';
+}
+
+/*---------------PAGINATIONS------------------*/
+.page-item.active .page-link {
+    z-index: 3;
+    color: #fff;
+    background-color: #F23B2F;
+    border-color: #F23B2F;
+}
+
+.page-link:hover {
+    z-index: 2;
+    color: #F23B2F;
+    background-color: #efeae9;
+    border-color: #dee2e6;
+}
+
+.page-link:focus {
+    z-index: 3;
+    color: #f23b2f;
+    background-color: #efeae9;
+    outline: 0;
+    box-shadow: 0 0 0 .25rem rgba(242, 59, 47, .25);
+}
+
+.page-link {
+    position: relative;
+    display: block;
+    color: #F23B2F;
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}

@@ -1,0 +1,38 @@
+.colored-header {
+    background: #2E244D;
+    color: white;
+    height: 36px;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-family: 'Poppins-SemiBold';
+}
+
+header .nav .nav-link {
+    font-size: 14px;
+    min-width: 100px;
+    text-align: center;
+    color: #6f6e75;
+}
+
+header .nav .nav-link.link-active {
+    font-family: 'Poppins-SemiBold';
+    border: 2px solid #FB6339;
+    border-radius: 2rem;
+    padding: 6px 8px;
+    color: var(--accent-dark);
+}
+
+footer {
+    /* border-top: 2px solid var(--accent-secondary); */
+    background-color: #110D19;
+    /* background-color: #0D1226; */
+    color: white;
+}
+
+header .role-badge {
+    font-family: 'Poppins-SemiBold';
+    color: white;
+    border-radius: 2rem;
+    letter-spacing: 1px;
+    background-color: #FF7701;
+}

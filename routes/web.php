@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\LearnerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TutorController;
@@ -35,9 +36,14 @@ require __DIR__.'/auth.php';
 
 $RoleMw = 'role-mw:'; // Role middleware
 
-Route::middleware(['auth', $RoleMw . User::ROLE_ADMIN])->group(function () {
-    Route::get('/admin', function () {
-        return view('admin.dashboard');
+Route::middleware(['auth', $RoleMw . User::ROLE_ADMIN])->group(function ()
+{
+    Route::controller(AdminController::class)->group(function()
+    {
+        Route::get('/admin', 'index')->name('admin.index');
+        Route::get('/admin/tutors', 'tutors_index')->name('admin.tutors-index');
+        Route::get('/admin/tutors/filter/clear', 'tutors_clear_filter')->name('admin.tutors-clear-filter');
+        Route::post('/admin/tutors/filter', 'tutors_filter')->name('admin.tutors-filter');
     });
 });
 
@@ -47,11 +53,6 @@ Route::middleware(['auth', $RoleMw . User::ROLE_LEARNER])->group(function ()
     {
         Route::get('/learner', 'index')->name('index');
         Route::get('/learner/my-tutors', 'myTutors')->name('mytutors');
-
-        // Route::get('/sign-lingua/become-tutor',                 'becomeTutor')->name('become-tutor');
-        // Route::get('/sign-lingua/become-tutor/forms',           'becomeTutorFormsPage')->name('become-tutor.forms');
-        // Route::get('/sign-lingua/become-tutor/success',         'becomeTutorSuccess')->name('become-tutor.success');
-        // Route::post('/sign-lingua/become-tutor/forms/submit',   'becomeTutorOnSubmit')->name('become-tutor.forms.submit');
 
         Route::get('/sign-lingua/become-tutor',                 'becomeTutor_index')->name('become-tutor');
         Route::get('/sign-lingua/become-tutor/forms',           'becomeTutor_create')->name('become-tutor.forms');

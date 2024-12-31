@@ -33,7 +33,7 @@
 
     @yield('before-header')
 
-    @include('partials.header-learner-tutor')
+    @include('shared.header-members')
 
     @stack('dialogs')
     @yield('content')
