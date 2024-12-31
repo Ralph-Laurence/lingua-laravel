@@ -73,8 +73,14 @@ html {
     border: 1px solid #E7E8F2;
 }
 
-.btn-find-results {
+.action-button {
     background-color: #F23B2F;
+}
+
+.row-button {
+    font-size: 13px;
+    padding: 2px 8px 2px 8px;
+    /* font-family: 'Poppins-SemiBold'; */
 }
 
 /*------------------------------------*/

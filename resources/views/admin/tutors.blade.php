@@ -60,7 +60,7 @@
                         </select>
                     </div>
                 </div>
-                <button class="btn btn-sm btn-danger w-100 btn-find-results">Find Results</button>
+                <button class="btn btn-sm btn-danger w-100 action-button">Find Results</button>
                 @if (isset($hasFilter))
                     <a role="button" href="{{ route('admin.tutors-clear-filter') }}"
                       class="btn btn-sm btn-outline-secondary w-100 mt-2 btn-clear-results">Clear Filters</a>
@@ -102,7 +102,13 @@
                 <div class="col-2 flex-center">
                     <span class="badge {{ $obj['statusBadge'] }}">{{ $obj['statusStr'] }}</span>
                 </div>
-                <div class="col-2 flex-center">Actions</div>
+                <div class="col-2 flex-center">
+                    @if ($obj['needsAction'])
+                        <a role="button" href="" class="btn btn-sm btn-danger row-button action-button">Review</a>
+                    @else
+                        <a role="button" href="{{ route('admin.tutors-show', $obj['hashedId']) }}" class="btn btn-sm btn-secondary row-button">Details</a>
+                    @endif
+                </div>
             </div>
             @empty
                 @if (isset($hasFilter))
@@ -118,7 +124,7 @@
 
             {{ $tutors->links() }}
         </div>
-        
+
     </section>
 </main>
 @endsection

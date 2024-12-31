@@ -43,6 +43,7 @@ Route::middleware(['auth', $RoleMw . User::ROLE_ADMIN])->group(function ()
         Route::get('/admin', 'index')->name('admin.index');
         Route::get('/admin/tutors', 'tutors_index')->name('admin.tutors-index');
         Route::get('/admin/tutors/filter/clear', 'tutors_clear_filter')->name('admin.tutors-clear-filter');
+        Route::get('/admin/tutors/details/{id}', 'tutors_show')->name('admin.tutors-show');
         Route::post('/admin/tutors/filter', 'tutors_filter')->name('admin.tutors-filter');
     });
 });

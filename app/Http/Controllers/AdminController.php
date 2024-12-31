@@ -9,29 +9,24 @@ use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
 use App\Models\PendingRegistration;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Hashids\Hashids;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
 {
-    private $hashids;
-
-    public function __construct()
-    {
-        $this->hashids = new Hashids(HashSalts::Tutors, 10);
-    }
-
     function index()
     {
         return view('admin.dashboard');
     }
 
     public function tutors_index(Request $request)
-    {  
+    {
         $result = null;
-        
+
         if ($request->session()->has('result'))
             $result = $request->session()->get('result');
         else
@@ -101,13 +96,82 @@ class AdminController extends Controller
         return redirect()->route('admin.tutors-index');
     }
 
+    public function tutors_show($id)
+    {
+        $hashids = new Hashids(HashSalts::Tutors, 10);
+
+        try
+        {
+            // Decode the hashed ID
+            $decodedId = $hashids->decode($id);
+
+            // Check if the ID is empty
+            if (empty($decodedId)) {
+                return view('errors.404');
+            }
+
+            // Fetch the tutor along with their profile
+            $tutorId      = $decodedId[0];
+            $tutor        = User::with('profile')->findOrFail($tutorId);
+            $fluencyLevel = FluencyLevels::Tutor[$tutor->profile->{ProfileFields::Fluency}];
+
+            $photo = $tutor->{UserFields::Photo};
+            $profilePic = asset('assets/img/default_avatar.png');
+
+            if (!empty($photo))
+                $profilePic = Storage::url("public/uploads/profiles/$photo");
+
+            $skills = [];
+
+            if ($tutor->profile->{ProfileFields::Skills})
+            {
+                foreach($tutor->profile->{ProfileFields::Skills} as $skill)
+                {
+                    $skills[] = User::SOFT_SKILLS[$skill];
+                }
+            }
+
+            $tutorDetails = [
+                'firstname'          => $tutor->{UserFields::Firstname},
+                'fullname'           => implode(' ', [$tutor->{UserFields::Firstname}, $tutor->{UserFields::Lastname}]),
+                'email'              => $tutor->email,
+                'contact'            => $tutor->{UserFields::Contact},
+                'address'            => $tutor->{UserFields::Address},
+                'verified'           => $tutor->{UserFields::IsVerified} == 1,
+                'work'               => $tutor->profile->{ProfileFields::Experience},
+                'bio'                => $tutor->profile->{ProfileFields::Bio},
+                'about'              => $tutor->profile->{ProfileFields::About},
+                'education'          => $tutor->profile->{ProfileFields::Education},
+                'certs'              => $tutor->profile->{ProfileFields::Certifications},
+                'skills'             => $skills,
+                'photo'              => $profilePic,
+                'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],
+                'fluencyBadgeColor'  => $fluencyLevel['Badge Color'],
+                'fluencyLevelText'   => $fluencyLevel['Level'],
+            ];
+
+            // Return the view with the tutor data
+            return view('admin.show-tutor', compact('tutorDetails'));
+        }
+        catch (ModelNotFoundException $e)
+        {
+            // Return custom 404 page
+            return view('errors.404');
+        }
+        catch (Exception $e)
+        {
+            // Return custom 404 page
+            return view('errors.500');
+        }
+    }
+
     private function getTutors($options = [])
     {
         $options = array_merge(['min_entries' => 10], $options);
-    
+
         // Get the ids of all users with pending registration
         $pending = PendingRegistration::pluck(ProfileFields::UserId)->toArray();
-    
+
         // Get all existing tutors
         $fields = [
             'users.id',
@@ -118,7 +182,7 @@ class AdminController extends Controller
             UserFields::IsVerified,
             ProfileFields::Fluency
         ];
-    
+
         // Build the query
         $tutors = User::select($fields)
                     ->join('profiles', 'users.id', '=', 'profiles.'.ProfileFields::UserId)
@@ -127,9 +191,9 @@ class AdminController extends Controller
                     {
                         if ($options['status'] == 1) // Pending
                             return $query->whereIn('users.id', $pending);
-                        
+
                         else if ($options['status'] == 2) // Verified
-                            return $query->where(UserFields::IsVerified, true);    
+                            return $query->where(UserFields::IsVerified, true);
                     },
                     function($query) use ($pending)
                     {
@@ -148,57 +212,60 @@ class AdminController extends Controller
                         });
                     }])
                     ->orderBy(UserFields::Firstname, 'ASC');
-    
+
         if (array_key_exists('fluency', $options) && $options['fluency'] != -1)
         {
             $tutors = $tutors->where(ProfileFields::Fluency, $options['fluency']);
         }
-        
+
         if (array_key_exists('search', $options))
         {
             $searchWord = $options['search'];
             $tutors = $tutors->where(UserFields::Firstname, 'LIKE', "%$searchWord%")
                     ->orWhere(UserFields::Lastname, 'LIKE', "%$searchWord%");
         }
-    
+
         // Get the results
         $tutors = $tutors->paginate($options['min_entries']);
-    
+
         $defaultPic = asset('assets/img/default_avatar.png');
         $fluencyFilter = $this->getFluencyFilters();
-    
+        $hashids = new Hashids(HashSalts::Tutors, 10);
+
         foreach ($tutors as $key => $obj)
         {
             $obj['totalStudents'] = $obj->totalStudents;
-    
+
             if ($obj->{UserFields::IsVerified} == 1)
             {
-                $obj['statusStr']   = 'Verified';
-                $obj['statusBadge'] = 'bg-primary';
+                $obj['statusStr']       = 'Verified';
+                $obj['statusBadge']     = 'bg-primary';
+                $obj['needsAction']     = false;
             }
 
             else if (!$obj->{UserFields::IsVerified} || in_array($obj->id, $pending) )
             {
-                $obj['statusStr']   = 'Pending';
-                $obj['statusBadge'] = 'bg-warning text-dark';
+                $obj['statusStr']       = 'Pending';
+                $obj['statusBadge']     = 'bg-warning text-dark';
+                $obj['needsAction']     = true;
             }
 
             $obj->name  = implode(' ', [$obj->{UserFields::Firstname}, $obj->{UserFields::Lastname}]);
-            $obj->id    = $this->hashids->encode($obj->id);
-            
+            $obj['hashedId'] = $hashids->encode($obj->id);
+
             $fluency = $obj->{ProfileFields::Fluency};
             $obj['fluencyStr']   = $fluencyFilter[$fluency];
             $obj['fluencyBadge'] = FluencyLevels::Tutor[$fluency]['Badge Color'];
 
             $photo = $obj->{UserFields::Photo};
             $obj['photo'] = $defaultPic;
-    
+
             if (!empty($photo))
             {
                 $obj['photo'] = Storage::url("public/uploads/profiles/$photo");
             }
         }
-    
+
         return [
             'tutorsSet'     => $tutors,
             'fluencyFilter' => $fluencyFilter
