@@ -1,3 +1,15 @@
+@php
+    $preRenderTitle = '';
+    $preRenderContent = '';
+    $preRenderModal = '';
+
+    if (isset($preRenderState))
+    {
+        $preRenderTitle = $preRenderState['title'];
+        $preRenderContent = $preRenderState['content'];
+        $preRenderModal = 'show';
+    }
+@endphp
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/css/message-box.css') }}">
 @endpush
@@ -10,12 +22,12 @@
                     <span class="message-box-icon me-2">
                         <i class="fas fa-circle-info"></i>
                     </span>
-                    <h6 class="modal-title" id="staticBackdropLabel"></h6>
+                    <h6 class="modal-title" id="staticBackdropLabel">{{ $preRenderTitle }}</h6>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-14">
-
+                {{ $preRenderContent }}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary btn-ok text-14 px-3" data-bs-dismiss="modal">OK</button>
@@ -25,4 +37,9 @@
 </div>
 @push('scripts')
     <script src="{{ asset('assets/js/message-box.js') }}"></script>
+    @if ($preRenderModal)
+        <script>
+            $(() => $('.message-box').modal('show'));
+        </script>
+    @endif
 @endpush

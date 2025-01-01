@@ -16,7 +16,7 @@
                     <a href="{{route('admin.tutors-index')}}" class="nav-link px-2 {{ Request::is('admin/tutors') ? 'link-active' : '' }}">Tutors</a>
                 </li>
                 <li>
-                    <a href="{{-- route('mytutors') --}}" class="nav-link px-2 {{ Request::is('learner/my-tutors') ? 'link-active' : '' }}">Learners</a>
+                    <a href="{{ route('admin.learners-index') }}" class="nav-link px-2 {{ Request::is('learner/my-tutors') ? 'link-active' : '' }}">Learners</a>
                 </li>
             </ul>
 

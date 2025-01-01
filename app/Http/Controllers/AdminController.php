@@ -9,6 +9,7 @@ use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
 use App\Models\PendingRegistration;
 use App\Models\User;
+use App\Services\TutorService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -18,6 +19,17 @@ use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
 {
+    private $tutorHashIds;
+    private $learnerHashIds;
+    protected $tutorService;
+
+    function __construct(TutorService $tutService)
+    {
+        $this->tutorHashIds    = new Hashids(HashSalts::Tutors, 10);
+        $this->learnerHashIds  = new Hashids(HashSalts::Learners, 10);
+        $this->tutorService    = $tutService;
+    }
+
     function index()
     {
         return view('admin.dashboard');
@@ -27,10 +39,17 @@ class AdminController extends Controller
     {
         $result = null;
 
-        if ($request->session()->has('result'))
-            $result = $request->session()->get('result');
+        // if ($request->session()->has('result'))
+        //     $result = $request->session()->get('result');
+        if ($request->session()->has('filter'))
+        {
+            $filter = $request->session()->get('filter');
+            $result = $result = $this->getTutors($filter);
+        }
         else
+        {
             $result = $this->getTutors();
+        }
 
         $tutors = $result['tutorsSet'];
         $fluencyFilter = $result['fluencyFilter'];
@@ -80,6 +99,7 @@ class AdminController extends Controller
         }
 
         $request->session()->put('inputs', $inputs);
+        $request->session()->put('filter', $filter);
         $request->session()->put('result', $this->getTutors($filter));
 
         return redirect()->route('admin.tutors-index');
@@ -87,23 +107,33 @@ class AdminController extends Controller
 
     public function tutors_clear_filter(Request $request)
     {
-        if ($request->session()->has('result'))
-            $request->session()->forget('result');
-
-        if ($request->session()->has('inputs'))
-            $request->session()->forget('inputs');
+        // Forget multiple session variables in one line
+        $request->session()->forget(['result', 'filter', 'inputs']);
 
         return redirect()->route('admin.tutors-index');
     }
 
+    public function tutors_review_registration($id)
+    {
+        return $this->tutorService->showReviewRegistration($id);
+    }
+
+    public function tutors_approve_registration($id)
+    {
+        return $this->tutorService->approveRegistration($id);
+    }
+    
+    public function tutors_decline_registration($id)
+    {
+        return $this->tutorService->declineRegistration($id);
+    }
+
     public function tutors_show($id)
     {
-        $hashids = new Hashids(HashSalts::Tutors, 10);
-
         try
         {
             // Decode the hashed ID
-            $decodedId = $hashids->decode($id);
+            $decodedId = $this->tutorHashIds->decode($id);
 
             // Check if the ID is empty
             if (empty($decodedId)) {
@@ -228,9 +258,8 @@ class AdminController extends Controller
         // Get the results
         $tutors = $tutors->paginate($options['min_entries']);
 
-        $defaultPic = asset('assets/img/default_avatar.png');
-        $fluencyFilter = $this->getFluencyFilters();
-        $hashids = new Hashids(HashSalts::Tutors, 10);
+        $defaultPic     = asset('assets/img/default_avatar.png');
+        $fluencyFilter  = $this->getFluencyFilters();
 
         foreach ($tutors as $key => $obj)
         {
@@ -238,20 +267,22 @@ class AdminController extends Controller
 
             if ($obj->{UserFields::IsVerified} == 1)
             {
-                $obj['statusStr']       = 'Verified';
-                $obj['statusBadge']     = 'bg-primary';
-                $obj['needsAction']     = false;
+                $obj['statusStr']   = 'Verified';
+                $obj['statusBadge'] = 'bg-primary';
+                $obj['needsReview'] = false;
+                $obj['verified']    = true;
             }
 
             else if (!$obj->{UserFields::IsVerified} || in_array($obj->id, $pending) )
             {
-                $obj['statusStr']       = 'Pending';
-                $obj['statusBadge']     = 'bg-warning text-dark';
-                $obj['needsAction']     = true;
+                $obj['statusStr']   = 'Pending';
+                $obj['statusBadge'] = 'bg-warning text-dark';
+                $obj['needsReview'] = true;
+                $obj['verified']    = false;
             }
 
-            $obj->name  = implode(' ', [$obj->{UserFields::Firstname}, $obj->{UserFields::Lastname}]);
-            $obj['hashedId'] = $hashids->encode($obj->id);
+            $obj->name = implode(' ', [$obj->{UserFields::Firstname}, $obj->{UserFields::Lastname}]);
+            $obj['hashedId'] = $this->tutorHashIds->encode($obj->id);
 
             $fluency = $obj->{ProfileFields::Fluency};
             $obj['fluencyStr']   = $fluencyFilter[$fluency];
@@ -268,7 +299,8 @@ class AdminController extends Controller
 
         return [
             'tutorsSet'     => $tutors,
-            'fluencyFilter' => $fluencyFilter
+            'fluencyFilter' => $fluencyFilter,
+            'options'       => $options
         ];
     }
 
@@ -282,5 +314,104 @@ class AdminController extends Controller
         }
 
         return $fluencyFilter;
+    }
+
+    public function learners_index(Request $request)
+    {
+        $result = null;
+
+        if ($request->session()->has('result'))
+            $result = $request->session()->get('result');
+        else
+            $result = $this->getLearners();
+
+        $learners = $result['learnersSet'];
+        $fluencyFilter = $result['fluencyFilter'];
+
+        if ($request->session()->has('inputs'))
+        {
+            // Remove the session variable to prevent access after the first visit.
+            // Which means GET and CLEAR the session data
+            // $inputs = $request->session()->pull('inputs');
+
+            // However, This will retain the old session data...
+            $inputs = $request->session()->get('inputs');
+            $hasFilter = true;
+
+            return view('admin.learners', compact('learners', 'fluencyFilter', 'inputs', 'hasFilter'));
+        }
+
+        return view('admin.learners', compact('learners', 'fluencyFilter'));
+    }
+
+    private function getLearners($options = [])
+    {
+        $options = array_merge(['min_entries' => 10], $options);
+
+        // Get all existing learners
+        $fields = [
+            'users.id',
+            UserFields::Firstname,
+            UserFields::Lastname,
+            UserFields::Photo,
+            UserFields::Role,
+            ProfileFields::Fluency
+        ];
+
+        // Build the query
+        $learners = User::select($fields)
+                    ->where(UserFields::Role, User::ROLE_LEARNER)
+                    ->join('profiles', 'users.id', '=', 'profiles.'.ProfileFields::UserId)
+                    ->withCount(['bookingsAsLearner as totalTutors' => function($query)
+                    {
+                        $query->whereHas('tutor', function($query)
+                        {
+                            $query->where(UserFields::Role, User::ROLE_TUTOR);
+                        });
+                    }])
+                    ->orderBy(UserFields::Firstname, 'ASC');
+
+        if (array_key_exists('fluency', $options) && $options['fluency'] != -1)
+        {
+            $learners = $learners->where(ProfileFields::Fluency, $options['fluency']);
+        }
+
+        if (array_key_exists('search', $options))
+        {
+            $searchWord = $options['search'];
+            $learners = $learners->where(UserFields::Firstname, 'LIKE', "%$searchWord%")
+                    ->orWhere(UserFields::Lastname, 'LIKE', "%$searchWord%");
+        }
+
+        // Get the results
+        $learners = $learners->paginate($options['min_entries']);
+
+        $defaultPic     = asset('assets/img/default_avatar.png');
+        $fluencyFilter  = $this->getFluencyFilters();
+
+        foreach ($learners as $key => $obj)
+        {
+            //$obj['totalLearners'] = $obj->totalLearners;
+
+            $obj->name = implode(' ', [$obj->{UserFields::Firstname}, $obj->{UserFields::Lastname}]);
+            $obj['hashedId'] = $this->tutorHashIds->encode($obj->id);
+
+            $fluency = $obj->{ProfileFields::Fluency};
+            $obj['fluencyStr']   = $fluencyFilter[$fluency];
+            $obj['fluencyBadge'] = FluencyLevels::Learner[$fluency]['Badge Color'];
+
+            $photo = $obj->{UserFields::Photo};
+            $obj['photo'] = $defaultPic;
+
+            if (!empty($photo))
+            {
+                $obj['photo'] = Storage::url("public/uploads/profiles/$photo");
+            }
+        }
+
+        return [
+            'learnersSet'   => $learners,
+            'fluencyFilter' => $fluencyFilter
+        ];
     }
 }

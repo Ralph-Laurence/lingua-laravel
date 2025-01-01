@@ -141,6 +141,7 @@ class UserService
                     'institution'   => $inputs["education-institution-$index"],
                     'degree'        => $inputs["education-degree-$index"],
                     'file_upload'   => $filePath,
+                    'full_path'     => "$filePath/$fileName",
                 ];
             }
 
@@ -167,6 +168,7 @@ class UserService
                     'company'       => $inputs["work-company-$index"],
                     'role'          => $inputs["work-role-$index"],
                     'file_upload'   => $filePath,
+                    'full_path'     => "$filePath/$fileName",
                 ];
             }
 
@@ -191,7 +193,8 @@ class UserService
                     'from'          => $value,
                     'title'         => $inputs["certification-title-$index"],
                     'description'   => $inputs["certification-description-$index"],
-                    'file_upload'   => $filePath
+                    'file_upload'   => $filePath,
+                    'full_path'     => "$filePath/$fileName",
                 ];
             }
         }

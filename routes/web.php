@@ -43,8 +43,13 @@ Route::middleware(['auth', $RoleMw . User::ROLE_ADMIN])->group(function ()
         Route::get('/admin', 'index')->name('admin.index');
         Route::get('/admin/tutors', 'tutors_index')->name('admin.tutors-index');
         Route::get('/admin/tutors/filter/clear', 'tutors_clear_filter')->name('admin.tutors-clear-filter');
+        Route::get('/admin/tutors/review/{id}', 'tutors_review_registration')->name('admin.tutors-review-registration');
+        Route::get('/admin/tutors/registration/approve/{id}', 'tutors_approve_registration')->name('admin.tutors-approve-registration');
+        Route::get('/admin/tutors/registration/decline/{id}', 'tutors_decline_registration')->name('admin.tutors-decline-registration');
         Route::get('/admin/tutors/details/{id}', 'tutors_show')->name('admin.tutors-show');
         Route::post('/admin/tutors/filter', 'tutors_filter')->name('admin.tutors-filter');
+
+        Route::get('/admin/learners', 'learners_index')->name('admin.learners-index');
     });
 });
 
@@ -93,8 +98,8 @@ Route::get('/send-test-email', function ()
     return 'Test email sent!';
 });
 
-Route::get('/success', function() {
-    return view('shared.registration-success');
+Route::get('/mail', function() {
+    return view('mails.registration-approved');
 });
 /*
 ---------------------------------------------------------------------------

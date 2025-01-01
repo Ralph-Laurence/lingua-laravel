@@ -5,9 +5,11 @@ namespace App\Services;
 use App\Http\Utils\HashSalts;
 use App\Models\Booking;
 use App\Models\FieldNames\BookingFields;
+use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
 use App\Models\User;
 use Hashids\Hashids;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class LearnerService extends UserService

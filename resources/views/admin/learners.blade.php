@@ -72,7 +72,7 @@
         <div class="workarea-table-header mb-4">
             <div class="table-content-item row user-select-none">
                 <div class="col-1">#</div>
-                <div class="col-5">Tutor</div>
+                <div class="col-5">Learner</div>
                 <div class="col-2 flex-center">Fluency</div>
                 <div class="col-2 flex-center">Status</div>
                 <div class="col-2 flex-center">Actions</div>
@@ -80,22 +80,18 @@
             <div class="rect-mask"></div>
         </div>
         <div class="workarea-table-body mb-3">
-            @forelse ($tutors as $key => $obj)
+            @forelse ($learners as $key => $obj)
             <div class="table-content-item row user-select-none mb-3">
-                <div class="col-1 flex-start text-secondary">{{ ($tutors->currentPage() - 1) * $tutors->perPage() + $loop->index + 1 }}</div>
+                <div class="col-1 flex-start text-secondary">{{ ($learners->currentPage() - 1) * $learners->perPage() + $loop->index + 1 }}</div>
                 <div class="col-5">
                     <div class="profile-info w-100 flex-start">
                         <img class="rounded profile-pic" src="{{ $obj['photo'] }}" alt="profile-pic">
                         <div class="ms-3 flex-fill">
                             <h6 class="profile-name text-truncate  mb-2 text-13">{{ $obj->name }}</h6>
-                            @if ($obj['totalStudents'] > 0)
-                                <p class="text-secondary m-0">{{ $obj->totalStudents }} Students</p>
+                            @if ($obj->totalTutors > 0)
+                                <p class="text-secondary m-0">{{ $obj->totalTutors }} Tutors</p>
                             @else
-                                @if ($obj['needsReview'])
-                                    <p class="m-0" style="color: #FF7701;">Pending Registration</p>
-                                @else
-                                    <p class="text-danger m-0">0 Students</p>
-                                @endif
+                                <p class="text-danger m-0">0 Tutors</p>
                             @endif
                         </div>
                     </div>
@@ -115,7 +111,7 @@
                 </div>
                 <div class="col-2 flex-center">
                     @if ($obj['needsReview'])
-                        <a role="button" href="{{ route('admin.tutors-review-registration', $obj['hashedId']) }}" class="btn btn-sm btn-danger row-button action-button">Review</a>
+                        <a role="button" href="" class="btn btn-sm btn-danger row-button action-button">Review</a>
                     @else
                         <a role="button" href="{{ route('admin.tutors-show', $obj['hashedId']) }}" class="btn btn-sm btn-secondary row-button">Details</a>
                     @endif
@@ -133,15 +129,9 @@
                 @endif
             @endforelse
 
-            {{ $tutors->links() }}
+            {{ $learners->links() }}
         </div>
 
     </section>
 </main>
 @endsection
-
-@push('dialogs')
-    @if (session('registerSuccessMsg'))
-        @include('partials.messagebox', ['preRenderState' => ['title' => 'Success', 'content' => session('registerSuccessMsg')]])
-    @endif
-@endpush

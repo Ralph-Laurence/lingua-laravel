@@ -86,10 +86,6 @@ class LearnerController extends Controller
 
         try
         {
-            // Save to the database
-            $registration = $this->learnerService->buildRegistrationData(Auth::user()->id, $model);
-            PendingRegistration::create($registration);
-
             // Process uploads...
             foreach ($upload as $category => $uploadData)
             {
@@ -106,6 +102,10 @@ class LearnerController extends Controller
                     }
                 }
             }
+
+            // Save to the database
+            $registration = $this->learnerService->buildRegistrationData(Auth::user()->id, $model);
+            PendingRegistration::create($registration);
 
             DB::commit();
 
