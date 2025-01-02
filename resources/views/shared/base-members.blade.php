@@ -33,7 +33,9 @@
 
     @yield('before-header')
 
-    @include('shared.header-members')
+    @if ($includeHeader ?? true)
+        @include('shared.header-members')
+    @endif
 
     @stack('dialogs')
     @yield('content')

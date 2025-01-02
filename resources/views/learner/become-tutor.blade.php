@@ -64,6 +64,46 @@
         </div>
     </section>
 
+    <section class="p-4">
+        <div class="text-center w-100 mb-5">
+            <h3 class="darker-text fw-bold">It's easy as 1-2-3!</h3>
+            <p>Becoming a tutor on SignLingua is as simple as following three steps.</p>
+        </div>
+        <div class="easy-steps">
+
+            <div class="card shadow" style="width: 19rem;">
+                <div class="card-body text-secondary">
+                    <img src="{{ asset('assets/img/card-icn-resume.png') }}" alt="resume icon" width="80">
+                    <div>
+                        <h6 class="fw-bold pt-2">1. Fill out your resume</h6>
+                        <p class="text-14">Provide your details and qualifications to get started.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow" style="width: 19rem;">
+                <div class="card-body text-secondary">
+                    <img src="{{ asset('assets/img/card-icn-connect.png') }}" alt="resume icon" width="80">
+                    <div>
+                        <h6 class="fw-bold pt-2">2. Find a learner</h6>
+                        <p class="text-14">Connect with learners eager to improve their ASL skills.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow" style="width: 20rem;">
+                <div class="card-body text-secondary">
+                    <img src="{{ asset('assets/img/card-icn-teach.png') }}" alt="resume icon" width="80">
+                    <div>
+                        <h6 class="fw-bold pt-2">3. Start teaching</h6>
+                        <p class="text-14">Begin your ASL lesson and share your expertise.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
     <section class="section-consider section-content mb-5" id="pre-flight">
         <div class="row">
             <div class="col">
@@ -107,46 +147,6 @@
             <div class="col text-center pt-5">
                 <img src="{{ asset('assets/img/become-a-tutor-4.jpg') }}" alt="tutor-session" height="500">
             </div>
-        </div>
-    </section>
-
-    <section class="p-4 mb-5">
-        <div class="text-center w-100 mb-5">
-            <h3 class="darker-text fw-bold">It's easy as 1-2-3!</h3>
-            <p>Becoming a tutor on SignLingua is as simple as following three steps.</p>
-        </div>
-        <div class="easy-steps">
-
-            <div class="card shadow" style="width: 19rem;">
-                <div class="card-body text-secondary">
-                    <img src="{{ asset('assets/img/card-icn-resume.png') }}" alt="resume icon" width="80">
-                    <div>
-                        <h6 class="fw-bold pt-2">1. Fill out your resume</h6>
-                        <p class="text-14">Provide your details and qualifications to get started.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card shadow" style="width: 19rem;">
-                <div class="card-body text-secondary">
-                    <img src="{{ asset('assets/img/card-icn-connect.png') }}" alt="resume icon" width="80">
-                    <div>
-                        <h6 class="fw-bold pt-2">2. Find a learner</h6>
-                        <p class="text-14">Connect with learners eager to improve their ASL skills.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card shadow" style="width: 20rem;">
-                <div class="card-body text-secondary">
-                    <img src="{{ asset('assets/img/card-icn-teach.png') }}" alt="resume icon" width="80">
-                    <div>
-                        <h6 class="fw-bold pt-2">3. Start teaching</h6>
-                        <p class="text-14">Begin your ASL lesson and share your expertise.</p>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </section>
 @endsection

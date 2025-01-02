@@ -3,12 +3,14 @@
         #slava-ukraini {
             background: #141414;
             color: white;
-            height: 64px;
+            height: 50px;
             position: relative;
         }
 
         #ukr-flag {
             border-radius: 3px;
+            height: 20px;
+            width: 28px;
         }
 
         #stand-with-ukr {
@@ -23,6 +25,7 @@
             right: 18px;
             top: 50%;
             transform: translateY(-50%);
+            display: none;
         }
         #btn-ukr-close:hover {
             background: #1c1b23;

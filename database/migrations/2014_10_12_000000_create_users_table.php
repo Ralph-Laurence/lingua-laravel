@@ -28,9 +28,9 @@ return new class extends Migration
 
             // Common Details
             $table->string(UserFields::Contact, 20);
-            $table->string(UserFields::Address);
-            $table->string(UserFields::Photo);
-            $table->string(UserFields::IsVerified);
+            $table->string(UserFields::Address, 128);
+            $table->string(UserFields::Photo)->nullable();
+            $table->integer(UserFields::IsVerified)->default(0);
 
             $table->rememberToken();
             $table->timestamp('created_at')->useCurrent();

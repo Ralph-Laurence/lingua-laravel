@@ -81,7 +81,11 @@
                     <div class="col-4 gx-0">
                         <img src="{{ $obj['profilePic'] }}" class="profile-photo" alt="profile-photo">
                     </div>
-                    <div class="col"></div>
+                    <div class="col pe-0">
+                        <div class="flex-end">
+                            <a role="button" href="{{ route('tutor.show', $obj['hashedId']) }}" data-tutor-id="{{ $obj['hashedId'] }} ?>" class="btn btn-sm btn-secondary btn-more-details">More Details</a>
+                        </div>
+                    </div>
                 </div>
                 <h6 class="card-title tutor-name mt-3 mb-1">
                     <i class="fas fa-circle-check {{ $obj['hiredIndicator'] }} accent-secondary me-2"></i>
@@ -92,9 +96,9 @@
                     {{ $obj['fluencyLevelText'] }}
                 </span>
                 <p class="card-text tutor-bio">{{ $obj['bioNotes'] }}</p>
-                <div class="flex-end">
+                {{-- <div class="flex-end">
                     <a role="button" href="{{ route('tutor.show', $obj['hashedId']) }}" data-tutor-id="{{ $obj['hashedId'] }} ?>" class="btn btn-sm btn-secondary btn-more-details">More Details</a>
-                </div>
+                </div> --}}
             </div>
         </div>
         @endforeach

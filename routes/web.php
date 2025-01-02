@@ -1,10 +1,14 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\GuestController;
 use App\Http\Controllers\LearnerController;
+use App\Http\Controllers\MemberRegistration;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TutorController;
+use App\Models\FieldNames\UserFields;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 /*
@@ -18,12 +22,67 @@ use Illuminate\Support\Facades\Hash;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', function ()
+{
+    // return view('welcome');
+
+    $currentRole = 'guest';
+    $headerData = [];
+
+    if (Auth::user())
+    {
+        $user = Auth::user();
+
+        $headerData = [
+            'roleStr'       => User::ROLE_MAPPING[$user->{UserFields::Role}],
+            'profilePhoto'  => User::getPhotoUrl($user->{UserFields::Photo}),
+            'username'      => $user->{UserFields::Username}
+        ];
+
+        if ($user->{UserFields::Role} == User::ROLE_LEARNER)
+        {
+            $currentRole = 'learner';
+        }
+
+        else if ($user->{UserFields::Role} == User::ROLE_TUTOR)
+            $currentRole = 'tutor';
+    }
+
+    return view('shared.common-home-page', compact('currentRole', 'headerData'));
+});
+
+Route::controller(GuestController::class)->group(function()
+{
+    Route::get('/sign-lingua/become-tutor',       'becomeTutor_index')->name('become-tutor');
+    Route::get('/sign-lingua/become-tutor/forms', 'becomeTutor_create')->name('become-tutor.forms');
+});
+
+Route::controller(MemberRegistration::class)->group(function()
+{
+    Route::get('/signlingua/learner/registration', 'showMemberRegistrationForm')->name('registration.learner');
+    Route::post('/signlingua/learner/registration', 'registerLearner')->name('registration.learner-submit');
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    // return view('dashboard');
+    // return view('shared.common-home-page');
+
+    if (Auth::user())
+    {
+        $role = Auth::user()->{UserFields::Role};
+
+        switch ($role) {
+            case User::ROLE_LEARNER:
+            case User::ROLE_STR_TUTOR:
+                return redirect()->to('/');
+                break;
+
+            case User::ROLE_ADMIN:
+                return redirect()->route('admin.dashboard');
+                break;
+        }
+    }
+
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -40,7 +99,6 @@ Route::middleware(['auth', $RoleMw . User::ROLE_ADMIN])->group(function ()
 {
     Route::controller(AdminController::class)->group(function()
     {
-        Route::get('/',                                         'index');
         Route::get('/admin/dashboard',                          'index')->name('admin.dashboard');
         Route::get('/admin/tutors',                             'tutors_index')->name('admin.tutors-index');
         Route::get('/admin/tutors/filter/clear',                'tutors_clear_filter')->name('admin.tutors-clear-filter');
