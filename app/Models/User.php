@@ -10,6 +10,7 @@ use App\Models\FieldNames\UserFields;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -121,5 +122,15 @@ class User extends Authenticatable
         $lastNameInitial = strtoupper(mb_substr($lastName, 0, 1)) . '.';
 
         return "{$firstName} {$lastNameInitial}";
+    }
+
+    public static function getPhotoUrl($photo)
+    {
+        if (!empty($photo))
+        {
+            return asset(Storage::url("public/uploads/profiles/$photo"));
+        }
+
+        return asset('assets/img/default_avatar.png');
     }
 }

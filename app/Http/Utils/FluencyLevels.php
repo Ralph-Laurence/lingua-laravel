@@ -14,7 +14,7 @@ class FluencyLevels {
     const Learner = [
         '0' => ['Level' => 'Absolute',     'Badge Color' => 'badge-gray',    'Badge Icon' => 'fa-seedling',      'Description' => 'Has no prior knowledge or experience with sign language'],
         '1' => ['Level' => 'Beginner',     'Badge Color' => 'badge-cyan',    'Badge Icon' => 'fa-ranking-star',  'Description' => 'Has some understanding of the basics of sign language'],
-        '2' => ['Level' => 'Intermediate', 'Badge Color' => 'badge-primary', 'Badge Icon' => 'fa-hat-cowboy',    'Description' => 'Able to hold simple conversations, expanding skills'],
-        '3' => ['Level' => 'Proficient',   'Badge Color' => 'badge-success', 'Badge Icon' => 'fa-medal',         'Description' => 'Comfortable with most aspects of ASL, conversationally fluent']
+        '2' => ['Level' => 'Intermediate', 'Badge Color' => 'badge-green', 'Badge Icon' => 'fa-hat-cowboy',    'Description' => 'Able to hold simple conversations, expanding skills'],
+        '3' => ['Level' => 'Proficient',   'Badge Color' => 'badge-pro', 'Badge Icon' => 'fa-medal',         'Description' => 'Comfortable with most aspects of ASL, conversationally fluent']
     ];
 }

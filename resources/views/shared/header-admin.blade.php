@@ -8,15 +8,19 @@
                 <img class="logo-brand" src="{{ asset('assets/img/logo-brand.png') }}" alt="logo-brand" height="40">
             </a>
 
+            @php
+                $dashboardIsActive = Request::is('/') || Request::is('admin/dashboard') ? 'link-active' : '';
+            @endphp
+
             <ul class="nav col-12 col-lg-auto ms-lg-3 me-lg-auto mb-2 justify-content-center mb-md-0">
                 <li>
-                    <a href="{{-- route('mytutors') --}}" class="nav-link px-2 {{ Request::is('learner/my-tutors') ? 'link-active' : '' }}">Dashboard</a>
+                    <a href="{{ route('admin.dashboard') }}" class="nav-link px-2 {{ $dashboardIsActive }}">Dashboard</a>
                 </li>
                 <li>
                     <a href="{{route('admin.tutors-index')}}" class="nav-link px-2 {{ Request::is('admin/tutors') ? 'link-active' : '' }}">Tutors</a>
                 </li>
                 <li>
-                    <a href="{{ route('admin.learners-index') }}" class="nav-link px-2 {{ Request::is('learner/my-tutors') ? 'link-active' : '' }}">Learners</a>
+                    <a href="{{ route('admin.learners-index') }}" class="nav-link px-2 {{ Request::is('admin/learners') ? 'link-active' : '' }}">Learners</a>
                 </li>
             </ul>
 

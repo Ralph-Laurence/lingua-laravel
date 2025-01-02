@@ -1,4 +1,12 @@
-@php $includeFooter = false; @endphp
+@php
+$includeFooter = false;
+
+$statusOptions = [
+    '0' => 'All',
+    '1' => 'Pending',
+    '2' => 'Verified'
+];
+@endphp
 @extends('shared.base-admin')
 
 @section('content')
@@ -24,9 +32,15 @@
                     </div>
                     <div class="col text-13">
                         <select class="form-select p-1 text-13" name="select-status" id="select-status">
-                            <option class="text-14" {{ ($inputs['select-status'] ?? null) == 0  ? 'selected' : '' }} value="0">All</option>
-                            <option class="text-14" {{ ($inputs['select-status'] ?? null) == 1  ? 'selected' : '' }} value="1">Pending</option>
-                            <option class="text-14" {{ ($inputs['select-status'] ?? null) == 2  ? 'selected' : '' }} value="2">Verified</option>
+                            @foreach ($statusOptions as $k => $opt)
+                                @php
+                                    $isSelected = ($inputs['select-status'] ?? null) == $k  ? 'selected' : '';
+                                @endphp
+                                <option class="text-14" {{ $isSelected }} value="{{ $k }}">{{ $opt }}</option>
+                            @endforeach
+                            {{-- <option class="text-14" {{ ($inputs['select-status'] ?? null) == 0  ? 'selected' : '' }} value="0">All</option> --}}
+                            {{-- <option class="text-14" {{ ($inputs['select-status'] ?? null) == 1  ? 'selected' : '' }} value="1">Pending</option>
+                            <option class="text-14" {{ ($inputs['select-status'] ?? null) == 2  ? 'selected' : '' }} value="2">Verified</option> --}}
                         </select>
                     </div>
                 </div>
@@ -36,7 +50,10 @@
                     </div>
                     <div class="col text-13">
                         <select class="form-select p-1 text-13" name="select-fluency" id="select-fluency">
-                            <option class="text-14" value="-1">All</option>
+                            {{-- <option class="text-14" value="-1">All</option> --}}
+                            @php
+                                $fluencyFilter = ['-1' => 'All'] + $fluencyFilter;
+                            @endphp
                             @foreach ($fluencyFilter as $k => $v)
                                 @php
                                     $isSelected = ($inputs['select-fluency'] ?? -1) == $k  ? 'selected' : '';
@@ -69,6 +86,16 @@
         </div>
     </aside>
     <section class="workspace-workarea">
+        @if (isset($hasFilter))
+        <div id="breadcrumb">
+            <a><i class="fas fa-filter me-1"></i>Filter</a>
+            <a href="#">Status: {{ $statusOptions[$inputs['select-status']] }} </a>
+            <a href="#">Fluency: {{ $fluencyFilter[$inputs['select-fluency']] }}</a>
+            <a href="#">Entries: {{ $inputs['select-entries'] }} per page</a>
+            <a href="#">Keyword: {{ $inputs['search-keyword'] ?? 'None' }}</a>
+            {{-- Product --}}
+        </div>
+        @endif
         <div class="workarea-table-header mb-4">
             <div class="table-content-item row user-select-none">
                 <div class="col-1">#</div>
@@ -140,8 +167,12 @@
 </main>
 @endsection
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/css/breadcrumb.css') }}">
+@endpush
+
 @push('dialogs')
-    @if (session('registerSuccessMsg'))
-        @include('partials.messagebox', ['preRenderState' => ['title' => 'Success', 'content' => session('registerSuccessMsg')]])
+    @if (session('registrationResultMsg'))
+        @include('partials.messagebox', ['preRenderState' => ['title' => 'Registration', 'content' => session('registrationResultMsg')]])
     @endif
 @endpush

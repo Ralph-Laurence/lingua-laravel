@@ -1,0 +1,138 @@
+#breadcrumb {
+    width: fit-content;
+    border-radius: 30px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    line-height: 30px;
+    /* color: #aaa; */
+    color: white;
+    padding: 1px;
+    border: 1px solid #F0F0F0;
+    font-size: 12px;
+}
+
+#breadcrumb a {
+    display: block;
+    float: left;
+    background: #F0F0F0;
+    padding-right: 10px;
+    height: 30px;
+    margin-right: 31px;
+    position: relative;
+    text-decoration: none;
+    /* color: #aaa; */
+    color: white;
+}
+
+#breadcrumb a:last-of-type {
+    margin-right: 25px;
+}
+
+#breadcrumb a:before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    position: absolute;
+    top: 0;
+    left: -30px;
+    border: 15px solid transparent;
+    border-color: #F0F0F0;
+    border-left-color: transparent;
+}
+
+#breadcrumb a:after {
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    position: absolute;
+    top: 0;
+    right: -30px;
+    border: 15px solid transparent;
+    border-left-color: #F0F0F0;
+}
+
+#breadcrumb a:first-of-type {
+    padding-left: 15px;
+}
+
+#breadcrumb a:first-of-type:before {
+    display: none;
+}
+
+/* #breadcrumb a:hover {
+    background: #00b0ec;
+    color: #fff;
+    text-decoration: none;
+}
+
+#breadcrumb a:hover:before {
+    border-color: #00b0ec;
+    border-left-color: transparent;
+}
+
+#breadcrumb a:hover:after {
+    border-left-color: #00b0ec;
+} */
+
+/* FIRST ITEM (RED) */
+#breadcrumb a:nth-child(1) {
+    background: #F23B2F;
+    color: white;
+}
+#breadcrumb a:nth-child(1)::before {
+    border-left-color: #F23B2F;
+}
+#breadcrumb a:nth-child(1)::after {
+    border: 15px solid #F23B2F;
+}
+
+/* SECOND ITEM (ORANGE) */
+#breadcrumb a:nth-child(2) {
+    background: #FF7701;
+}
+#breadcrumb a:nth-child(2)::before {
+    border-color: #FF7701;
+    border-left-color: transparent;
+}
+#breadcrumb a:nth-child(2)::after {
+    border: 15px solid #FF7701;
+}
+
+/* THIRD ITEM (BLUE) */
+#breadcrumb a:nth-child(3) {
+    background: #0d6efd;
+}
+#breadcrumb a:nth-child(3)::before {
+    border-color: #0d6efd;
+    border-left-color: transparent;
+}
+#breadcrumb a:nth-child(3)::after {
+    border: 15px solid #0d6efd;
+}
+
+/* FOURTH ITEM (INDIGO) */
+#breadcrumb a:nth-child(4) {
+    background: #463674;
+}
+#breadcrumb a:nth-child(4)::before {
+    border-color: #463674;
+    border-left-color: transparent;
+}
+#breadcrumb a:nth-child(4)::after {
+    border: 15px solid #463674;
+}
+
+/* FIFTH ITEM (GRAY) */
+#breadcrumb a:nth-child(5) {
+    background: #e1cce2;
+    color: #271e41;
+}
+#breadcrumb a:nth-child(5)::before {
+    border-color: #e1cce2;
+    border-left-color: transparent;
+}
+#breadcrumb a:nth-child(5)::after {
+    border: 15px solid #e1cce2;
+}
