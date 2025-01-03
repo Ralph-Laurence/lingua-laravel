@@ -1,5 +1,14 @@
 @php $includeFooter = false; @endphp
-@extends('shared.base-members')
+@extends('shared.layouts.master')
+
+@section('header')
+    @auth
+        @include('shared.header-members')
+    @endauth
+    @guest
+        @include('shared.common-header')
+    @endguest
+@endsection
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/lib/katex0.16.9/css/katex.min.css') }}">
@@ -16,20 +25,24 @@
 
 @section('content')
     <form method="post" id="main-form" novalidate
-          action="{{ route('become-tutor.forms.submit') }}"
-          enctype="multipart/form-data"
-          class="needs-validation @if($errors->any()) was-validated @endif">
+    enctype="multipart/form-data"
+    @if ($guestRegistration !== false)
+        action="{{ route('tutor.register-submit') }}"
+    @else
+        action="{{ route('become-tutor.forms.submit') }}"
+    @endif
+    class="needs-validation @if($errors->any()) was-validated @endif">
 
         <div id="form-carousel" class="carousel slide" data-interval="false">
             <div class="carousel-inner">
                 <div class="carousel-item active">
-                    @include('learner.become-tutor-forms-step1')
+                    @include('shared.contents.become-tutor-forms-step1')
                 </div>
                 <div class="carousel-item">
-                    @include('learner.become-tutor-forms-step2')
+                    @include('shared.contents.become-tutor-forms-step2')
                 </div>
                 <div class="carousel-item">
-                    @include('learner.become-tutor-forms-step3')
+                    @include('shared.contents.become-tutor-forms-step3')
                 </div>
             </div>
         </div>
@@ -66,7 +79,7 @@
 
         function repopulateOldInput()
         {
-            $('#fluency-level').val(oldInput['fluency-level']).selectmenu('refresh');
+            $('#fluency').val(oldInput['fluency']).selectmenu('refresh');
 
             if ('education-year-from-0' in oldInput)
             {

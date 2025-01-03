@@ -24,7 +24,7 @@
                     Identify and enter the correct letter for each sign shown in the images.
                 </h6>
             </div>
-            <div class="d-flex align-items-center gap-2 mb-1 py-2 flex-wrap" id="skill-entries"></div>
+            {{-- <div class="d-flex align-items-center gap-2 mb-1 py-2 flex-wrap" id="skill-entries"></div> --}}
             <div class="alert alert-danger text-14 text-center captcha-error d-none">
                 Incorrect letters given. Please try again.
             </div>
@@ -36,7 +36,7 @@
             </div>
             <input type="hidden" id="captcha_csrf" value="{{ csrf_token() }}">
             <input type="hidden" id="captcha_text">
-            @if ($showConvertAccWarning)
+            @if (isset($showConvertAccWarning) && $showConvertAccWarning)
                 @push('scripts')
                     <script>
                         $(() => {

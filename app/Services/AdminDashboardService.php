@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Http\Utils\HashSalts;
 use App\Models\FieldNames\BookingFields;
 use App\Models\FieldNames\UserFields;
+use App\Models\PendingRegistration;
 use App\Models\User;
 use Hashids\Hashids;
 use Illuminate\Support\Facades\DB;
@@ -89,10 +90,12 @@ class AdminDashboardService
             'totalTutors'      => $learnerWithMostTutors->total_tutors,
         ];
 
+        $totalPending = PendingRegistration::count();
+
         $viewData['totalTutors']   = $totals->total_tutors;
         $viewData['totalLearners'] = $totals->total_learners;
         $viewData['totalMembers']  = $totals->total_learners + $totals->total_tutors;
-        $viewData['totalPending']  = DB::table('pending_registrations')->count();
+        $viewData['totalPending']  = $totalPending;
         $viewData['topTutors']     = json_encode($topTutorsArr);
         $viewData['topLearner']    = $topLearner;
 

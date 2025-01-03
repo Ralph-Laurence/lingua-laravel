@@ -2,7 +2,7 @@ let quill;
 
 function initStep1()
 {
-    $('#fluency-level').selectmenu();
+    $('#fluency').selectmenu();
 
     quill = new Quill('#about-me', {
         modules: {

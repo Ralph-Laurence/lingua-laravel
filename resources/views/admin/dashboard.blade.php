@@ -47,7 +47,7 @@
                 <div class="card-body text-white">
                     <div class="w-100 d-flex align-items-center">
                         <h6 class="flex-fill m-0">Pending Registrations</h6>
-                        <h5 class="fw-bold m-0">0</h5>
+                        <h5 class="fw-bold m-0">{{ $totals['totalPending'] }}</h5>
                     </div>
                     <hr class="my-1">
                     <small class="flex-fill text-danger-accent m-0 text-12">*All unapproved tutors</small>

@@ -1,5 +1,5 @@
 INSERT INTO `users` (`id`, `firstname`, `lastname`, `username`, `email`, `email_verified_at`, `password`, `role`, `contact`, `address`, `photo`, `is_verified`, `remember_token`, `created_at`, `updated_at`) VALUES
-(2, 'User0', '', 'admin', 'user@admin', NULL, '$2y$12$BSXgyj5FvlzFeES9Ff8gyOzXpTdqTxUsk6x1Zppsv2Z34Nh1X.qGm', 0, '', '', '', '1', NULL, '2024-12-23 15:21:46', '2024-12-23 15:21:46'),
+(2, 'User0', '', 'admin', 'laramailer.dev@gmail.com', NULL, '$2y$12$BSXgyj5FvlzFeES9Ff8gyOzXpTdqTxUsk6x1Zppsv2Z34Nh1X.qGm', 0, '', '', '', '1', NULL, '2024-12-23 15:21:46', '2024-12-23 15:21:46'),
 (9, 'Tarzan', 'Cruz', 'Tarzan9', 'email@gmail.com', NULL, '$2y$12$5hJ7Wpqgg8Kjr.R3gZwTZuW2BA1cet7OHC/qWcEMaEL1496LYIeq.', 1, '09876543210', 'Poblacion Lingayen Pangasinan', '6x.jpg', '1', NULL, '2024-12-23 15:21:46', '2024-12-23 15:21:46'),
 (10, 'Nika', 'David', 'Nika10', 'learner@gmail.com', NULL, '$2y$12$5hJ7Wpqgg8Kjr.R3gZwTZuW2BA1cet7OHC/qWcEMaEL1496LYIeq.', 2, '09876543210', 'New Street West, Lingayen Pangasinan', 'img3.jpg', '0', NULL, '2024-12-23 15:21:46', '2024-12-23 15:21:46'),
 (12, 'John', 'Doe', 'John12', 'tutor1@gmail.com', NULL, '$2y$12$5hJ7Wpqgg8Kjr.R3gZwTZuW2BA1cet7OHC/qWcEMaEL1496LYIeq.', 0, '09876543210', 'Poblacion Lingayen Pangasinan', '', '0', NULL, '2024-12-23 15:21:46', '2024-12-23 15:21:46'),

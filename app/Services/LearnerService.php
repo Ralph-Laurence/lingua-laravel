@@ -8,11 +8,13 @@ use App\Models\Booking;
 use App\Models\FieldNames\BookingFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
+use App\Models\Profile;
 use App\Models\User;
 use Exception;
 use Hashids\Hashids;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -248,7 +250,10 @@ class LearnerService extends UserService
         return redirect()->route('admin.learners-index');
     }
 
-    private function getFluencyFilters()
+    /**
+     * Create a key-value pair of Fluencies that can be used in a <select> options
+     */
+    public function getFluencyFilters()
     {
         $fluencyFilter = [];
 

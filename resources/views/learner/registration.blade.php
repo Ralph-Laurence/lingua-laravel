@@ -6,7 +6,7 @@
 
 @section('content')
 <section class="container w-100 h-100 flex-center">
-    <form action="{{ route('registration.learner-submit') }}" method="post" class="needs-validation" novalidate>
+    <form action="{{ route('learner.register-submit') }}" method="post" class="needs-validation" novalidate>
         @csrf
         <div class="forms-card">
             <div class="logo-wrapper flex-center mb-4">
@@ -93,7 +93,7 @@
                             </div>
                         </div>
                     </div>
-    
+
                     <div class="border p-2">
                         <h6 class="text-13 text-secondary mb-2">Your Account</h6>
                         <div class="row mb-2">
@@ -149,7 +149,7 @@
                             </div>
                         </div>
                     </div>
-    
+
                     <div class="d-flex justify-content-between align-items-center pt-3">
                         <p class="text-13 mb-0">
                             Already a member?
@@ -157,7 +157,7 @@
                         </p>
                         <button type="submit" class="btn btn-primary btn-sm">Register</button>
                     </div>
-    
+
                 </div>
             </div>
         </div>
@@ -172,9 +172,9 @@
         body {
             background: #F3F4F6;
             background-repeat: no-repeat;
-            background-image: 
+            background-image:
                 linear-gradient(
-                    to right, 
+                    to right,
                     rgba(255, 123, 0, 0.5),   /* Red with 50% opacity */
                     /* rgba(0, 4, 255, 0.5), Yellow with 50% opacity */
                     /*rgba(111, 0, 255, 0.5)     Blue with 50% opacity */

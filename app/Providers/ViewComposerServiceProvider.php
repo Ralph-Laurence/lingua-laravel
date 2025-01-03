@@ -41,7 +41,8 @@ class ViewComposerServiceProvider extends ServiceProvider
             $roleStr = User::ROLE_MAPPING[$role];
 
             $headerData = [
-                'fullname'          => implode(' ', [$user->firstname, $user->lastname]),
+                'fullname'          => implode(' ', [$user->{UserFields::Firstname}, $user->{UserFields::Lastname}]),
+                'username'          => $user->{UserFields::Username},
                 'profilePic'        => $profilePic,
                 'showBecomeTutor'   => $role == User::ROLE_LEARNER,
                 'roleBadge'         => Str::lower('role-' . $roleStr),

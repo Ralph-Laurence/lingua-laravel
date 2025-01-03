@@ -9,6 +9,7 @@ use App\Models\FieldNames\BookingFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
 use App\Models\User;
+use App\Services\RegistrationService;
 use Exception;
 use Hashids\Hashids;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -18,11 +19,13 @@ use Illuminate\Support\Facades\Storage;
 
 class TutorController extends Controller
 {
+    private $registrationService;
     private $hashids;
 
-    public function __construct()
+    public function __construct(RegistrationService $regSvc)
     {
         $this->hashids = new Hashids(HashSalts::Tutors, 10);
+        $this->registrationService = $regSvc;
     }
 
     public function listTutors()
@@ -224,5 +227,72 @@ class TutorController extends Controller
             // Return custom 404 page
             return view('errors.500');
         }
+    }
+
+
+
+
+
+
+
+    //===================================================================//
+    //                   F O R   G U E S T   U S E R S
+    //....................................................................
+    // These route controllers are accessible to the unauthenticated users
+    //===================================================================//
+
+    /**
+     * Launch the tutor registration form
+     */
+    public function registerTutor_create()
+    {
+        // Check if we have a pending registration for the current learner
+        // then we shouldn't allow them to visit the tutor registration page
+        //$userId = Auth::user()->id;
+
+        //if ($this->registrationService->isPendingTutorRegistration($userId))
+            //return response()->view('shared.pending-registration', [], 301);
+
+        // Show the forms page otherwise ...
+        $returnData = $this->registrationService->buildTutorRegistrationFormView();
+
+        // This will signal the blade view to include the firstnames, emails etc
+        $returnData['guestRegistration'] = true;
+
+        return view('shared.contents.become-tutor-forms', $returnData);
+    }
+
+    public function registerTutor_store(Request $request)
+    {
+        $register = $this->registrationService->registerTutor($request);
+
+        // If the validation fails... we go back
+        if ($register instanceof \Illuminate\Http\RedirectResponse)
+            return $register;
+
+        if ($register['status'] == 200)
+        {
+            // Log the user in after registration
+            auth()->login($register['createdUser']);
+        }
+        else
+        {
+            // If there is an error in the database or fileupload during
+            // the registration, we abort the execution
+            return response()->view('errors.500', [], 500);
+        }
+
+        // We will use this to guard the registration success screen
+        // so that it can only be visited once if ONLY there is a
+        // successful registration.
+        //$request->session()->put('registration_success', true);
+
+        // Add a welcome greetings
+        $firstname = $register['createdUser']->{UserFields::Firstname};
+
+        session()->flash('registration_message', "Welcome to the community, $firstname!");
+
+        // Show the homepage
+        return redirect()->to('/');
     }
 }

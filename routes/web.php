@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GuestController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LearnerController;
 use App\Http\Controllers\MemberRegistration;
 use App\Http\Controllers\ProfileController;
@@ -22,52 +23,19 @@ use Illuminate\Support\Facades\Hash;
 |
 */
 
-Route::get('/', function ()
+
+Route::controller(HomeController::class)->group(function()
 {
-    // return view('welcome');
-
-    $currentRole = 'guest';
-    $headerData = [];
-
-    if (Auth::user())
-    {
-        $user = Auth::user();
-
-        $headerData = [
-            'roleStr'       => User::ROLE_MAPPING[$user->{UserFields::Role}],
-            'profilePhoto'  => User::getPhotoUrl($user->{UserFields::Photo}),
-            'username'      => $user->{UserFields::Username}
-        ];
-
-        if ($user->{UserFields::Role} == User::ROLE_LEARNER)
-        {
-            $currentRole = 'learner';
-        }
-
-        else if ($user->{UserFields::Role} == User::ROLE_TUTOR)
-            $currentRole = 'tutor';
-    }
-
-    return view('shared.common-home-page', compact('currentRole', 'headerData'));
-});
-
-Route::controller(GuestController::class)->group(function()
-{
-    Route::get('/sign-lingua/become-tutor',       'becomeTutor_index')->name('become-tutor');
-    Route::get('/sign-lingua/become-tutor/forms', 'becomeTutor_create')->name('become-tutor.forms');
-});
-
-Route::controller(MemberRegistration::class)->group(function()
-{
-    Route::get('/signlingua/learner/registration', 'showMemberRegistrationForm')->name('registration.learner');
-    Route::post('/signlingua/learner/registration', 'registerLearner')->name('registration.learner-submit');
+    Route::get('/', 'index');
+    //Route::get('/sign-lingua/become-tutor', 'becomeTutor_index')->name('guest-become-tutor');
+    // Route::get('/sign-lingua/register-tutor/forms', 'becomeTutor_create')->name('guest-become-tutor.forms');
 });
 
 Route::get('/dashboard', function () {
     // return view('dashboard');
     // return view('shared.common-home-page');
 
-    if (Auth::user())
+    if (Auth::check())
     {
         $role = Auth::user()->{UserFields::Role};
 
@@ -82,6 +50,8 @@ Route::get('/dashboard', function () {
                 break;
         }
     }
+
+    return redirect()->to('/');
 
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -115,25 +85,54 @@ Route::middleware(['auth', $RoleMw . User::ROLE_ADMIN])->group(function ()
     });
 });
 
-Route::middleware(['auth', $RoleMw . User::ROLE_LEARNER])->group(function ()
+Route::controller(LearnerController::class)->group(function() use ($RoleMw)
 {
-    Route::controller(LearnerController::class)->group(function()
+    // The default user role is Learner. Pending or unregistered tutors are
+    // given a role of "learner", meaning they have access to learner routes.
+    // We have to make sure they can't access any learner and tutor routes
+    // unless their profile has been verified, thus "ensureNotPending" .
+    Route::middleware(['auth', 'ensureNotPending', $RoleMw . User::ROLE_LEARNER])->group(function()
     {
-        Route::get('/learner', 'index')->name('index');
+        Route::get('/learner', 'index')->name('learner.index');
         Route::get('/learner/my-tutors', 'myTutors')->name('mytutors');
 
         Route::get('/sign-lingua/become-tutor',                 'becomeTutor_index')->name('become-tutor');
         Route::get('/sign-lingua/become-tutor/forms',           'becomeTutor_create')->name('become-tutor.forms');
-        Route::get('/sign-lingua/become-tutor/success',         'becomeTutor_success')->name('become-tutor.success');
         Route::post('/sign-lingua/become-tutor/forms/submit',   'becomeTutor_store')->name('become-tutor.forms.submit');
     });
 
-    Route::controller(TutorController::class)->group(function()
+    Route::middleware('guest')->group(function()
+    {
+        // These cant be accessed by an authenticated learner
+        // as these should be a guest-only route
+        Route::get('/signlingua/learner/register',  'registerLearner_create')->name('learner.register');
+        Route::post('/signlingua/learner/register', 'registerLearner_store')->name('learner.register-submit');
+    });
+
+    Route::get('/sign-lingua/become-tutor/success', 'becomeTutor_success')->name('become-tutor.success');
+});
+
+Route::controller(TutorController::class)->group(function() use ($RoleMw)
+{
+    Route::middleware(['auth', 'ensureNotPending', $RoleMw . User::ROLE_LEARNER])->group(function()
     {
         Route::get('/learner/find-tutors', 'listTutors')->name('tutors.list');
         Route::get('/learner/tutor-details/{id}', 'show')->name('tutor.show');
         Route::post('/tutor/hire', 'hireTutor')->name('tutor.hire');
         Route::post('/tutor/end-contract', 'endContract')->name('tutor.end');
+    });
+
+    Route::middleware('guest', 'ensureNotPending')->group(function()
+    {
+        // Redirects authenticated learners to /sign-lingua/become-tutor
+        // if they try to access tutor registration routes.
+        Route::get('/signlingua/tutor/register',  'registerTutor_create')
+            ->middleware('learnerToTutor')
+            ->name('tutor.register');
+
+        Route::post('/signlingua/tutor/register', 'registerTutor_store')
+            ->middleware('learnerToTutor')
+            ->name('tutor.register-submit');
     });
 });
 
@@ -144,25 +143,25 @@ Route::middleware(['auth', $RoleMw . User::ROLE_TUTOR])->group(function ()
     });
 });
 
-Route::get('/generate-password', function () {
-    $password = 'Joy_021428';
-    $hashedPassword = Hash::make($password);
-    echo $hashedPassword;
-});
+// Route::get('/generate-password', function () {
+//     $password = 'Joy_021428';
+//     $hashedPassword = Hash::make($password);
+//     echo $hashedPassword;
+// });
 
-use App\Mail\TestMail;
-use Illuminate\Support\Facades\Mail;
+// use App\Mail\TestMail;
+// use Illuminate\Support\Facades\Mail;
 
-Route::get('/send-test-email', function ()
-{
-    // Disable AVAST Mail Shield "Outbound SMTP"
-    Mail::to('bluescreen512@gmail.com')->send(new TestMail());
-    return 'Test email sent!';
-});
+// Route::get('/send-test-email', function ()
+// {
+//     // Disable AVAST Mail Shield "Outbound SMTP"
+//     Mail::to('bluescreen512@gmail.com')->send(new TestMail());
+//     return 'Test email sent!';
+// });
 
-Route::get('/mail', function() {
-    return view('mails.registration-declined');
-});
+// Route::get('/mail', function() {
+//     return view('mails.registration-declined');
+// });
 /*
 ---------------------------------------------------------------------------
 Verb	    URI	                    Typical Method Name	    Route Name

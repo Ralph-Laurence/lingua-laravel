@@ -10,6 +10,7 @@ use App\Models\FieldNames\UserFields;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -124,6 +125,9 @@ class User extends Authenticatable
         return "{$firstName} {$lastNameInitial}";
     }
 
+    /**
+     * Get the url of user's photo. Returns the default if photo doesn't exist.
+     */
     public static function getPhotoUrl($photo)
     {
         if (!empty($photo))
@@ -132,5 +136,14 @@ class User extends Authenticatable
         }
 
         return asset('assets/img/default_avatar.png');
+    }
+
+    /** 
+     * Checks if an authenticated user has a pending registration
+     * @return bool
+     */
+    public function hasPendingRegistration()
+    {
+        return PendingRegistration::where(ProfileFields::UserId, Auth::user()->id)->exists();
     }
 }

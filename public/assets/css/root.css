@@ -59,7 +59,18 @@ body {
     -webkit-tap-highlight-color: transparent;
     position: relative;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
+
+/*============= UTILITY CLASSES ============*/
+.no-resize { resize: none; }
+.text-12 { font-size: 12px; }
+.text-13 { font-size: 13px; }
+.text-14 { font-size: 14px; }
+.text-16 { font-size: 16px; }
+.text-64 { font-size: 64px; }
 
 .msw-justify
 {
@@ -67,6 +78,32 @@ body {
     text-justify: inter-word;
 }
 
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-end {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+}
+
+.flex-start {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+
+/*============= OTHER CLASSES ============*/
+
+footer {
+    /* border-top: 2px solid var(--accent-secondary); */
+    background-color: #110D19;
+    /* background-color: #0D1226; */
+    color: white;
+}
 
 .grad-btn-danger
 {
@@ -89,24 +126,6 @@ body {
     border-radius: 20px;
     background: none;
     color: var(--accent-dark);
-}
-
-.flex-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.flex-end {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-}
-
-.flex-start {
-    display: flex;
-    align-items: center;
-    justify-content: start;
 }
 
 .accent-secondary { color: var(--accent-secondary); }
@@ -140,12 +159,6 @@ body {
     background-color: var(--accent-dark);
     color: #FFAE3B;
 }
-
-.text-12 { font-size: 12px; }
-.text-13 { font-size: 13px; }
-.text-14 { font-size: 14px; }
-.text-16 { font-size: 16px; }
-.no-resize { resize: none; }
 /*
 .form-control.sign-lingua-input-field:focus {
     color: #212529;

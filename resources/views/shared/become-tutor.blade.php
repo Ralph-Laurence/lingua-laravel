@@ -1,4 +1,10 @@
-@extends('shared.base-members')
+
+@extends('shared.layouts.master')
+
+@section('header')
+    @include('shared.header-members')
+@endsection
+
 @section('content')
     @push('styles')
         <link rel="stylesheet" href="{{ asset('assets/css/tutors.css') }}">
@@ -20,8 +26,13 @@
                     <li>Share your expertise</li>
                     <li>Support and learn from each other</li>
                 </ul>
-                <a role="button" href="#pre-flight" class="btn btn-dark">Become a tutor <i
+                <a role="button" href="#pre-flight" class="btn btn-outline-dark">
+                    More Details
+                </a>
+                <a role="button" href="{{ route('become-tutor.forms') }}" class="btn btn-dark">Become a tutor <i
                         class="fas fa-arrow-right"></i></a>
+                {{-- <a role="button" href="#pre-flight" class="btn btn-dark">Become a tutor <i
+                        class="fas fa-arrow-right"></i></a> --}}
             </div>
         </div>
     </section>

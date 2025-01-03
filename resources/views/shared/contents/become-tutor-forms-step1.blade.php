@@ -30,6 +30,12 @@
         <div class="card-body">
             <h5 class="fw-bold darker-text">Introduce Yourself</h5>
             <small class="text-secondary mb-3 d-block">All fields with <strong>*</strong> are required.</small>
+
+            @if ($guestRegistration !== false)
+                @include('shared.contents.become-tutor-forms-step1-guest')
+            @endif
+
+
             <p for="bio" class="form-label fw-bold">My Bio *</p>
             <p for="bio" class="darker-text text-14">Write a short note about yourself.</p>
             <div class="input-group has-validation bio-input-group mb-3">
@@ -58,7 +64,7 @@
 
             <div class="fluency-options mb-3">
                 <p class="form-label fw-bold">ASL Fluency *</p>
-                <p for="fluency-level" class="text-14">How fluent are you with American Sign Language?</p>
+                <p for="fluency" class="text-14">How fluent are you with American Sign Language?</p>
                 <div class="alert alert-secondary text-12 px-1">
                     <ul class="mb-0">
                         @foreach ($fluencyOptions as $key => $obj)
@@ -69,7 +75,7 @@
 
                     </ul>
                 </div>
-                <select id="fluency-level" name="fluency-level">
+                <select id="fluency" name="fluency">
                     @foreach ($fluencyOptions as $key => $obj)
                         <option data-description="{{ $obj['Description'] }}" value="{{ $key }}">{{ $obj['Level'] }}</option>
                     @endforeach

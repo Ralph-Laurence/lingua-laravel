@@ -1,3 +1,4 @@
+/*============== COMMON WHITE HEADER ============*/
 header .nav .nav-link {
     font-size: 14px;
     min-width: 100px;
@@ -13,13 +14,6 @@ header .nav .nav-link.link-active {
     color: var(--accent-dark);
 }
 
-footer {
-    /* border-top: 2px solid var(--accent-secondary); */
-    background-color: #110D19;
-    /* background-color: #0D1226; */
-    color: white;
-}
-
 header .role-badge {
     font-family: 'Poppins-SemiBold';
     color: white;
@@ -27,6 +21,19 @@ header .role-badge {
     letter-spacing: 1px;
 }
 
+/*============ OVERRIDDEN COLORED HOME PAGE HEADER ============*/
+.home-header, .banner {
+    background: #FDC057;
+}
+
+.home-header .nav-link {
+    /* color: #4F1E05 !important; */
+    color: #141C3A !important;
+    font-family: 'Poppins-Medium';
+    padding-bottom: 0 !important;
+}
+
+/*============ HEADER STYLES FOR AUTHENTICATED MEMBERS ============*/
 .role-badge.role-admin { background-color: #FF7701; }
 .role-badge.role-tutor { background-color: darkslateblue; }
 .role-badge.role-learner { background-color: #00CF73; }

@@ -1,0 +1,33 @@
+.primary-toast {
+    background: #5A4095;
+}
+.primary-toast .toast-header {
+    background: #2E2149;
+    font-weight: normal;
+    font-family: 'Poppins-SemiBold';
+    color: white;
+}
+.primary-toast .toast-header {
+    height: 41px;
+    max-height: 41px;
+}
+.primary-toast .toast-header .toast-time {
+    color: #9982CC;
+}
+.primary-toast .toast-header .toast-btn-close {
+    width: 32px;
+    max-width: 32px;
+}
+.primary-toast .toast-header .toast-btn-close i {
+    color: #6C557D;
+    font-size: 16px;
+    padding-top: 3px;
+}
+.primary-toast .toast-header .toast-btn-close:hover i {
+    color: #a381bb;
+    padding-top: 4px;
+    font-size: 18px;
+}
+.primary-toast .toast-body {
+    color: #dbcbff;
+}
