@@ -119,10 +119,10 @@ Route::controller(TutorController::class)->group(function() use ($RoleMw)
         Route::get('/learner/find-tutors', 'listTutors')->name('tutors.list');
         Route::get('/learner/tutor-details/{id}', 'show')->name('tutor.show');
 
-        Route::get('/tutor/my-learners',             'myLearners')->name('mylearners');
-        Route::get('/tutor/filter/learners/clear',   'learners_clear_filter')->name('tutor.learners-clear-filter');
-        Route::get('/tutor/my-learner-details',      'myLearners_show')->name('tutor.learners-show');
-        Route::post('/tutor/filter/learners',        'learners_filter')->name('tutor.learners-filter');
+        Route::get('/tutor/my-learners',              'myLearners')->name('mylearners');
+        Route::get('/tutor/my-learners/filter/clear', 'myLearners_clear_filter')->name('tutor.learners-clear-filter');
+        Route::get('/tutor/my-learner-details',       'myLearners_show')->name('tutor.learners-show');
+        Route::post('/tutor/my-learners/filter',      'myLearners_filter')->name('tutor.learners-filter');
 
         Route::post('/tutor/hire', 'hireTutor')->name('tutor.hire');
         Route::post('/tutor/end-contract', 'endContract')->name('tutor.end');

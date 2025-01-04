@@ -8,17 +8,15 @@ use App\Models\Booking;
 use App\Models\FieldNames\BookingFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
-use App\Models\Profile;
 use App\Models\User;
 use Exception;
 use Hashids\Hashids;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
-class LearnerService extends UserService
+class LearnerService
 {
     const Role = User::ROLE_LEARNER;
 
@@ -29,149 +27,7 @@ class LearnerService extends UserService
         $this->learnerHashIds = new Hashids(HashSalts::Learners, 10);
     }
 
-    public function getConnectedTutors($learnerId) : array
-    {
-        // Retrieve all userids of tutors tied to the learner
-        $tutorIds = Booking::where(BookingFields::LearnerId, $learnerId)
-                  ->pluck(BookingFields::TutorId)
-                  ->toArray();
-
-        // Store each tutor's data here
-        $connectedTutors = [];
-
-        if (!empty($tutorIds))
-        {
-            $hashids = new Hashids(HashSalts::Tutors, 10);
-            $tutors  = User::whereIn('id', $tutorIds)->get();
-
-            foreach ($tutors as $key => $obj)
-            {
-                $photo = $obj->{UserFields::Photo};
-
-                if (empty($photo))
-                    $photo = asset('assets/img/default_avatar.png');
-
-                else
-                    $photo = Storage::url("public/uploads/profiles/$photo");
-
-                $connectedTutors[] = [
-                    'tutorId'   => $hashids->encode($obj['id']),
-                    'shortName' => User::toShortName($obj->{UserFields::Firstname}, $obj->{UserFields::Lastname}),
-                    'photo'     => $photo
-                ];
-            }
-        }
-
-        return $connectedTutors;
-    }
-
-    public function listAllLearners(Request $request)
-    {
-        $result = null;
-
-        if ($request->session()->has('learner-filter'))
-        {
-            $filter = $request->session()->get('learner-filter');
-            $result = $result = $this->getLearners($filter);
-        }
-        else
-        {
-            $result = $this->getLearners();
-        }
-
-        $learners = $result['learnersSet'];
-        $fluencyFilter = $result['fluencyFilter'];
-
-        if ($request->session()->has('learner-filter-inputs'))
-        {
-            $learnerFilterInputs = $request->session()->get('learner-filter-inputs');
-            $hasFilter = true;
-
-            return view('admin.learners', compact('learners', 'fluencyFilter', 'learnerFilterInputs', 'hasFilter'));
-        }
-
-        return view('admin.learners', compact('learners', 'fluencyFilter'));
-    }
-
-    public function listAllLearnersForTutor(Request $request, $tutorId)
-    {
-        $result = null;
-        $filter = ['forTutor' => $tutorId];
-
-        if ($request->session()->has('learner-filter'))
-        {
-            $dataSetFilters = $request->session()->get('learner-filter');
-            $filter = array_merge($filter, $dataSetFilters);
-        }
-
-        $result = $result = $this->getLearners($filter);
-
-        $learners = $result['learnersSet'];
-        $fluencyFilter = $result['fluencyFilter'];
-
-        if ($request->session()->has('learner-filter-inputs'))
-        {
-            $learnerFilterInputs = $request->session()->get('learner-filter-inputs');
-            $hasFilter = true;
-
-            return view('tutor.mylearners', compact('learners', 'fluencyFilter', 'learnerFilterInputs', 'hasFilter'));
-        }
-
-        return view('tutor.mylearners', compact('learners', 'fluencyFilter'));
-    }
-    //
-    // This must be accessed via Standard HTTP GET
-    //
-    public function showLearnerDetailsForAdmin($id)
-    {
-        $learnerDetails = $this->getLearnerDetails($id);
-
-        if ($learnerDetails == 400)
-        {
-            // Return custom 404 page
-            return view('errors.404');
-        }
-
-        if ($learnerDetails == 500)
-        {
-            // Return custom 404 page
-            return view('errors.500');
-        }
-
-        // Return the view with the tutor data
-        return view('admin.show-learner', compact('learnerDetails'));
-    }
-    //
-    // This must be accessed via Asynchronous POST
-    //
-    public function showLearnerDetailsForTutor(Request $request)
-    {
-        $id = $request->input('learner_id');
-        $learnerDetails = $this->getLearnerDetails($id);
-        $status  = 200;
-        $message = 'Found';
-
-        if ($learnerDetails == 400)
-        {
-            $status  = 400;
-            $message = "The learner does not exist or has been deleted.";
-        }
-
-        if ($learnerDetails == 500)
-        {
-            $status  = 500;
-            $message = "There was a problem while trying to read the learner's data.";
-        }
-
-        // Return the data as JSON
-        return response()->json([
-            'status'  => $status,
-            'message' => $message,
-            'data'    => $learnerDetails
-        ], $status);
-    }
-
-    private function getLearnerDetails($id)
+    protected function getLearnerDetails($id)
     {
         try
         {
@@ -222,7 +78,7 @@ class LearnerService extends UserService
         }
     }
 
-    private function getLearners($options = [])
+    protected function getLearners($options = [])
     {
         $options = array_merge(['min_entries' => 10], $options);
 
@@ -250,9 +106,9 @@ class LearnerService extends UserService
                     $query->where(BookingFields::TutorId, $options['forTutor']);
                 }
             })
-            ->withCount(['bookingsAsLearner as totalTutors' => function($query) use($options)
+            ->withCount(['bookingsAsLearner as totalTutors' => function($query)
             {
-                $query->whereHas('tutor', function($query) use($options)
+                $query->whereHas('tutor', function($query)
                 {
                     $query->where(UserFields::Role, User::ROLE_TUTOR);
                 });
@@ -301,6 +157,44 @@ class LearnerService extends UserService
             'fluencyFilter' => $fluencyFilter
         ];
     }
+    //
+    // Used by learner controller ...
+    //
+    public function getConnectedTutors($learnerId) : array
+    {
+        // Retrieve all userids of tutors tied to the learner
+        $tutorIds = Booking::where(BookingFields::LearnerId, $learnerId)
+                  ->pluck(BookingFields::TutorId)
+                  ->toArray();
+
+        // Store each tutor's data here
+        $connectedTutors = [];
+
+        if (!empty($tutorIds))
+        {
+            $hashids = new Hashids(HashSalts::Tutors, 10);
+            $tutors  = User::whereIn('id', $tutorIds)->get();
+
+            foreach ($tutors as $key => $obj)
+            {
+                $photo = $obj->{UserFields::Photo};
+
+                if (empty($photo))
+                    $photo = asset('assets/img/default_avatar.png');
+
+                else
+                    $photo = Storage::url("public/uploads/profiles/$photo");
+
+                $connectedTutors[] = [
+                    'tutorId'   => $hashids->encode($obj['id']),
+                    'shortName' => User::toShortName($obj->{UserFields::Firstname}, $obj->{UserFields::Lastname}),
+                    'photo'     => $photo
+                ];
+            }
+        }
+
+        return $connectedTutors;
+    }
 
     public function filterLearners(Request $request, $extraFilters = [])
     {
@@ -336,22 +230,19 @@ class LearnerService extends UserService
             $filter['search'] = $inputs['search-keyword'];
         }
 
+        return [
+            'filterOptions' => $filter,
+            'filterInputs'  => $inputs
+        ];
+        // IMPORTANT:
         // The learners-index, depend on these session filter inputs.
         // The learners-index does the heavy lifting, which means
         // the retrieval of data including the filters is handled
         // by the learners-index
-        $request->session()->put('learner-filter-inputs', $inputs);
-        $request->session()->put('learner-filter', $filter);
+        // $request->session()->put('learner-filter-inputs', $inputs);
+        // $request->session()->put('learner-filter', $filter);
 
-        return redirect()->route('admin.learners-index');
-    }
-
-    public function clearFilters(Request $request)
-    {
-        // Forget multiple session variables in one line
-        $request->session()->forget(['learner-filter', 'learner-filter-inputs']);
-
-        return redirect()->route('admin.learners-index');
+        // return redirect()->route('admin.learners-index');
     }
 
     /**

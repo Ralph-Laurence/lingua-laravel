@@ -16,7 +16,7 @@
             <h6 class="text-13 fw-bold">
                 <i class="fas fa-filter me-2"></i>Filter Learners
             </h6>
-            <form action="{{ route('admin.learners-filter') }}" method="post">
+            <form action="{{ route('tutor.learners-filter') }}" method="post">
                 @csrf
                 <div class="mb-3">
                   <input type="text" class="form-control text-13" id="search-keyword" maxlength="64" name="search-keyword" placeholder="Search Learner" value="{{ ($learnerFilterInputs['search-keyword'] ?? '') }}">
@@ -55,7 +55,7 @@
                 </div>
                 <button class="btn btn-sm btn-primary w-100 action-button">Find Learners</button>
                 @if (isset($hasFilter))
-                    <a role="button" href="{{ route('admin.learners-clear-filter') }}"
+                    <a role="button" href="{{ route('tutor.learners-clear-filter') }}"
                       class="btn btn-sm btn-outline-secondary w-100 mt-2 btn-clear-results">Clear Filters</a>
                 @endif
             </form>

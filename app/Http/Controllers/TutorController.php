@@ -9,7 +9,7 @@ use App\Models\FieldNames\BookingFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
 use App\Models\User;
-use App\Services\LearnerService;
+use App\Services\LearnerServiceForTutor;
 use App\Services\RegistrationService;
 use Exception;
 use Hashids\Hashids;
@@ -20,15 +20,15 @@ use Illuminate\Support\Facades\Storage;
 
 class TutorController extends Controller
 {
-    private $learnerService;
+    private $learnerServiceForTutor;
     private $registrationService;
     private $hashids;
 
-    public function __construct(RegistrationService $regSvc, LearnerService $lrnSvc)
+    public function __construct(RegistrationService $regSvc, LearnerServiceForTutor $lrnSvc)
     {
         $this->hashids = new Hashids(HashSalts::Tutors, 10);
         $this->registrationService = $regSvc;
-        $this->learnerService = $lrnSvc;
+        $this->learnerServiceForTutor = $lrnSvc;
     }
 
     public function listTutors()
@@ -239,12 +239,23 @@ class TutorController extends Controller
     public function myLearners(Request $request)
     {
         $tutorId = Auth::user()->id;
-        return $this->learnerService->listAllLearnersForTutor($request, $tutorId);
+        return $this->learnerServiceForTutor->listAllLearnersForTutor($request, $tutorId);
     }
 
     public function myLearners_show(Request $request)
     {
-        return $this->learnerService->showLearnerDetailsForTutor($request);
+        return $this->learnerServiceForTutor->showLearnerDetailsForTutor($request);
+    }
+
+    public function myLearners_filter(Request $request)
+    {
+        $filter = ['forTutor' => Auth::user()->id];
+        return $this->learnerServiceForTutor->filterLearnersForTutor($request, $filter);
+    }
+
+    public function myLearners_clear_filter(Request $request)
+    {
+        return $this->learnerServiceForTutor->clearFiltersForTutor($request);
     }
 
 

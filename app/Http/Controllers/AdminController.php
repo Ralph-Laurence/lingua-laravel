@@ -3,21 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Services\AdminDashboardService;
-use App\Services\LearnerService;
+use App\Services\LearnerServiceForAdmin;
 use App\Services\TutorService;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
     protected $tutorService;
-    protected $learnerService;
+    protected $learnerServiceForAdmin;
     protected $adminService;
 
-    function __construct(TutorService $tutService, LearnerService $lrnService, AdminDashboardService $adminSvc)
+    function __construct(TutorService $tutService, LearnerServiceForAdmin $lrnService, AdminDashboardService $adminSvc)
     {
-        $this->tutorService    = $tutService;
-        $this->learnerService  = $lrnService;
-        $this->adminService    = $adminSvc;
+        $this->tutorService = $tutService;
+        $this->adminService = $adminSvc;
+        $this->learnerServiceForAdmin  = $lrnService;
     }
 
     function index()
@@ -72,21 +72,21 @@ class AdminController extends Controller
     //
     public function learners_index(Request $request)
     {
-        return $this->learnerService->listAllLearners($request);
+        return $this->learnerServiceForAdmin->listAllLearnersForAdmin($request);
     }
 
     public function learners_filter(Request $request)
     {
-        return $this->learnerService->filterLearners($request);
+        return $this->learnerServiceForAdmin->filterLearnersForAdmin($request);
     }
 
     public function learners_clear_filter(Request $request)
     {
-        return $this->learnerService->clearFilters($request);
+        return $this->learnerServiceForAdmin->clearFiltersForAdmin($request);
     }
 
     public function learners_show($id)
     {
-        return $this->learnerService->showLearnerDetailsForAdmin($id);
+        return $this->learnerServiceForAdmin->showLearnerDetailsForAdmin($id);
     }
 }
