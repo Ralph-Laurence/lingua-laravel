@@ -25,4 +25,16 @@ $(document).ready(function()
             onOK: () => form.submit()
         })
     });
+
+    $('.btn-cancel-hire-req').on('click', function()
+    {
+        let form      = $('#frm-cancel-hire');
+        let firstname = DOMPurify.sanitize(form.find('#tutor_name').val());
+        let prompt    = `Would you like to cancel your hire request with <strong>${firstname}</strong>?`;
+
+        ConfirmBox.show(prompt, 'Cancel Hire',
+        {
+            onOK: () => form.submit()
+        })
+    });
 });

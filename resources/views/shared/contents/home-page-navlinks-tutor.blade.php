@@ -3,6 +3,10 @@
         <a href="" class="nav-link px-2">Find Learners</a>
     </li>
     <li>
-        <a href="{{ route('mylearners') }}" class="nav-link px-2">My Learners</a>
+        @php
+            $isReqMyLearners = request()->routeIs('mylearners');
+            $routeMyLearners = route('mylearners');
+        @endphp
+        <a href="{{ $isReqMyLearners ? '#' : $routeMyLearners }}" class="nav-link px-2 {{ $isReqMyLearners ? 'link-active' : '' }}">My Learners</a>
     </li>
 </ul>

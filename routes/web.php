@@ -1,17 +1,14 @@
 <?php
 
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\GuestController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LearnerController;
-use App\Http\Controllers\MemberRegistration;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TutorController;
 use App\Models\FieldNames\UserFields;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Hash;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -93,8 +90,10 @@ Route::controller(LearnerController::class)->group(function() use ($RoleMw)
     // unless their profile has been verified, thus "ensureNotPending" .
     Route::middleware(['auth', 'ensureNotPending', $RoleMw . User::ROLE_LEARNER])->group(function()
     {
-        Route::get('/learner', 'index')->name('learner.index');
-        Route::get('/learner/my-tutors', 'myTutors')->name('mytutors');
+        Route::get('/learner',                    'index')->name('learner.index');
+        Route::get('/learner/my-tutors',          'myTutors')->name('mytutors');
+        Route::post('/learner/hire-tutor',        'hireTutor')->name('learner.hire-tutor');
+        Route::post('/learner/cancel-hire-tutor', 'cancelHireTutor')->name('learner.cancel-hire-tutor');
 
         Route::get('/sign-lingua/become-tutor',                 'becomeTutor_index')->name('become-tutor');
         Route::get('/sign-lingua/become-tutor/forms',           'becomeTutor_create')->name('become-tutor.forms');
@@ -114,18 +113,19 @@ Route::controller(LearnerController::class)->group(function() use ($RoleMw)
 
 Route::controller(TutorController::class)->group(function() use ($RoleMw)
 {
-    Route::middleware(['auth', 'ensureNotPending', $RoleMw . User::ROLE_TUTOR])->group(function()
+    Route::middleware(['auth', 'ensureNotPending', $RoleMw . User::ROLE_LEARNER])->group(function()
     {
         Route::get('/learner/find-tutors', 'listTutors')->name('tutors.list');
         Route::get('/learner/tutor-details/{id}', 'show')->name('tutor.show');
-
+        Route::post('/learner/leave-tutor', 'endContract')->name('tutor.end');
+    });
+    
+    Route::middleware(['auth', 'ensureNotPending', $RoleMw . User::ROLE_TUTOR])->group(function()
+    {
         Route::get('/tutor/my-learners',              'myLearners')->name('mylearners');
         Route::get('/tutor/my-learners/filter/clear', 'myLearners_clear_filter')->name('tutor.learners-clear-filter');
         Route::get('/tutor/my-learner-details',       'myLearners_show')->name('tutor.learners-show');
         Route::post('/tutor/my-learners/filter',      'myLearners_filter')->name('tutor.learners-filter');
-
-        Route::post('/tutor/hire', 'hireTutor')->name('tutor.hire');
-        Route::post('/tutor/end-contract', 'endContract')->name('tutor.end');
     });
 
     Route::middleware('guest', 'ensureNotPending')->group(function()

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
 use App\Models\Booking;
+use App\Models\BookingRequest;
 use App\Models\FieldNames\BookingFields;
+use App\Models\FieldNames\BookingRequestFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
 use App\Models\User;
@@ -85,41 +87,44 @@ class TutorController extends Controller
                ->with('hashids', $this->hashids);
     }
 
-    public function hireTutor(Request $request)
-    {
-        $hashedId = $request->input('tutor_id');
-        $error = response()->view('errors.500', [], 500);
+    //
+    // A learner sends a hire request to the tutor ...
+    //
+    // public function hireTutor(Request $request)
+    // {
+    //     $hashedId = $request->input('tutor_id');
+    //     $error = response()->view('errors.500', [], 500);
 
-        if (empty($hashedId))
-            return $error;
+    //     if (empty($hashedId))
+    //         return $error;
 
-        $decodeTutorId = $this->hashids->decode($hashedId);
+    //     $decodeTutorId = $this->hashids->decode($hashedId);
 
-        if (empty($decodeTutorId))
-            return $error;
+    //     if (empty($decodeTutorId))
+    //         return $error;
 
-        $tutorId = $decodeTutorId[0];
+    //     $tutorId = $decodeTutorId[0];
 
-        try
-        {
-            $tutorExists = User::where('id', $tutorId)->exists();
+    //     try
+    //     {
+    //         $tutorExists = User::where('id', $tutorId)->exists();
 
-            if (!$tutorExists) {
-                return $error;
-            }
+    //         if (!$tutorExists) {
+    //             return $error;
+    //         }
 
-            Booking::create([
-                BookingFields::LearnerId => Auth::user()->id,
-                BookingFields::TutorId   => $tutorId
-            ]);
+    //         Booking::create([
+    //             BookingFields::LearnerId => Auth::user()->id,
+    //             BookingFields::TutorId   => $tutorId
+    //         ]);
 
-            return redirect(route('tutor.show', $hashedId));
-        }
-        catch (Exception $ex)
-        {
-            return $error;
-        }
-    }
+    //         return redirect(route('tutor.show', $hashedId));
+    //     }
+    //     catch (Exception $ex)
+    //     {
+    //         return $error;
+    //     }
+    // }
 
     public function endContract(Request $request)
     {
@@ -173,11 +178,22 @@ class TutorController extends Controller
             $tutor        = User::with('profile')->findOrFail($tutorId);
             $fluencyLevel = FluencyLevels::Tutor[$tutor->profile->{ProfileFields::Fluency}];
 
-            error_log($tutor);
-            // Check if the tutor was already hired
-            $isHired = Booking::where(BookingFields::TutorId, $tutorId)
-                   ->where(BookingFields::LearnerId, Auth::user()->id)
-                   ->exists();
+            $hireStatus = -1;
+
+            if (Booking::where(BookingFields::TutorId, $tutorId)
+                ->where(BookingFields::LearnerId, Auth::user()->id)
+                ->exists())
+            {
+                // Tutor is hired by learner ...
+                $hireStatus = 1;
+            }
+            else if (BookingRequest::where(BookingRequestFields::ReceiverId, $tutorId)
+                ->where(BookingRequestFields::SenderId, Auth::user()->id)
+                ->exists())
+            {
+                // Tutor havent accepted the hire request yet
+                $hireStatus = 2;
+            }
 
             $photo = $tutor->{UserFields::Photo};
             $profilePic = asset('assets/img/default_avatar.png');
@@ -211,7 +227,7 @@ class TutorController extends Controller
                 'certs'              => $tutor->profile->{ProfileFields::Certifications},
                 'skills'             => $skills,
                 'photo'              => $profilePic,
-                'isHired'            => $isHired,
+                'hireStatus'         => $hireStatus,
                 'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],
                 'fluencyBadgeColor'  => $fluencyLevel['Badge Color'],
                 'fluencyLevelText'   => $fluencyLevel['Level'],

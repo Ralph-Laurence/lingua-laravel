@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Models\FieldNames\BookingFields;
+use App\Models\FieldNames\BookingRequestFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -99,15 +100,34 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+    //
+    //---------------------------------------------------
+    //                  Relationships
+    //---------------------------------------------------
+    //
 
-    // Relationships
-
+    // The bookings are the established connections
+    // between a tutor and learner
     public function bookingsAsTutor() {
         return $this->hasMany(Booking::class, BookingFields::TutorId);
     }
 
     public function bookingsAsLearner() {
         return $this->hasMany(Booking::class, BookingFields::LearnerId);
+    }
+
+    // The booking requests on the other hand are temporary.
+    // These must be accepted or rejected by user.
+    // Each booking request must be accepted by a user
+    // to establish a connection (eg bookings).
+    // ONE-TO-MANY ---- Each user can send Many friend request
+    public function bookingRequestsSent() {
+        return $this->hasMany(BookingRequest::class, BookingRequestFields::SenderId);
+    }
+
+    // ONE-TO-MANY ---- Each user can receive Many friend request
+    public function bookingRequestsReceived() {
+        return $this->hasMany(BookingRequest::class, BookingRequestFields::ReceiverId);
     }
 
     public function profile() {
@@ -136,14 +156,5 @@ class User extends Authenticatable
         }
 
         return asset('assets/img/default_avatar.png');
-    }
-
-    /** 
-     * Checks if an authenticated user has a pending registration
-     * @return bool
-     */
-    public function hasPendingRegistration()
-    {
-        return PendingRegistration::where(ProfileFields::UserId, Auth::user()->id)->exists();
     }
 }

@@ -2,21 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Utils\HashSalts;
 use App\Models\FieldNames\UserFields;
+use App\Models\User;
+use App\Services\LearnerBookingRequestService;
 use App\Services\LearnerService;
 use App\Services\RegistrationService;
+use Hashids\Hashids;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class LearnerController extends Controller
 {
-    protected $learnerService;
-    protected $registrationService;
+    private $learnerService;
+    private $registrationService;
+    private $lrnBookingReqSvc;
 
-    public function __construct(LearnerService $service, RegistrationService $regSvc)
+    public function __construct(
+        LearnerService $service,
+        RegistrationService $regSvc,
+        LearnerBookingRequestService $lrnBookingReqSvc)
     {
-        $this->learnerService = $service;
-        $this->registrationService = $regSvc;
+        $this->learnerService       = $service;
+        $this->registrationService  = $regSvc;
+        $this->lrnBookingReqSvc     = $lrnBookingReqSvc;
     }
 
     //===================================================================//
@@ -176,6 +185,66 @@ class LearnerController extends Controller
 
         // Redirect to home if the session variable is not set
         return redirect('/');
+    }
+
+    public function hireTutor(Request $request)
+    {
+        $hashedId = $request->input('tutor_id');
+        $error500 = response()->view('errors.500', [], 500);
+        $error404 = response()->view('errors.404', [], 404);
+
+        if (empty($hashedId))
+            return $error404;
+
+        $hashids = new Hashids(HashSalts::Tutors, 10);
+        $decodeTutorId = $hashids->decode($hashedId);
+
+        if (empty($decodeTutorId))
+            return $error500;
+
+        $tutorId     = $decodeTutorId[0];
+        $learnerId   = Auth::user()->id;
+        $bookRequest = $this->lrnBookingReqSvc->hireTutor($learnerId, $tutorId);
+
+        if ($bookRequest == 404)
+            return $error404;
+
+        if ($bookRequest == 500)
+            return $error500;
+
+        session()->flash('booking_request_success', true);
+
+        return redirect(route('tutor.show', $hashedId));
+    }
+
+    public function cancelHireTutor(Request $request)
+    {
+        $hashedId = $request->input('tutor_id');
+        $error500 = response()->view('errors.500', [], 500);
+        $error404 = response()->view('errors.404', [], 404);
+
+        if (empty($hashedId))
+            return $error404;
+
+        $hashids = new Hashids(HashSalts::Tutors, 10);
+        $decodeTutorId = $hashids->decode($hashedId);
+
+        if (empty($decodeTutorId))
+            return $error500;
+
+        $tutorId     = $decodeTutorId[0];
+        $learnerId   = Auth::user()->id;
+        $cancelRequest = $this->lrnBookingReqSvc->cancelHireTutor($learnerId, $tutorId);
+
+        if ($cancelRequest == 404)
+            return $error404;
+
+        if ($cancelRequest == 500)
+            return $error500;
+
+        session()->flash('booking_request_canceled', true);
+
+        return redirect(route('tutor.show', $hashedId));
     }
 }
 

@@ -18,7 +18,7 @@
                 <div class="profile-captions ps-4">
                     <div class="tutor-name flex-start gap-2 mb-3">
                         <h2 class="mb-0 darker-text">{{ $tutorDetails['fullname'] }}</h2>
-                        @if ($tutorDetails['isHired'])
+                        @if ($tutorDetails['hireStatus'] == 1)
                             <i class="fas fa-heart heart-color"></i>
                         @endif
                     </div>
@@ -51,7 +51,7 @@
         </div>
         <div class="col-4">
 
-        @if ($tutorDetails['isHired'])
+        @if ($tutorDetails['hireStatus'] == 1)
 
             <div class="card shadow">
                 <div class="card-body">
@@ -113,9 +113,15 @@
                         </div>
 
                     </div>
-                    <button class="btn btn-primary mt-4 mx-2 w-100 btn-hire-tutor">
-                        <i class="fa-solid fa-heart-circle-plus me-2"></i>Hire Tutor
-                    </button>
+                    @if ($tutorDetails['hireStatus'] == 2)
+                        <button class="btn btn-secondary mt-4 mx-2 w-100 btn-cancel-hire-req">
+                            <i class="fa-solid fa-times me-2"></i>Cancel Request
+                        </button>
+                    @else
+                        <button class="btn btn-primary mt-4 mx-2 w-100 btn-hire-tutor">
+                            <i class="fa-solid fa-heart-circle-plus me-2"></i>Hire Tutor
+                        </button>
+                    @endif
                 </div>
             </div>
 
@@ -224,7 +230,12 @@
     </div>
 </section>
 
-<form class="d-none" id="frm-hire-tutor" action="{{ route('tutor.hire') }}" method="post">
+<form class="d-none" id="frm-hire-tutor" action="{{ route('learner.hire-tutor') }}" method="post">
+    @csrf
+    <input type="hidden" id="tutor_name" value="{{ $tutorDetails['firstname'] }}">
+    <input type="hidden" name="tutor_id" value="{{ $tutorDetails['hashedId'] }}">
+</form>
+<form class="d-none" id="frm-cancel-hire" action="{{ route('learner.cancel-hire-tutor') }}" method="post">
     @csrf
     <input type="hidden" id="tutor_name" value="{{ $tutorDetails['firstname'] }}">
     <input type="hidden" name="tutor_id" value="{{ $tutorDetails['hashedId'] }}">
@@ -239,4 +250,31 @@
 @push('scripts')
     <script src="{{ asset('assets/lib/dompurify/purify.min.js') }}"></script>
     <script src="{{ asset('assets/js/tutor-details.js') }}"></script>
+@endpush
+
+@push('dialogs')
+    <x-toast-container>
+        @if (session('booking_request_success'))
+            @php
+                $to = $tutorDetails['firstname'];
+                $requestMsg = "Your hire request has been sent to $to! We'll notify you once it has been accepted. In the meantime, feel free to explore and connect with other tutors.";
+            @endphp
+            @include('partials.toast', [
+                'toastMessage' => $requestMsg,
+                'toastTitle'   => 'Request Sent!',
+                'useOKButton'  => 'true'
+            ])
+        @endif
+        @if (session('booking_request_canceled'))
+            @php
+                $to = $tutorDetails['firstname'];
+                $cancelMsg = "Your hire request to $to has been canceled.";
+            @endphp
+            @include('partials.toast', [
+                'toastMessage' => $cancelMsg,
+                'toastTitle'   => 'Request Canceled',
+                'useOKButton'  => 'true'
+            ])
+        @endif
+    </x-toast-container>
 @endpush
