@@ -93,17 +93,98 @@ class LearnerService extends UserService
         return view('admin.learners', compact('learners', 'fluencyFilter'));
     }
 
-    public function showLearnerDetails($id)
+    public function listAllLearnersForTutor(Request $request, $tutorId)
+    {
+        $result = null;
+        $filter = ['forTutor' => $tutorId];
+
+        if ($request->session()->has('learner-filter'))
+        {
+            $dataSetFilters = $request->session()->get('learner-filter');
+            $filter = array_merge($filter, $dataSetFilters);
+        }
+
+        $result = $result = $this->getLearners($filter);
+
+        $learners = $result['learnersSet'];
+        $fluencyFilter = $result['fluencyFilter'];
+
+        if ($request->session()->has('learner-filter-inputs'))
+        {
+            $learnerFilterInputs = $request->session()->get('learner-filter-inputs');
+            $hasFilter = true;
+
+            return view('tutor.mylearners', compact('learners', 'fluencyFilter', 'learnerFilterInputs', 'hasFilter'));
+        }
+
+        return view('tutor.mylearners', compact('learners', 'fluencyFilter'));
+    }
+    //
+    // This must be accessed via Standard HTTP GET
+    //
+    public function showLearnerDetailsForAdmin($id)
+    {
+        $learnerDetails = $this->getLearnerDetails($id);
+
+        if ($learnerDetails == 400)
+        {
+            // Return custom 404 page
+            return view('errors.404');
+        }
+
+        if ($learnerDetails == 500)
+        {
+            // Return custom 404 page
+            return view('errors.500');
+        }
+
+        // Return the view with the tutor data
+        return view('admin.show-learner', compact('learnerDetails'));
+    }
+    //
+    // This must be accessed via Asynchronous POST
+    //
+    public function showLearnerDetailsForTutor(Request $request)
+    {
+        $id = $request->input('learner_id');
+        $learnerDetails = $this->getLearnerDetails($id);
+        $status  = 200;
+        $message = 'Found';
+
+        if ($learnerDetails == 400)
+        {
+            $status  = 400;
+            $message = "The learner does not exist or has been deleted.";
+        }
+
+        if ($learnerDetails == 500)
+        {
+            $status  = 500;
+            $message = "There was a problem while trying to read the learner's data.";
+        }
+
+        // Return the data as JSON
+        return response()->json([
+            'status'  => $status,
+            'message' => $message,
+            'data'    => $learnerDetails
+        ], $status);
+    }
+
+    private function getLearnerDetails($id)
     {
         try
         {
+            // Check if the ID is empty
+            if (empty($id))
+                return 400;
+
             // Decode the hashed ID
             $decodedId = $this->learnerHashIds->decode($id);
 
             // Check if the ID is empty
-            if (empty($decodedId)) {
-                return view('errors.404');
-            }
+            if (empty($decodedId))
+                return 500;
 
             // Fetch the learner's details
             $learnerId    = $decodedId[0];
@@ -114,7 +195,7 @@ class LearnerService extends UserService
             $profilePic = asset('assets/img/default_avatar.png');
 
             if (!empty($photo))
-                $profilePic = Storage::url("public/uploads/profiles/$photo");
+                $profilePic = asset(Storage::url("public/uploads/profiles/$photo"));
 
             $learnerDetails = [
                 'fullname'           => implode(' ', [$learner->{UserFields::Firstname}, $learner->{UserFields::Lastname}]),
@@ -127,18 +208,17 @@ class LearnerService extends UserService
                 'fluencyLevelText'   => $fluencyLevel['Level'],
             ];
 
-            // Return the view with the tutor data
-            return view('admin.show-learner', compact('learnerDetails'));
+            return $learnerDetails;
         }
         catch (ModelNotFoundException $e)
         {
             // Return custom 404 page
-            return view('errors.404');
+            return 400; // view('errors.404');
         }
         catch (Exception $e)
         {
             // Return custom 404 page
-            return view('errors.500');
+            return 500; // view('errors.500');
         }
     }
 
@@ -160,8 +240,20 @@ class LearnerService extends UserService
         $learners = User::select($fields)
             ->join('profiles', 'users.id', '=', 'profiles.'.ProfileFields::UserId)
             ->where(UserFields::Role, User::ROLE_LEARNER)
-            ->withCount(['bookingsAsLearner as totalTutors' => function($query) {
-                $query->whereHas('tutor', function($query) {
+            ->whereHas('bookingsAsLearner', function($query) use($options)
+            {
+                // If there is a key "forTutor", that means we only
+                // select specific learners connected to that tutor,
+                // identified by tutor id
+                if (array_key_exists("forTutor", $options))
+                {
+                    $query->where(BookingFields::TutorId, $options['forTutor']);
+                }
+            })
+            ->withCount(['bookingsAsLearner as totalTutors' => function($query) use($options)
+            {
+                $query->whereHas('tutor', function($query) use($options)
+                {
                     $query->where(UserFields::Role, User::ROLE_TUTOR);
                 });
             }])
@@ -210,7 +302,7 @@ class LearnerService extends UserService
         ];
     }
 
-    public function filterLearners(Request $request)
+    public function filterLearners(Request $request, $extraFilters = [])
     {
         $rules = [
             'search-keyword' => 'nullable|string|max:64',
@@ -227,15 +319,27 @@ class LearnerService extends UserService
         // Select Options validation
         $inputs = $validator->validated();
         $filter = [
-            'min_entries'   => $inputs['select-entries'],
-            'fluency'       => $inputs['select-fluency']
+            'min_entries' => $inputs['select-entries'],
+            'fluency'     => $inputs['select-fluency'],
         ];
+
+        // The admin side mostly doesnt need these.
+        // The tutor side will need this because we
+        // can use $extraFilters to hold the option
+        // "forTutor" to limit the results to return
+        // learners that belong to the tutor.
+        if (!empty($extraFilters))
+            $filter = array_merge($filter, $extraFilters);
 
         if (!empty($inputs['search-keyword']))
         {
             $filter['search'] = $inputs['search-keyword'];
         }
 
+        // The learners-index, depend on these session filter inputs.
+        // The learners-index does the heavy lifting, which means
+        // the retrieval of data including the filters is handled
+        // by the learners-index
         $request->session()->put('learner-filter-inputs', $inputs);
         $request->session()->put('learner-filter', $filter);
 

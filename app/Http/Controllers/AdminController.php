@@ -87,6 +87,6 @@ class AdminController extends Controller
 
     public function learners_show($id)
     {
-        return $this->learnerService->showLearnerDetails($id);
+        return $this->learnerService->showLearnerDetailsForAdmin($id);
     }
 }

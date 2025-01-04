@@ -35,5 +35,5 @@ header .role-badge {
 
 /*============ HEADER STYLES FOR AUTHENTICATED MEMBERS ============*/
 .role-badge.role-admin { background-color: #FF7701; }
-.role-badge.role-tutor { background-color: darkslateblue; }
+.role-badge.role-tutor { background-color: #624CC2; }
 .role-badge.role-learner { background-color: #00CF73; }

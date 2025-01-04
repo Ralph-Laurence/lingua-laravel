@@ -9,6 +9,7 @@ use App\Models\FieldNames\BookingFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
 use App\Models\User;
+use App\Services\LearnerService;
 use App\Services\RegistrationService;
 use Exception;
 use Hashids\Hashids;
@@ -19,13 +20,15 @@ use Illuminate\Support\Facades\Storage;
 
 class TutorController extends Controller
 {
+    private $learnerService;
     private $registrationService;
     private $hashids;
 
-    public function __construct(RegistrationService $regSvc)
+    public function __construct(RegistrationService $regSvc, LearnerService $lrnSvc)
     {
         $this->hashids = new Hashids(HashSalts::Tutors, 10);
         $this->registrationService = $regSvc;
+        $this->learnerService = $lrnSvc;
     }
 
     public function listTutors()
@@ -215,7 +218,7 @@ class TutorController extends Controller
             ];
 
             // Return the view with the tutor data
-            return view('tutors.show', compact('tutorDetails'));
+            return view('tutor.show', compact('tutorDetails'));
         }
         catch (ModelNotFoundException $e)
         {
@@ -228,10 +231,21 @@ class TutorController extends Controller
             return view('errors.500');
         }
     }
+    //
+    //..............................................
+    //                FOR LEARNERS
+    //..............................................
+    //
+    public function myLearners(Request $request)
+    {
+        $tutorId = Auth::user()->id;
+        return $this->learnerService->listAllLearnersForTutor($request, $tutorId);
+    }
 
-
-
-
+    public function myLearners_show(Request $request)
+    {
+        return $this->learnerService->showLearnerDetailsForTutor($request);
+    }
 
 
 
@@ -246,13 +260,6 @@ class TutorController extends Controller
      */
     public function registerTutor_create()
     {
-        // Check if we have a pending registration for the current learner
-        // then we shouldn't allow them to visit the tutor registration page
-        //$userId = Auth::user()->id;
-
-        //if ($this->registrationService->isPendingTutorRegistration($userId))
-            //return response()->view('shared.pending-registration', [], 301);
-
         // Show the forms page otherwise ...
         $returnData = $this->registrationService->buildTutorRegistrationFormView();
 
@@ -281,11 +288,6 @@ class TutorController extends Controller
             // the registration, we abort the execution
             return response()->view('errors.500', [], 500);
         }
-
-        // We will use this to guard the registration success screen
-        // so that it can only be visited once if ONLY there is a
-        // successful registration.
-        //$request->session()->put('registration_success', true);
 
         // Add a welcome greetings
         $firstname = $register['createdUser']->{UserFields::Firstname};
