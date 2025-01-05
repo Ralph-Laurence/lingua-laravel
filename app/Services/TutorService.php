@@ -6,6 +6,10 @@ use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
 use App\Mail\RegistrationApprovedMail;
 use App\Mail\RegistrationDeclinedMail;
+use App\Models\Booking;
+use App\Models\BookingRequest;
+use App\Models\FieldNames\BookingFields;
+use App\Models\FieldNames\BookingRequestFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
 use App\Models\PendingRegistration;
@@ -25,10 +29,12 @@ class TutorService
     const Role = User::ROLE_TUTOR;
 
     private $tutorHashIds;
+    private $learnerHashIds;
 
     function __construct()
     {
-        $this->tutorHashIds = new Hashids(HashSalts::Tutors, 10);
+        $this->tutorHashIds   = new Hashids(HashSalts::Tutors, 10);
+        $this->learnerHashIds = new Hashids(HashSalts::Learners, 10);
     }
 
     public static function FindById($id)
@@ -602,5 +608,54 @@ class TutorService
         }
 
         return $fluencyFilter;
+    }
+
+    //=======================================
+    // HIRE REQUESTS
+    //=======================================
+    public function getHireRequests($tutorId)
+    {
+        $hashids = $this->learnerHashIds;//new Hashids(HashSalts::Learners, 10);
+        $hireRequests = BookingRequest::with(['sender' => function($query)
+        {
+            // (aliasing not necessary anyway)
+            $selectUserFields = [
+                UserFields::Firstname . ' as fname',
+                UserFields::Lastname  . ' as lname',
+                UserFields::Photo     . ' as photo',
+                UserFields::Contact   . ' as contact',
+                'id',
+                'email',
+            ];
+
+            $selectProfileFields = implode(',', [
+                'profile:id',
+                ProfileFields::Fluency.' as fluency',
+                ProfileFields::UserId .' as user_id'
+            ]);
+
+            $query->select($selectUserFields)->with($selectProfileFields);
+        }])
+        ->where('receiver_id', $tutorId)
+        ->paginate(10)
+        ->through(function($request) use($hashids)
+        {
+            // Transform the data to the desired structure..
+            // Meaning, we only get those we need
+
+            return  [
+                //'id'       => $request->sender->id,
+                // 'firstname'  => $request->sender->fname,
+                // 'lastname'   => $request->sender->lname,
+                'name'       => implode(' ', [$request->sender->fname, $request->sender->lname]),
+                'photo'      => User::getPhotoUrl($request->sender->photo),
+                'contact'    => $request->sender->contact,
+                'email'      => $request->sender->email,
+                //'fluency'    => FluencyLevels::Learner[$request->sender->profile->fluency],
+                'user_id'    => $hashids->encode($request->sender->profile->user_id),
+            ];
+        });
+
+        return view('tutor.hire-requests', compact('hireRequests'));
     }
 }

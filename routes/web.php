@@ -119,12 +119,17 @@ Route::controller(TutorController::class)->group(function() use ($RoleMw)
         Route::get('/learner/tutor-details/{id}', 'show')->name('tutor.show');
         Route::post('/learner/leave-tutor', 'endContract')->name('tutor.end');
     });
-    
+
     Route::middleware(['auth', 'ensureNotPending', $RoleMw . User::ROLE_TUTOR])->group(function()
     {
         Route::get('/tutor/my-learners',              'myLearners')->name('mylearners');
+        Route::get('/tutor/find-learners',            'find_learners')->name('tutor.find-learners');
+        Route::get('/tutor/requests',                 'hire_requests')->name('tutor.hire-requests');
         Route::get('/tutor/my-learners/filter/clear', 'myLearners_clear_filter')->name('tutor.learners-clear-filter');
         Route::get('/tutor/my-learner-details',       'myLearners_show')->name('tutor.learners-show');
+
+        Route::post('/tutor/requests/accept',          'hire_request_accept')->name('tutor.accept-hire-request');
+        Route::post('/tutor/requests/decline',         'hire_request_decline')->name('tutor.decline-hire-request');
         Route::post('/tutor/my-learners/filter',      'myLearners_filter')->name('tutor.learners-filter');
     });
 

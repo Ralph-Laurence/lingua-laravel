@@ -2,14 +2,20 @@
     $uuid = uniqid();
     $toastUuid = 'toast-'. $uuid;
     $hasOKButton = false;
+    $autoHide = 'false';
 
     if (isset($useOKButton) && $useOKButton == 'true')
     {
         $hasOKButton = true;
     }
+
+    if (isset($autoClose) && $autoClose == 'true')
+    {
+        $autoHide = 'true';
+    }
 @endphp
 
-<div id="{{ $toastUuid }}" data-bs-autohide="false" class="toast primary-toast" role="alert" aria-live="assertive" aria-atomic="true">
+<div id="{{ $toastUuid }}" data-bs-autohide="{{ $autoHide }}" class="toast primary-toast" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="toast-header">
         <img src="{{ asset('assets/img/logo-s.png') }}" class="rounded me-2" width="18" height="18">
         <strong class="me-auto">

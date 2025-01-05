@@ -13,25 +13,39 @@ use App\Models\FieldNames\UserFields;
 use App\Models\User;
 use App\Services\LearnerServiceForTutor;
 use App\Services\RegistrationService;
+use App\Services\TutorBookingRequestService;
+use App\Services\TutorService;
 use Exception;
 use Hashids\Hashids;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class TutorController extends Controller
 {
-    private $learnerServiceForTutor;
-    private $registrationService;
     private $hashids;
 
-    public function __construct(RegistrationService $regSvc, LearnerServiceForTutor $lrnSvc)
+    // Property Promotion
+    public function __construct(
+        private RegistrationService         $registrationService,
+        private LearnerServiceForTutor      $learnerServiceForTutor,
+        private TutorService                $tutorService,
+        private TutorBookingRequestService  $tutorBookingRequestService
+    )
     {
         $this->hashids = new Hashids(HashSalts::Tutors, 10);
-        $this->registrationService = $regSvc;
-        $this->learnerServiceForTutor = $lrnSvc;
     }
+    // Traditional:
+    // public function __construct(RegistrationService $regSvc, LearnerServiceForTutor $lrnSvc, TutorService $tutSvc, TutorBookingRequestService $tutBookReqSvc)
+    // {
+    //     $this->hashids = new Hashids(HashSalts::Tutors, 10);
+    //     $this->registrationService = $regSvc;
+    //     $this->learnerServiceForTutor = $lrnSvc;
+    //     $this->tutorService = $tutSvc;
+    //     $this->tutorBookingRequestService = $tutBookReqSvc;
+    // }
 
     public function listTutors()
     {
@@ -143,20 +157,32 @@ class TutorController extends Controller
 
         try
         {
+            DB::beginTransaction();
+
             $tutorExists = User::where('id', $tutorId)->exists();
 
             if (!$tutorExists) {
                 return $error;
             }
 
-            Booking::where(BookingFields::LearnerId, Auth::user()->id)
-                   ->where(BookingFields::TutorId, $tutorId)
-                   ->delete();
+            $deleted = Booking::where(BookingFields::LearnerId, Auth::user()->id)
+                    ->where(BookingFields::TutorId, $tutorId)
+                    ->delete();
 
-            return redirect(route('tutor.show', $hashedId));
+            if ($deleted)
+            {
+                DB::commit();
+                return redirect(route('tutor.show', $hashedId));
+            }
+            else
+            {
+                DB::rollBack();
+                return $error;
+            }
         }
         catch (Exception $ex)
         {
+            DB::rollBack();
             return $error;
         }
     }
@@ -255,18 +281,22 @@ class TutorController extends Controller
     public function myLearners(Request $request)
     {
         $tutorId = Auth::user()->id;
-        return $this->learnerServiceForTutor->listAllLearnersForTutor($request, $tutorId);
+        return $this->learnerServiceForTutor
+                    ->listAllLearnersForTutor($request, $tutorId);
     }
 
     public function myLearners_show(Request $request)
     {
-        return $this->learnerServiceForTutor->showLearnerDetailsForTutor($request);
+        return $this->learnerServiceForTutor
+                    ->showLearnerDetailsForTutor($request);
     }
 
     public function myLearners_filter(Request $request)
     {
         $filter = ['forTutor' => Auth::user()->id];
-        return $this->learnerServiceForTutor->filterLearnersForTutor($request, $filter);
+
+        return $this->learnerServiceForTutor
+                    ->filterLearnersForTutor($request, $filter);
     }
 
     public function myLearners_clear_filter(Request $request)
@@ -274,7 +304,27 @@ class TutorController extends Controller
         return $this->learnerServiceForTutor->clearFiltersForTutor($request);
     }
 
+    public function hire_requests()
+    {
+        return $this->tutorService->getHireRequests(Auth::user()->id);
+    }
 
+    public function hire_request_accept(Request $request)
+    {
+        return $this->tutorBookingRequestService
+                    ->acceptHireRequest($request, Auth::user()->id);
+    }
+
+    public function hire_request_decline(Request $request)
+    {
+        return $this->tutorBookingRequestService
+                    ->declineHireRequest($request, Auth::user()->id);
+    }
+
+    public function find_learners()
+    {
+
+    }
 
     //===================================================================//
     //                   F O R   G U E S T   U S E R S

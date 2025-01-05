@@ -185,3 +185,12 @@ footer {
     color: var(--base-dark) !important;
     background: white !important;
 }
+
+.centered-image
+{
+    object-fit: cover;          /* Scale the image to cover the container */
+    object-position: center;    /* Center the image horizontally and vertically */
+    border: 1px solid #ccc;   /* Optional: add a border to see the image boundaries */
+    display: block;             /* Make sure the image behaves like a block element */
+    margin: 0 auto;             /* Center the image horizontally if needed */
+}

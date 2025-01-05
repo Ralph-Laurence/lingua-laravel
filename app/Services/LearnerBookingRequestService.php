@@ -9,6 +9,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class LearnerBookingRequestService
 {
@@ -43,31 +44,38 @@ class LearnerBookingRequestService
     {
         if (empty($tutorId) || empty($learnerId))
         {
-            error_log('empty IDs');
             return 500;
         }
 
         try
         {
+            DB::beginTransaction();
+
             $bookingRequest = BookingRequest::where(BookingRequestFields::ReceiverId, $tutorId)
                 ->where(BookingRequestFields::SenderId, Auth::user()->id)
                 ->firstOrFail();
-            
+
             $deleted = $bookingRequest->delete();
-            
+
             if ($deleted)
+            {
+                DB::commit();
                 return 200;
+            }
             else
+            {
+                DB::rollBack();
                 return 500;
+            }
         }
         catch (ModelNotFoundException $ex)
         {
+            DB::rollBack();
             return 404;
         }
         catch (Exception $ex)
         {
-            error_log('GENERAL ERROR --> ');
-            error_log($ex->getMessage());
+            DB::rollBack();
             return 500;
         }
     }
