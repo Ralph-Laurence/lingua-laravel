@@ -22,15 +22,18 @@ class User extends Authenticatable
     const ROLE_ADMIN     = 0;
     const ROLE_TUTOR     = 1;
     const ROLE_LEARNER   = 2;
+    const ROLE_PENDING   = 3;
 
     const ROLE_STR_ADMIN     = 'Admin';
     const ROLE_STR_TUTOR     = 'Tutor';
     const ROLE_STR_LEARNER   = 'Learner';
+    const ROLE_STR_PENDING   = 'Pending';
 
     const ROLE_MAPPING = [
         self::ROLE_ADMIN     => self::ROLE_STR_ADMIN,
         self::ROLE_TUTOR     => self::ROLE_STR_TUTOR,
         self::ROLE_LEARNER   => self::ROLE_STR_LEARNER,
+        self::ROLE_PENDING   => self::ROLE_STR_PENDING,
     ];
 
     const SOFT_SKILLS = [

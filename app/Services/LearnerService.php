@@ -105,10 +105,6 @@ class LearnerService
             //     {
             //         $query->where(BookingFields::TutorId, $options['forTutor']);
             //     }
-            //     else if (array_key_exists('exceptConnected', $options))
-            //     {
-            //         $query->where(BookingFields::TutorId, '!=', $options['exceptConnected']);
-            //     }
             // })
             ->when(array_key_exists("forTutor", $options), function($query) use($options)
             {
@@ -136,6 +132,13 @@ class LearnerService
             }])
             ->orderBy(UserFields::Firstname, 'ASC');
 
+        // if (array_key_exists('exceptConnected', $options))
+        // {
+        //     $learners = $learners->whereDoesntHave('bookingsAsLearner', function($query) use($options)
+        //     {
+        //         $query->where(BookingFields::TutorId, $options['exceptConnected']);
+        //     });
+        // }
         // if (array_key_exists("forTutor", $options))
         // {
         //     $learners = $learners->whereHas('bookingsAsLearner', function($query) use($options)
@@ -166,6 +169,8 @@ class LearnerService
                       ->orWhere(UserFields::Lastname, 'LIKE', "%$searchWord%");
             });
         }
+
+        error_log($learners->toSql());
 
         // Get the results
         $learners = $learners->paginate($options['min_entries']);

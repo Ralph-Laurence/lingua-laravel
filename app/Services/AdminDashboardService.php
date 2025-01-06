@@ -69,26 +69,59 @@ class AdminDashboardService
             ->orderBy('total_tutors', 'desc')
             ->first();
 
-        $topTutorsArr = [];
+        $tutorWithMostLearners = DB::table('bookings')
+            ->select([
+                'tutor.id',
+                $strFieldPhoto,
+                DB::raw("CONCAT($strFieldFname,' ',$strFieldLname) as tutor_name") ,
+                DB::raw("COUNT(bookings.$strFieldLrnId) AS total_learners")
+            ])
+            ->join('users AS tutor', "bookings.$strFieldTutId", '=', 'tutor.id')
+            ->groupBy('tutor.id', $strFieldFname, $strFieldLname, $strFieldPhoto)
+            ->orderBy('total_learners', 'desc')
+            ->first();
 
-        foreach ($topTutors as $k => $obj)
+        if ($tutorWithMostLearners)
         {
-            $topTutorsArr[] = [
-                'tutorDetails'  => route('admin.tutors-show', $this->tutorHashIds->encode($obj->id)),
-                'tutorFname'    => $obj->tutor_fname,
-                'tutorName'     => $obj->tutor_name,
-                'tutorPhoto'    => User::getPhotoUrl($obj->photo),
-                'totalLearners' => $obj->total_students,
+            $topTutorId = $this->tutorHashIds->encode($tutorWithMostLearners->id);
+            $topTutor = [
+                'tutorDetails'   => route('admin.tutors-show', $topTutorId),
+                'tutorName'      => $tutorWithMostLearners->tutor_name,
+                'tutorPhoto'     => User::getPhotoUrl($tutorWithMostLearners->photo),
+                'totalLearners'  => $tutorWithMostLearners->total_learners,
             ];
+            $viewData['topTutor'] = $topTutor;
         }
 
-        $topLearnerId = $this->learnerHashIds->encode($learnerWithMostTutors->id);
-        $topLearner = [
-            'learnerDetails'   => route('admin.learners-show', $topLearnerId),
-            'learnerName'      => $learnerWithMostTutors->learner_name,
-            'learnerPhoto'     => User::getPhotoUrl($learnerWithMostTutors->photo),
-            'totalTutors'      => $learnerWithMostTutors->total_tutors,
-        ];
+        if ($topTutors->isNotEmpty())
+        {
+            $topTutorsArr = [];
+
+            foreach ($topTutors as $k => $obj)
+            {
+                $topTutorsArr[] = [
+                    'tutorDetails'  => route('admin.tutors-show', $this->tutorHashIds->encode($obj->id)),
+                    'tutorFname'    => $obj->tutor_fname,
+                    'tutorName'     => $obj->tutor_name,
+                    'tutorPhoto'    => User::getPhotoUrl($obj->photo),
+                    'totalLearners' => $obj->total_students,
+                ];
+            }
+
+            $viewData['topTutors'] = json_encode($topTutorsArr);
+        }
+
+        if ($learnerWithMostTutors)
+        {
+            $topLearnerId = $this->learnerHashIds->encode($learnerWithMostTutors->id);
+            $topLearner = [
+                'learnerDetails'   => route('admin.learners-show', $topLearnerId),
+                'learnerName'      => $learnerWithMostTutors->learner_name,
+                'learnerPhoto'     => User::getPhotoUrl($learnerWithMostTutors->photo),
+                'totalTutors'      => $learnerWithMostTutors->total_tutors,
+            ];
+            $viewData['topLearner']    = $topLearner;
+        }
 
         $totalPending = PendingRegistration::count();
 
@@ -96,8 +129,6 @@ class AdminDashboardService
         $viewData['totalLearners'] = $totals->total_learners;
         $viewData['totalMembers']  = $totals->total_learners + $totals->total_tutors;
         $viewData['totalPending']  = $totalPending;
-        $viewData['topTutors']     = json_encode($topTutorsArr);
-        $viewData['topLearner']    = $topLearner;
 
         return $viewData;
     }

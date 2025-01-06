@@ -531,6 +531,7 @@ class RegistrationService
             //===================================
             // 1. Create the user first
             //===================================
+            $userEntries[UserFields::Role] = User::ROLE_PENDING;
             $userModel = User::create($userEntries);
 
             //===================================

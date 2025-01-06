@@ -36,16 +36,25 @@ Route::get('/dashboard', function () {
     {
         $role = Auth::user()->{UserFields::Role};
 
-        switch ($role) {
-            case User::ROLE_LEARNER:
-            case User::ROLE_STR_TUTOR:
-                return redirect()->to('/');
-                break;
-
-            case User::ROLE_ADMIN:
-                return redirect()->route('admin.dashboard');
-                break;
+        if ($role == User::ROLE_ADMIN)
+        {
+            return redirect()->route('admin.dashboard');
         }
+        else
+        {
+            return redirect()->to('/');
+        }
+        // switch ($role) {
+        //     case User::ROLE_LEARNER:
+        //     case User::ROLE_LEARNER:
+        //     case User::ROLE_STR_TUTOR:
+        //         return redirect()->to('/');
+        //         break;
+
+        //     case User::ROLE_ADMIN:
+        //         return redirect()->route('admin.dashboard');
+        //         break;
+        // }
     }
 
     return redirect()->to('/');
@@ -56,6 +65,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+
+    Route::put('/profile/update-photo', [ProfileController::class, 'updatePhoto'])->name('profile.update.photo');
 });
 
 require __DIR__.'/auth.php';

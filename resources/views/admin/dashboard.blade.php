@@ -57,13 +57,17 @@
     </div>
 
     <div class="row">
-        <div class="col-8">
+        <div class="col-8 top-tutors-col">
             <div class="card">
                 <div class="card-body">
                     <h6 id="chart-title">Top 5 tutors</h6>
-                    <textarea id="chartData" class="d-none">
-                        {{ $totals['topTutors'] }}
-                    </textarea>
+
+                        @if (array_key_exists('topTutors', $totals) && !empty($totals['topTutors']))
+                            <textarea id="chartData" class="d-none">
+                                {{ $totals['topTutors'] }}
+                            </textarea>
+                        @endif
+
                     <div class="d-flex w-100">
                         <div class="container flex-fill">
                             <canvas id="topTutorsChart"></canvas>
@@ -74,7 +78,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-2">
+        {{-- <div class="col-2">
             <h6 id="chart-title" class="text-center">Tutor with most Learners</h6>
             <div class="card">
                 <div class="card-body text-center">
@@ -86,17 +90,42 @@
                     <a id="best-tutor-details" class="btn btn-sm btn-primary w-100 mt-2 text-13" role="button">About Tutor</a>
                 </div>
             </div>
+        </div> --}}
+        <div class="col-2">
+            <h6 id="chart-title" class="text-center">Tutor with most Learners</h6>
+            <div class="card">
+                <div class="card-body text-center">
+                    @if (isset($totals['topTutor']) && !empty($totals['topTutor']))
+                        <img src="{{ $totals['topTutor']['tutorPhoto'] }}" class="mb-1" alt="photo" id="best-tutor-photo" width="80" height="80">
+                        <p class="fw-bold my-1">
+                            <i class="fas fa-medal me-1 text-primary"></i>
+                            <span id="best-tutor-name" class="text-14">{{ $totals['topTutor']['tutorName'] }}</span>
+                        </p>
+                        <a href="{{ $totals['topTutor']['tutorDetails'] }}" class="btn btn-sm btn-primary w-100 mt-2 text-13" role="button">About Tutor</a>
+                    @else
+                        <div class="text-secondary text-14">
+                            None yet
+                        </div>
+                    @endif
+                </div>
+            </div>
         </div>
         <div class="col-2">
             <h6 id="chart-title" class="text-center light">Learner with most Tutors</h6>
             <div class="card">
                 <div class="card-body text-center">
-                    <img src="{{ $totals['topLearner']['learnerPhoto'] }}" class="mb-1" alt="photo" id="best-learner-photo" width="80" height="80">
-                    <p class="fw-bold my-1">
-                        <i class="fas fa-medal me-1 text-primary"></i>
-                        <span id="best-tutor-name" class="text-14">{{ $totals['topLearner']['learnerName'] }}</span>
-                    </p>
-                    <a href="{{ $totals['topLearner']['learnerDetails'] }}" class="btn btn-sm btn-primary w-100 mt-2 text-13" role="button">About Learner</a>
+                    @if (isset($totals['topLearner']) && !empty($totals['topLearner']))
+                        <img src="{{ $totals['topLearner']['learnerPhoto'] }}" class="mb-1" alt="photo" id="best-learner-photo" width="80" height="80">
+                        <p class="fw-bold my-1">
+                            <i class="fas fa-star me-1 text-primary"></i>
+                            <span id="best-tutor-name" class="text-14">{{ $totals['topLearner']['learnerName'] }}</span>
+                        </p>
+                        <a href="{{ $totals['topLearner']['learnerDetails'] }}" class="btn btn-sm btn-primary w-100 mt-2 text-13" role="button">About Learner</a>
+                    @else
+                        <div class="text-secondary text-14">
+                            None yet
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -158,12 +187,18 @@
 <script>
     $(document).ready(function()
     {
-        let chartData = $('#chartData').val();
+        if (!document.getElementById('chartData'))
+        {
+            $('.top-tutors-col').addClass('d-none');
+            return;
+        }
+
+        let chartData = $('#chartData').val().trim();
 
         if (!chartData)
         {
-            $('.container').html('Nothing to show...');
-           return;
+            $('.top-tutors-col').addClass('d-none');
+            return;
         }
 
         chartData = JSON.parse(chartData);
@@ -195,13 +230,13 @@
         });
 
         // Find the tutor with most students
-        let keys = Object.keys(contest).map(Number);
-        let bestTutor_key = Math.max(...keys);
-        let bestTutor = contest[bestTutor_key];
+        // let keys = Object.keys(contest).map(Number);
+        // let bestTutor_key = Math.max(...keys);
+        // let bestTutor = contest[bestTutor_key];
 
-        $('#best-tutor-photo').attr('src', bestTutor.tutorPhoto);
-        $('#best-tutor-name').text(bestTutor.tutorName);
-        $('#best-tutor-details').attr('href', bestTutor.tutorDetails);
+        // $('#best-tutor-photo').attr('src', bestTutor.tutorPhoto);
+        // $('#best-tutor-name').text(bestTutor.tutorName);
+        // $('#best-tutor-details').attr('href', bestTutor.tutorDetails);
 
         // Display all top 5 tutors
         let ctx = document.getElementById('topTutorsChart').getContext('2d');
