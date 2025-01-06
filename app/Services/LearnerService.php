@@ -96,15 +96,36 @@ class LearnerService
         $learners = User::select($fields)
             ->join('profiles', 'users.id', '=', 'profiles.'.ProfileFields::UserId)
             ->where(UserFields::Role, User::ROLE_LEARNER)
-            ->whereHas('bookingsAsLearner', function($query) use($options)
+            // ->whereHas('bookingsAsLearner', function($query) use($options)
+            // {
+            //     // If there is a key "forTutor", that means we only
+            //     // select specific learners connected to that tutor,
+            //     // identified by tutor id
+            //     if (array_key_exists("forTutor", $options))
+            //     {
+            //         $query->where(BookingFields::TutorId, $options['forTutor']);
+            //     }
+            //     else if (array_key_exists('exceptConnected', $options))
+            //     {
+            //         $query->where(BookingFields::TutorId, '!=', $options['exceptConnected']);
+            //     }
+            // })
+            ->when(array_key_exists("forTutor", $options), function($query) use($options)
             {
-                // If there is a key "forTutor", that means we only
-                // select specific learners connected to that tutor,
-                // identified by tutor id
-                if (array_key_exists("forTutor", $options))
+                $query->whereHas('bookingsAsLearner', function($subquery) use($options)
                 {
-                    $query->where(BookingFields::TutorId, $options['forTutor']);
-                }
+                    // If there is a key "forTutor", that means we only
+                    // select specific learners connected to that tutor,
+                    // identified by tutor id
+                    $subquery->where(BookingFields::TutorId, $options['forTutor']);
+                });
+            })
+            ->when(array_key_exists('exceptConnected', $options), function($query) use($options)
+            {
+                $query->whereDoesntHave('bookingsAsLearner', function($subquery) use($options)
+                {
+                    $subquery->where(BookingFields::TutorId, $options['exceptConnected']);
+                });
             })
             ->withCount(['bookingsAsLearner as totalTutors' => function($query)
             {
@@ -114,6 +135,24 @@ class LearnerService
                 });
             }])
             ->orderBy(UserFields::Firstname, 'ASC');
+
+        // if (array_key_exists("forTutor", $options))
+        // {
+        //     $learners = $learners->whereHas('bookingsAsLearner', function($query) use($options)
+        //     {
+        //         // If there is a key "forTutor", that means we only
+        //         // select specific learners connected to that tutor,
+        //         // identified by tutor id
+        //         $query->where(BookingFields::TutorId, $options['forTutor']);
+        //     });
+        // }
+        // else if (array_key_exists('exceptConnected', $options))
+        // {
+        //     $learners = $learners->whereDoesntHave('bookingsAsLearner', function($query) use($options)
+        //     {
+        //         $query->where(BookingFields::TutorId, $options['exceptConnected']);
+        //     });
+        // }
 
         if (array_key_exists('fluency', $options) && $options['fluency'] != -1) {
             $learners = $learners->where(ProfileFields::Fluency, $options['fluency']);

@@ -483,7 +483,7 @@ class RegistrationService
                 UserFields::Address     => $data['address'],
                 'email'                 => $data['email'],
                 UserFields::Username    => $data['username'],
-                'password'              => Hash::make($data['password'])
+                'password'              => $data['password']
             ]);
 
             $profile = Profile::create([

@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 //===================================================================//
 class LearnerServiceForTutor extends LearnerService
 {
-    public function filterLearnersForTutor(Request $request)
+    public function filterMyLearners(Request $request)
     {
         $filterLearners = $this->filterLearners($request);
 
@@ -25,7 +25,7 @@ class LearnerServiceForTutor extends LearnerService
         return redirect()->route('mylearners');
     }
 
-    public function clearFiltersForTutor(Request $request)
+    public function clearMyLearnerFilters(Request $request)
     {
         // Forget multiple session variables in one line
         $request->session()->forget(['learner-filter-for-tutor', 'learner-filter-inputs-for-tutor']);
@@ -33,7 +33,34 @@ class LearnerServiceForTutor extends LearnerService
         return redirect()->route('mylearners');
     }
 
-    public function listAllLearnersForTutor(Request $request, $tutorId)
+    public function listAllLearners(Request $request, $tutorId)
+    {
+        $result = null;
+        $filter = ['exceptConnected' => $tutorId];
+
+        if ($request->session()->has('learner-filter-except'))
+        {
+            $dataSetFilters = $request->session()->get('learner-filter-except');
+            $filter = array_merge($filter, $dataSetFilters);
+        }
+
+        $result = $result = $this->getLearners($filter);
+
+        $learners = $result['learnersSet'];
+        $fluencyFilter = $result['fluencyFilter'];
+
+        if ($request->session()->has('learner-filter-inputs-for-tutor'))
+        {
+            $learnerFilterInputs = $request->session()->get('learner-filter-inputs-for-tutor');
+            $hasFilter = true;
+
+            return view('tutor.find-learners', compact('learners', 'fluencyFilter', 'learnerFilterInputs', 'hasFilter'));
+        }
+
+        return view('tutor.find-learners', compact('learners', 'fluencyFilter'));
+    }
+
+    public function listMyLearners(Request $request, $tutorId)
     {
         $result = null;
         $filter = ['forTutor' => $tutorId];
@@ -63,7 +90,7 @@ class LearnerServiceForTutor extends LearnerService
     //
     // This must be accessed via Asynchronous POST
     //
-    public function showLearnerDetailsForTutor(Request $request)
+    public function showLearnerDetails(Request $request)
     {
         $id = $request->input('learner_id');
         $learnerDetails = $this->getLearnerDetails($id);

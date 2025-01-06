@@ -3,29 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Http\Utils\HashSalts;
+use App\Mail\HireTutorRequest;
+use App\Mail\HireTutorRequestMail;
 use App\Models\FieldNames\UserFields;
 use App\Models\User;
 use App\Services\LearnerBookingRequestService;
 use App\Services\LearnerService;
 use App\Services\RegistrationService;
+use App\Services\TutorServiceForLearner;
 use Hashids\Hashids;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class LearnerController extends Controller
 {
-    private $learnerService;
-    private $registrationService;
-    private $lrnBookingReqSvc;
-
     public function __construct(
-        LearnerService $service,
-        RegistrationService $regSvc,
-        LearnerBookingRequestService $lrnBookingReqSvc)
+        private LearnerService $learnerService,
+        private RegistrationService $registrationService,
+        private LearnerBookingRequestService $lrnBookingReqSvc,
+        private TutorServiceForLearner $tutorSvcForLearner
+    )
     {
-        $this->learnerService       = $service;
-        $this->registrationService  = $regSvc;
-        $this->lrnBookingReqSvc     = $lrnBookingReqSvc;
+        // Constructor property promotion
     }
 
     //===================================================================//
@@ -76,7 +76,6 @@ class LearnerController extends Controller
         $firstname = $register['createdUser']->{UserFields::Firstname};
 
         session()->flash('registration_message', "Welcome to the community, $firstname!");
-        error_log('must have flashed!');
         // Show the homepage
         return redirect()->to('/');
     }
@@ -91,6 +90,16 @@ class LearnerController extends Controller
     public function index()
     {
         return view('learner.index');
+    }
+
+    public function findTutors()
+    {
+        return $this->tutorSvcForLearner->listAllTutors(Auth::user()->id);
+    }
+
+    public function filterTutors(Request $request)
+    {
+        return $this->tutorSvcForLearner->listAllTutorsWithFilter($request, Auth::user()->id);
     }
 
     /**

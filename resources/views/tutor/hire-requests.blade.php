@@ -29,7 +29,7 @@
                             <div class="text-truncate text-center">{{ $obj['name']}}</div>
                         </div>
                         <button type="button" data-learner-id="{{ $obj['user_id'] }}" class="btn btn-sm btn-outline-secondary btn-details-popover w-100 text-12">See Profile</button>
-                        <div class="d-flex align-items-center justify-content-around pt-2 gap-2">
+                        <div class="d-flex w-100 align-items-center pt-2 gap-2">
                             <button type="button" data-learner-id="{{ $obj['user_id'] }}" class="btn btn-sm btn-outline-secondary flex-fill text-12 btn-decline-request">Decline</button>
                             <button type="button" data-learner-id="{{ $obj['user_id'] }}" class="btn btn-sm btn-primary flex-fill text-12 btn-accept-request action-button">Accept</button>
                         </div>
@@ -37,6 +37,7 @@
                 </div>
             @endforeach
         </div>
+        {{ $hireRequests->links() }}
         @endif
     </section>
     <form action="{{ route('tutor.accept-hire-request') }}" method="post" class="d-none" id="frm-accept-request">
@@ -65,20 +66,20 @@
         .hire-req-item-card
         {
             width: fit-content;
-            min-width: 180px;
-            max-width: 180px;
+            min-width: 220px;
+            max-width: 220px;
             font-family: 'Poppins';
         }
         .hire-req-item-card .card-body {
             overflow: hidden;
         }
         .hire-req-item-card .photo-container {
-            width: 128px;
-            height: 128px;
+            width: 170px;
+            height: 170px;
         }
         .hire-req-item-card .learner-photo {
-            width: 128px;
-            height: 128px;
+            width: 170px;
+            height: 170px;
             border-radius: 3px;
             margin-left: 0;
             margin-right: 0;

@@ -90,11 +90,12 @@ Route::controller(LearnerController::class)->group(function() use ($RoleMw)
     // unless their profile has been verified, thus "ensureNotPending" .
     Route::middleware(['auth', 'ensureNotPending', $RoleMw . User::ROLE_LEARNER])->group(function()
     {
-        Route::get('/learner',                    'index')->name('learner.index');
-        Route::get('/learner/my-tutors',          'myTutors')->name('mytutors');
-        Route::post('/learner/hire-tutor',        'hireTutor')->name('learner.hire-tutor');
-        Route::post('/learner/cancel-hire-tutor', 'cancelHireTutor')->name('learner.cancel-hire-tutor');
-
+        Route::get('/learner',                                  'index')->name('learner.index');
+        Route::get('/signlingua/learner/find-tutors',           'findTutors')->name('learner.find-tutors');
+        Route::get('/signlingua/learner/find-tutors/filter',    'filterTutors')->name('learner.find-filtered-tutors');
+        Route::get('/signlingua/learner/my-tutors',             'myTutors')->name('mytutors');
+        Route::post('/learner/hire-tutor',                      'hireTutor')->name('learner.hire-tutor');
+        Route::post('/learner/cancel-hire-tutor',               'cancelHireTutor')->name('learner.cancel-hire-tutor');
         Route::get('/sign-lingua/become-tutor',                 'becomeTutor_index')->name('become-tutor');
         Route::get('/sign-lingua/become-tutor/forms',           'becomeTutor_create')->name('become-tutor.forms');
         Route::post('/sign-lingua/become-tutor/forms/submit',   'becomeTutor_store')->name('become-tutor.forms.submit');
@@ -115,8 +116,8 @@ Route::controller(TutorController::class)->group(function() use ($RoleMw)
 {
     Route::middleware(['auth', 'ensureNotPending', $RoleMw . User::ROLE_LEARNER])->group(function()
     {
-        Route::get('/learner/find-tutors', 'listTutors')->name('tutors.list');
-        Route::get('/learner/tutor-details/{id}', 'show')->name('tutor.show');
+
+        Route::get('/signlingua/learner/tutor-details/{id}', 'show')->name('tutor.show');
         Route::post('/learner/leave-tutor', 'endContract')->name('tutor.end');
     });
 

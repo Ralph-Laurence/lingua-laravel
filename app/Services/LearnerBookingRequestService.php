@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\HireTutorRequestMail;
 use App\Models\BookingRequest;
 use App\Models\FieldNames\BookingRequestFields;
 use App\Models\FieldNames\UserFields;
@@ -10,6 +11,7 @@ use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class LearnerBookingRequestService
 {
@@ -27,6 +29,17 @@ class LearnerBookingRequestService
             $friendRequest->sender()->associate($learner); // learner is the sender
             $friendRequest->receiver()->associate($tutor); // tutor is the reciever
             $friendRequest->save();
+
+            $learnerName = implode(' ', [$learner->{UserFields::Firstname}, $learner->{UserFields::Lastname}]);
+
+            // Disable AVAST Mail Shield "Outbound SMTP" before sending emails
+            $emailData = [
+                'name'      => $learnerName,
+                'action'    => route('tutor.hire-requests'),
+                'logo'      => public_path('assets/img/logo-brand-sm.png')
+            ];
+        
+            Mail::to($tutor->email)->send(new HireTutorRequestMail($emailData));
 
             return 200;
         }

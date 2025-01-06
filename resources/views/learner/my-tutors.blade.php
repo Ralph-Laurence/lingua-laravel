@@ -24,7 +24,7 @@
     <section class="mt-5 mb-3 px-4 text-center">
         <h3 class="m-0 darker-text fw-bold">No tutors yet</h3>
         <h6 class="text-14 mt-2 mb-3">You aren't connected to any tutors.</h6>
-        <a role="button" href="{{ route('tutors.list') }}#browse-tutors" class="btn btn-dark">
+        <a role="button" href="{{ route('learner.find-tutors') }}#browse-tutors" class="btn btn-dark">
             Browse Tutors<i class="fas fa-arrow-right ms-2"></i>
         </a>
     </section>
@@ -36,7 +36,7 @@
                 <h6 class="text-14 mt-2">Start learning with these tutors you've hired</h6>
             </div>
             <div class="col d-flex flex-row align-items-center justify-content-end gap-2">
-                <a role="button" href="{{ route('tutors.list') }}#browse-tutors" class="btn btn-outline-secondary">
+                <a role="button" href="{{ route('learner.find-tutors') }}#browse-tutors" class="btn btn-outline-secondary">
                     <i class="fas fa-plus me-2"></i>Add More
                 </a>
             </div>

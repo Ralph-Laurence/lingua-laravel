@@ -128,8 +128,6 @@ class TutorBookingRequestService
         }
         catch (Exception $ex) {
             DB::rollBack();
-            error_log("happens here");
-            error_log($ex->getMessage());
             return $error500;
         }
     }

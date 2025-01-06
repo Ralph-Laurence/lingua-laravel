@@ -47,59 +47,59 @@ class TutorController extends Controller
     //     $this->tutorBookingRequestService = $tutBookReqSvc;
     // }
 
-    public function listTutors()
-    {
-        $user = Auth::user();
+    // public function listTutors()
+    // {
+    //     $user = Auth::user();
 
-        // Get all list of tutors
-        // Perform the query with eager loading
-        $listOfTutors = User::where(UserFields::Role, User::ROLE_TUTOR)
-                    ->where(UserFields::IsVerified, 1)
-                    ->with('profile')
-                    ->get();
+    //     // Get all list of tutors
+    //     // Perform the query with eager loading
+    //     $listOfTutors = User::where(UserFields::Role, User::ROLE_TUTOR)
+    //                 ->where(UserFields::IsVerified, 1)
+    //                 ->with('profile')
+    //                 ->get();
 
-        // Store here the ids of tutors that were already hired
-        // Fetch the hired tutors' IDs as a single dimension indexed array
-        $hiredTutors = Booking::where(BookingFields::LearnerId, $user->id)
-                     ->pluck(BookingFields::TutorId)
-                     ->toArray();
+    //     // Store here the ids of tutors that were already hired
+    //     // Fetch the hired tutors' IDs as a single dimension indexed array
+    //     $hiredTutors = Booking::where(BookingFields::LearnerId, $user->id)
+    //                  ->pluck(BookingFields::TutorId)
+    //                  ->toArray();
 
-        $tutors = [];
+    //     $tutors = [];
 
-        foreach ($listOfTutors as $key => $obj)
-        {
-            $photo   = $obj->{UserFields::Photo};
-            $tutorId = $obj['id'];
-            $isHired = !empty($hiredTutors) && in_array($tutorId, $hiredTutors);
+    //     foreach ($listOfTutors as $key => $obj)
+    //     {
+    //         $photo   = $obj->{UserFields::Photo};
+    //         $tutorId = $obj['id'];
+    //         $isHired = !empty($hiredTutors) && in_array($tutorId, $hiredTutors);
 
-            $fluencyLevel = FluencyLevels::Tutor[$obj->profile->{ProfileFields::Fluency}];
+    //         $fluencyLevel = FluencyLevels::Tutor[$obj->profile->{ProfileFields::Fluency}];
 
-            if (empty($photo))
-                $photo = asset('assets/img/default_avatar.png');
+    //         if (empty($photo))
+    //             $photo = asset('assets/img/default_avatar.png');
 
-            else
-                $photo = Storage::url("public/uploads/profiles/$photo");
+    //         else
+    //             $photo = Storage::url("public/uploads/profiles/$photo");
 
-            $tutors[] = [
-                'hashedId'      => $this->hashids->encode($tutorId),
-                'profilePic'    => $photo,
-                'fullname'      => implode(' ', [$obj->{UserFields::Firstname}, $obj->{UserFields::Lastname}]),
-                'verified'      => $obj->{UserFields::IsVerified} == 1,
-                'bioNotes'      => $obj->profile->{ProfileFields::Bio} ?? "No Bio Available",
-                'isHired'       => $isHired,
+    //         $tutors[] = [
+    //             'hashedId'      => $this->hashids->encode($tutorId),
+    //             'profilePic'    => $photo,
+    //             'fullname'      => implode(' ', [$obj->{UserFields::Firstname}, $obj->{UserFields::Lastname}]),
+    //             'verified'      => $obj->{UserFields::IsVerified} == 1,
+    //             'bioNotes'      => $obj->profile->{ProfileFields::Bio} ?? "No Bio Available",
+    //             'isHired'       => $isHired,
 
-                'hiredIndicator'     => !$isHired ? 'd-none' : '',
-                'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],
-                'fluencyBadgeColor'  => $fluencyLevel['Badge Color'],
-                'fluencyLevelText'   => $fluencyLevel['Level'],
-            ];
-        }
+    //             'hiredIndicator'     => !$isHired ? 'd-none' : '',
+    //             'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],
+    //             'fluencyBadgeColor'  => $fluencyLevel['Badge Color'],
+    //             'fluencyLevelText'   => $fluencyLevel['Level'],
+    //         ];
+    //     }
 
-        return view('learner.list-tutors')
-               ->with('tutors', $tutors)
-               ->with('totalTutors', count($tutors))
-               ->with('hashids', $this->hashids);
-    }
+    //     return view('learner.list-tutors')
+    //            ->with('tutors', $tutors)
+    //            ->with('totalTutors', count($tutors))
+    //            ->with('hashids', $this->hashids);
+    // }
 
     //
     // A learner sends a hire request to the tutor ...
@@ -278,30 +278,32 @@ class TutorController extends Controller
     //                FOR LEARNERS
     //..............................................
     //
+    public function find_learners(Request $request)
+    {
+        $tutorId = Auth::user()->id;
+        return $this->learnerServiceForTutor->listAllLearners($request, $tutorId);
+    }
+
     public function myLearners(Request $request)
     {
         $tutorId = Auth::user()->id;
-        return $this->learnerServiceForTutor
-                    ->listAllLearnersForTutor($request, $tutorId);
+        return $this->learnerServiceForTutor->listMyLearners($request, $tutorId);
     }
 
     public function myLearners_show(Request $request)
     {
-        return $this->learnerServiceForTutor
-                    ->showLearnerDetailsForTutor($request);
+        return $this->learnerServiceForTutor->showLearnerDetails($request);
     }
 
     public function myLearners_filter(Request $request)
     {
         $filter = ['forTutor' => Auth::user()->id];
-
-        return $this->learnerServiceForTutor
-                    ->filterLearnersForTutor($request, $filter);
+        return $this->learnerServiceForTutor->filterMyLearners($request, $filter);
     }
 
     public function myLearners_clear_filter(Request $request)
     {
-        return $this->learnerServiceForTutor->clearFiltersForTutor($request);
+        return $this->learnerServiceForTutor->clearMyLearnerFilters($request);
     }
 
     public function hire_requests()
@@ -319,11 +321,6 @@ class TutorController extends Controller
     {
         return $this->tutorBookingRequestService
                     ->declineHireRequest($request, Auth::user()->id);
-    }
-
-    public function find_learners()
-    {
-
     }
 
     //===================================================================//

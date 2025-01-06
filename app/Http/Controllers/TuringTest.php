@@ -73,8 +73,6 @@ class TuringTest extends Controller
             ], 422);
         }
 
-        error_log($decodedCaptchaText);
-
         // Check if the user input matches the decoded captcha text
         if ($inputs['userInput'] === $decodedCaptchaText)
         {
