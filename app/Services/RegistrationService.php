@@ -231,7 +231,7 @@ class RegistrationService
                 $rules = array_merge($rules, [
                     "certification-year-from{$suffix}"   => "required|numeric|min:1980|max:$currentYear",
                     "certification-title{$suffix}"       => 'required|string|max:255',
-                    "certification-description{$suffix}" => 'required|string|max:255',
+                    "certification-description{$suffix}" => 'required|string',
                     "certification-file-upload{$suffix}" => [
                         'required',
                         'file',
