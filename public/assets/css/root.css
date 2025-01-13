@@ -96,6 +96,15 @@ body {
     justify-content: start;
 }
 
+.cursor-pointer { cursor: pointer; }
+.rounded-half-rem { border-radius: 0.5rem; }
+.rounded-1rem { border-radius: 1rem; }
+.rounded-2rem { border-radius: 2rem; }
+.z-idx-1 { z-index: 1;}
+.font-semi-bold {
+    font-family: 'Poppins-SemiBold';
+}
+
 /*============= OTHER CLASSES ============*/
 
 footer {
@@ -103,6 +112,39 @@ footer {
     background-color: #110D19;
     /* background-color: #0D1226; */
     color: white;
+}
+
+.w-20px {
+    width: 20px;
+}
+
+.darker-text {
+    color: #121117;
+}
+
+.sign-lingua-red-text {
+    color: #FE233A;
+}
+
+.sign-lingua-red-button {
+    background: #FE233A;
+    color: white;
+}
+.sign-lingua-red-button:hover {
+    /* background: #F23B2F; */
+    background: #EF4444;
+}
+
+.sign-lingua-purple-button {
+    background-color: #5A4095 !important;
+    border: 1px solid #493477 !important;
+}
+.sign-lingua-purple-button:hover {
+    background-color: #624CC2 !important;
+    border: 1px solid #493477 !important;
+}
+.sign-lingua-purple-button:disabled {
+    opacity: 0.75;
 }
 
 .grad-btn-danger

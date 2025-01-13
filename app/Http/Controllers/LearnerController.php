@@ -2,19 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Utils\Constants;
+use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
-use App\Mail\HireTutorRequest;
-use App\Mail\HireTutorRequestMail;
+use App\Models\Booking;
+use App\Models\FieldNames\BookingFields;
+use App\Models\FieldNames\ProfileFields;
+use App\Models\FieldNames\RatingsAndReviewFields;
 use App\Models\FieldNames\UserFields;
-use App\Models\User;
+use App\Models\RatingsAndReview;
 use App\Services\LearnerBookingRequestService;
 use App\Services\LearnerService;
+use App\Services\LearnerSvc;
 use App\Services\RegistrationService;
 use App\Services\TutorServiceForLearner;
+use App\Services\TutorSvc;
+use Exception;
 use Hashids\Hashids;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 class LearnerController extends Controller
 {
@@ -22,10 +29,21 @@ class LearnerController extends Controller
         private LearnerService $learnerService,
         private RegistrationService $registrationService,
         private LearnerBookingRequestService $lrnBookingReqSvc,
-        private TutorServiceForLearner $tutorSvcForLearner
+        private TutorServiceForLearner $tutorSvcForLearner,
+        private LearnerSvc $learnerSvc,
+        private TutorSvc $tutorSvc
     )
     {
         // Constructor property promotion
+    }
+
+    public function fetchLearnerDetails(Request $request)
+    {
+        $id = $this->learnerSvc->toRawId(
+            $request->input('learner_id', '')
+        );
+
+        return $this->learnerSvc->fetchLearnerDetails($id);
     }
 
     //===================================================================//
@@ -53,9 +71,6 @@ class LearnerController extends Controller
         // If the validation fails... we go back
         if ($register instanceof \Illuminate\Http\RedirectResponse)
             return $register;
-
-        // Log the user in after registration
-        // auth()->login($register['createdUser']);
 
         if ($register['status'] == 500)
         {
@@ -87,19 +102,66 @@ class LearnerController extends Controller
     //            eg Controllers prefixed with "becomeTutor_*"
     //===================================================================//
 
-    public function index()
+    //
+    //..............................................
+    //           FOR VIEWING THE TUTORS
+    //..............................................
+    //
+    public function find_tutors(Request $request)
     {
-        return view('learner.index');
+        $availableFilters = [
+            'search'  => '',
+            'fluency' => -1,
+            'exceptConnected' => Auth::user()->id
+            // Add other filters here with default values
+        ];
+
+        $options = $this->tutorSvc->createRequestFilterRules($request, $availableFilters);
+
+        $minEntries = $request->input('min-entries');
+
+        if (in_array($minEntries, Constants::PageEntries))
+        {
+            $options['minEntries'] = $minEntries;
+            session()->flash('minEntries', $minEntries);
+        }
+
+        $options['extraFields'] = [ProfileFields::Bio];
+        $options['includeRatings'] = true;
+        $options['includeDateJoined'] = true;
+
+        $tutors = $this->tutorSvc->getTutorsListForLearner($options);
+        $fluencyFilter = FluencyLevels::ToSelectOptions(FluencyLevels::SELECT_OPTIONS_LEARNER);
+
+        // Determine if any filters are applied
+        $filtersApplied = $this->tutorSvc->areFiltersApplied($options, $availableFilters);
+
+        session()->flash('search', $options['search']);
+        session()->flash('fluency', $options['fluency']);
+        // ...Flash other filters as needed
+
+        $entriesOptions = Constants::PageEntries;
+
+        $totalTutors = $tutors->count();
+
+        return view('learner.find-tutors', compact(
+            'tutors',
+            'fluencyFilter',
+            'filtersApplied',
+            'entriesOptions',
+            'totalTutors'
+        ));
     }
 
-    public function findTutors()
-    {
-        return $this->tutorSvcForLearner->listAllTutors(Auth::user()->id);
-    }
-
+    // OBSOLETE: Make a new function from tutorSvc class instead
     public function filterTutors(Request $request)
     {
         return $this->tutorSvcForLearner->listAllTutorsWithFilter($request, Auth::user()->id);
+    }
+
+    public function clearFilterTutors()
+    {
+        return redirect()->route('learner.find-tutors');
     }
 
     /**
@@ -254,6 +316,82 @@ class LearnerController extends Controller
         session()->flash('booking_request_canceled', true);
 
         return redirect(route('tutor.show', $hashedId));
+    }
+
+    /**
+     * When learner makes a rating and review to a tutor
+     */
+    public function storeTutorReview(Request $request)
+    {
+        $rules = [
+            'tutorId'   => 'required|string',
+            'rating'    => 'required|integer|max:5|min:1',
+            'review'    => 'nullable|string|max:250'
+        ];
+
+        $messages = [
+            'tutorId'         => 'Tutor does not exist.',
+            'rating.required' => 'Please select a rating from the stars.',
+            'rating.integer'  => 'The rating must be at least 1 star and may not be greater than 5 stars.',
+            'rating.min'      => 'The rating must be at least 1 star.',
+            'rating.max'      => 'The rating may not be greater than 5 stars.',
+            'review.string'   => 'The review is invalid.',
+            'review.max'      => 'The review may not be greater than 250 characters.',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails())
+        {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $inputs     = $validator->validated();
+        $tutorId    = TutorSvc::toRawId($inputs['tutorId']);
+        $learnerId  = Auth::user()->id;
+
+        $recordMatch = RatingsAndReview::where(RatingsAndReviewFields::LearnerId, $learnerId)
+                ->where(RatingsAndReviewFields::TutorId, $tutorId);
+
+        try
+        {
+            $upsert = [
+                RatingsAndReviewFields::LearnerId => $learnerId,
+                RatingsAndReviewFields::TutorId   => $tutorId,
+                RatingsAndReviewFields::Rating    => $inputs['rating'],
+                RatingsAndReviewFields::Review    => $inputs['review'] ?? null,
+            ];
+
+            $successMessage = 'Your review has been published!';
+
+            // Update the existing review
+            if ($recordMatch->exists())
+            {
+                $recordMatch->update($upsert);
+                $successMessage = 'Your review has been updated!';
+            }
+
+            // Add new review
+            else
+                RatingsAndReview::create($upsert);
+
+            session()->flash('review_msg', $successMessage);
+
+            return redirect()->route('tutor.show', $inputs['tutorId']);
+        }
+        catch (Exception $ex)
+        {
+            session()->flash('review_msg', "We're unable to publish your review because of a technical error. Please try again later.");
+
+            return redirect()->back();
+        }
+
+        return view('test.test', compact('inputs'));
+    }
+
+    public function deleteTutorReview(Request $request)
+    {
+        return $this->learnerSvc->deleteTutorReview($request->input('tutor_id'));
     }
 }
 

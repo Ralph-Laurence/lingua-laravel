@@ -18,9 +18,9 @@ class LearnerServiceForTutor extends LearnerService
 
         $filter = $filterLearners['filterOptions'];
         $inputs = $filterLearners['filterInputs'];
-            
+
         $request->session()->put('learner-filter-inputs-for-tutor', $inputs);
-        $request->session()->put('learner-filter-for-tutor', $filter);
+        $request->session()->put('mylearner-filter-for-tutor', $filter);
 
         return redirect()->route('mylearners');
     }
@@ -28,7 +28,20 @@ class LearnerServiceForTutor extends LearnerService
     public function clearMyLearnerFilters(Request $request)
     {
         // Forget multiple session variables in one line
-        $request->session()->forget(['learner-filter-for-tutor', 'learner-filter-inputs-for-tutor']);
+        $request->session()->forget(['mylearner-filter-for-tutor', 'learner-filter-inputs-for-tutor']);
+
+        return redirect()->route('mylearners');
+    }
+
+    public function filterLearnersList(Request $request)
+    {
+        $filterLearners = $this->filterLearners($request);
+
+        $filter = $filterLearners['filterOptions'];
+        $inputs = $filterLearners['filterInputs'];
+
+        $request->session()->put('learner-filter-inputs-for-tutor', $inputs);
+        $request->session()->put('mylearner-filter-for-tutor', $filter);
 
         return redirect()->route('mylearners');
     }
@@ -65,9 +78,9 @@ class LearnerServiceForTutor extends LearnerService
         $result = null;
         $filter = ['forTutor' => $tutorId];
 
-        if ($request->session()->has('learner-filter-for-tutor'))
+        if ($request->session()->has('mylearner-filter-for-tutor'))
         {
-            $dataSetFilters = $request->session()->get('learner-filter-for-tutor');
+            $dataSetFilters = $request->session()->get('mylearner-filter-for-tutor');
             $filter = array_merge($filter, $dataSetFilters);
         }
 

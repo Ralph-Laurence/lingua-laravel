@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Models\FieldNames\BookingFields;
 use App\Models\FieldNames\BookingRequestFields;
 use App\Models\FieldNames\ProfileFields;
+use App\Models\FieldNames\RatingsAndReviewFields;
 use App\Models\FieldNames\UserFields;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -137,6 +138,23 @@ class User extends Authenticatable
         return $this->hasOne(Profile::class, ProfileFields::UserId);
     }
 
+    // Ratings & Reviews Relationships
+
+    // A learner (user) gives a tutor (also user) a rating score
+    public function givenRatings() {
+        return $this->hasMany(RatingsAndReview::class, RatingsAndReviewFields::LearnerId);
+    }
+
+    // The tutor (user) recieves the ratings given by learner (also a user)
+    public function receivedRatings() {
+        return $this->hasMany(RatingsAndReview::class, RatingsAndReviewFields::TutorId);
+    }
+
+    //
+    //---------------------------------------------------
+    //                  Helper Functions
+    //---------------------------------------------------
+    //
     // Other model methods and properties
 
     /* Get the short abbreviated name */
@@ -148,12 +166,19 @@ class User extends Authenticatable
         return "{$firstName} {$lastNameInitial}";
     }
 
+    // Add an 's or not. This is depending on the name's last letter.
+    public static function toPossessiveName($name)
+    {
+        return $name . (substr($name, -1) === 's' ? "'" : "'s");
+    }
+
     /**
      * Get the url of user's photo. Returns the default if photo doesn't exist.
      */
     public static function getPhotoUrl($photo)
     {
-        if (!empty($photo))
+        //if (!empty($photo))
+        if (!empty($photo) && Storage::exists("public/uploads/profiles/$photo"))
         {
             return asset(Storage::url("public/uploads/profiles/$photo"));
         }

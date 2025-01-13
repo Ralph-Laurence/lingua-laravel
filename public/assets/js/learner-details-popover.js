@@ -16,10 +16,25 @@ $(document).ready(function()
     {
         if (activePopover &&
             !$(e.target).closest('.popover').length &&
-            !$(e.target).closest('.btn-details-popover').length) {
+            !$(e.target).closest('.btn-learner-details-popover').length) {
             activePopover.hide();
         }
-    });
+    })
+    .on('click', '.btn-learner-details-popover', function(event)
+    {
+        // Just for double safety... When there is an open/active popover, we must
+        // force the user to close it first before we can open another popover
+        if (activePopover)
+            return;
+
+        var eventSender = event.currentTarget;
+        var learnerId = $(event.currentTarget).data('learner-id');
+
+        fetchLearnerDetails(eventSender, learnerId, function(res)
+        {
+            renderLearnerDetails(res.sender, res.data);
+        });
+    });;
 });
 
 //
@@ -84,6 +99,59 @@ async function handleShowPopOver(sender, content)
     popoverElement.addEventListener('hidden.bs.popover', hiddenEventHandler);
 }
 //
+// this function retrieves the data from server via asynchronous GET request
+//
+async function fetchLearnerDetails(eventSender, learnerId, success)
+{
+    waitingDialog.show("Loading learner details...", {
+        headerSize: 6,
+        headerText: "Hold on, this shouldn't take long...",
+        dialogSize: 'sm',
+        contentClass: 'text-13'
+    });
+
+    try
+    {
+        const res = await $.ajax({
+            url: $('#fetch-learner-url').val(),
+            method: 'get',
+            data: {
+                "learner_id": learnerId
+            }
+        });
+
+        await sleep(1000);
+        waitingDialog.hide();
+        await sleep(300);
+
+        if (res)
+        {
+            let output = {
+                'sender': eventSender,
+                'data': res
+            };
+
+            if (typeof success === 'function')
+                success(output);
+        }
+        else
+            MsgBox.showError("Aww, this shouldn't happen. Please try again.", 'Failure');
+    }
+    catch (jqXHR)
+    {
+        waitingDialog.hide();
+        await sleep(1000);
+
+        // Check if responseJSON exists to get the message
+        let message = 'Unknown error occurred';
+
+        if (jqXHR.responseJSON && jqXHR.responseJSON.message)
+            message = jqXHR.responseJSON.message;
+
+        MsgBox.showError(message, 'Fatal Error');
+    }
+}
+//
 // this function processes the data retrieved from the server into human-readable form.
 // We clone the original template then modify it.
 //
@@ -92,7 +160,7 @@ function renderLearnerDetails(sender, data)
     var template = $('#popover-template').clone()[0];
 
     $(template).find('.learner-details-photo').attr('src', data.photo);
-    $(template).find('.learner-details-name').text(data.fullname);
+    $(template).find('.learner-details-name').text(data.name);
     $(template).find('.learner-details-email').text(data.email);
     $(template).find('.learner-details-contact').text(data.contact);
     $(template).find('.learner-details-address').text(data.address);

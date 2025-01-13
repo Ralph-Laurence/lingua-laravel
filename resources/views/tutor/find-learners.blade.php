@@ -3,7 +3,7 @@
 
 @push('dialogs')
     @include('partials.messagebox')
-    @include('partials.learner-popover')
+    @include('partials.learner-details-popover')
 @endpush
 
 @section('content')
@@ -17,10 +17,13 @@
             <h6 class="text-13 fw-bold">
                 <i class="fas fa-filter me-2"></i>Filter Learners
             </h6>
-            <form action="{{ route('tutor.learners-filter') }}" method="post">
-                @csrf
+            <form action="{{ route('tutor.find-learners') }}" method="get">
                 <div class="mb-3">
-                  <input type="text" class="form-control text-13" id="search-keyword" maxlength="64" name="search-keyword" placeholder="Search Learner" value="{{ ($learnerFilterInputs['search-keyword'] ?? '') }}">
+                <input @if(session('search'))
+                          value="{{ session('search') }}"
+                       @endif
+                       type="text" class="form-control text-13" maxlength="20"
+                       name="search" placeholder="Search Learner">
                 </div>
                 <h6 class="text-13 text-secondary">What to include:</h6>
                 <div class="row mb-3">
@@ -28,13 +31,13 @@
                         <div class="h-100 flex-start">Fluency</div>
                     </div>
                     <div class="col text-13">
-                        <select class="form-select p-1 text-13" name="select-fluency" id="select-fluency">
+                        <select class="form-select p-1 text-13" name="fluency">
                             @php
                                 $fluencyFilter = ['-1' => 'All'] + $fluencyFilter;
                             @endphp
                             @foreach ($fluencyFilter as $k => $v)
                                 @php
-                                    $isSelected = ($learnerFilterInputs['select-fluency'] ?? -1) == $k  ? 'selected' : '';
+                                    $isSelected = (session('fluency') ?? -1) == $k  ? 'selected' : '';
                                 @endphp
                                 <option class="text-14" {{ $isSelected }} value="{{ $k }}">{{ $v }}</option>
                             @endforeach
@@ -46,33 +49,42 @@
                         <div class="h-100 flex-start">Entries</div>
                     </div>
                     <div class="col text-13">
-                        <select class="form-select p-1 text-13" name="select-entries" id="select-entries">
-                            <option class="text-14" {{ ($learnerFilterInputs['select-entries'] ?? null) == 10  ? 'selected' : '' }} value="10">10 Per Page</option>
-                            <option class="text-14" {{ ($learnerFilterInputs['select-entries'] ?? null) == 25  ? 'selected' : '' }} value="25">25 Per Page</option>
-                            <option class="text-14" {{ ($learnerFilterInputs['select-entries'] ?? null) == 50  ? 'selected' : '' }} value="50">50 Per Page</option>
-                            <option class="text-14" {{ ($learnerFilterInputs['select-entries'] ?? null) == 100 ? 'selected' : '' }} value="100">100 Per Page</option>
+                        <select class="form-select p-1 text-13" name="min-entries">
+                            @foreach ($entriesOptions as $opt)
+                                @php
+                                    $isSelected = (session('minEntries') ?? -1) == $opt  ? 'selected' : '';
+                                @endphp
+                                <option class="text-14" {{ $isSelected }} value="{{ $opt }}">{{ $opt }} Per Page</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
                 <button class="btn btn-sm btn-primary w-100 action-button">Find Learners</button>
-                @if (isset($hasFilter))
-                    <a role="button" href="{{ route('tutor.learners-clear-filter') }}"
+                @if ($filtersApplied)
+                    <a role="button" href="{{ route('tutor.find-learners.clear') }}"
                       class="btn btn-sm btn-outline-secondary w-100 mt-2 btn-clear-results">Clear Filters</a>
                 @endif
             </form>
         </div>
     </aside>
     <section class="workspace-workarea">
-        @if (isset($hasFilter))
+
+        <div class="alert alert-secondary py-2 px-3 text-12 mb-3" style="margin-top: 0.4375rem;">
+            <i class="fas fa-info-circle me-1"></i>
+            Learners who are already connected to you will not appear in this list.
+        </div>
+
+        @if ($filtersApplied)
         <div id="breadcrumb">
             <a><i class="fas fa-filter me-1"></i>Filter</a>
-            <a href="#">Fluency: {{ $fluencyFilter[$learnerFilterInputs['select-fluency']] }}</a>
-            <a href="#">Entries: {{ $learnerFilterInputs['select-entries'] }} per page</a>
-            <a href="#">Keyword: {{ $learnerFilterInputs['search-keyword'] ?? 'None' }}</a>
+            <a href="#">Fluency: {{ $fluencyFilter[session('fluency')] }}</a>
+            <a href="#">Entries: {{ session('minEntries') }} per page</a>
+            <a href="#">Keyword: {{ session('search') ?? 'None' }}</a>
             {{-- Product --}}
         </div>
         @endif
-        <div class="workarea-table-body mb-3 d-flex flex-wrap gap-3" style="padding-top: 0.4375rem;">
+
+        <div class="workarea-table-body mb-3 d-flex flex-wrap gap-3">
             @forelse ($learners as $key => $obj)
             <div class="card shadow-sm find-learner-item-card">
                 <div class="card-body p-4 d-flex flex-column align-items-center">
@@ -82,8 +94,8 @@
                     <div class="learner-name w-100 mb-1">
                         <div class="text-truncate text-center">{{ $obj['name']}}</div>
                     </div>
-                    <button type="button" data-learner-id="{{ $obj['user_id'] }}" class="btn btn-sm btn-outline-secondary btn-details-popover w-100 text-12 mb-2">See Profile</button>
-                    <button type="button" data-learner-id="{{ $obj['user_id'] }}" class="btn btn-sm btn-secondary w-100 text-12 btn-add-learner">
+                    <button type="button" data-learner-id="{{ $obj['learnerId'] }}" class="btn btn-sm btn-outline-secondary btn-learner-details-popover w-100 text-12 mb-2">See Profile</button>
+                    <button type="button" data-learner-id="{{ $obj['learnerId'] }}" class="btn btn-sm btn-secondary w-100 text-12 btn-add-learner">
                         <i class="fas fa-plus me-1"></i>
                         Add Learner
                     </button>
@@ -100,10 +112,10 @@
                     </div>
                 @endif
             @endforelse
-
+        </div>
+        <div class="mt-5 pagination-wrapper">
             {{ $learners->links() }}
         </div>
-
     </section>
 </main>
 @endsection
@@ -115,8 +127,6 @@
 @push('scripts')
     <script src="{{ asset('assets/js/utils.js') }}"></script>
     <script src="{{ asset('assets/lib/waitingfor/bootstrap-waitingfor.min.js') }}"></script>
-    <script src="{{ asset('assets/js/shared/fetch-learner-details.js') }}"></script>
-    <script src="{{ asset('assets/js/tutor-my-learners.js') }}"></script>
 @endpush
 @push('styles')
     <style>

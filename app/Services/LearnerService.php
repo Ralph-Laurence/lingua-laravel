@@ -170,8 +170,6 @@ class LearnerService
             });
         }
 
-        error_log($learners->toSql());
-
         // Get the results
         $learners = $learners->paginate($options['min_entries']);
 
@@ -186,6 +184,7 @@ class LearnerService
             $fluency = $obj->{ProfileFields::Fluency};
             $obj['fluencyStr']   = $fluencyFilter[$fluency];
             $obj['fluencyBadge'] = FluencyLevels::Learner[$fluency]['Badge Color'];
+            $obj['fluencyDesc'] = FluencyLevels::Learner[$fluency]['Description'];
 
             $photo = $obj->{UserFields::Photo};
             $obj['photo'] = $defaultPic;

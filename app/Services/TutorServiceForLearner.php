@@ -4,23 +4,12 @@ namespace App\Services;
 
 use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
-use App\Mail\RegistrationApprovedMail;
-use App\Mail\RegistrationDeclinedMail;
 use App\Models\Booking;
-use App\Models\BookingRequest;
 use App\Models\FieldNames\BookingFields;
-use App\Models\FieldNames\BookingRequestFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
-use App\Models\PendingRegistration;
-use App\Models\Profile;
 use App\Models\User;
-use Exception;
 use Hashids\Hashids;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -33,61 +22,6 @@ class TutorServiceForLearner
         $this->tutorHashids = new Hashids(HashSalts::Tutors, 10);
     }
 
-    // public function listAllTutors($learnerId, $options = [])
-    // {
-    //     // Store here the ids of tutors that were already hired
-    //     // Fetch the hired tutors' IDs as a single dimension indexed array
-    //     $hiredTutors = Booking::where(BookingFields::LearnerId, $learnerId) //$user->id)
-    //                  ->pluck(BookingFields::TutorId)
-    //                  ->toArray();
-
-    //     $totalTutors = User::where(UserFields::Role, User::ROLE_TUTOR)
-    //                 ->where(UserFields::IsVerified, 1)
-    //                 ->count();
-
-    //     // Get all list of tutors
-    //     // Perform the query with eager loading
-    //     $tutors = User::where(UserFields::Role, User::ROLE_TUTOR)
-    //         ->where(UserFields::IsVerified, 1)
-    //         ->with('profile');
-
-    //     if (array_key_exists('fluency', $options) && $options['fluency'] != -1)
-    //     {
-    //         $tutors = $tutors->where(ProfileFields::Fluency, $options['fluency']);
-    //     }
-
-    //     $tutors = $tutors->paginate(5)
-    //         ->through(function($request) use($hiredTutors)
-    //         {
-    //             $tutorId = $request->id;
-    //             $isHired = !empty($hiredTutors) && in_array($tutorId, $hiredTutors);
-
-    //             $fluencyLevel = FluencyLevels::Tutor[$request->profile->{ProfileFields::Fluency}];
-
-    //             // Transform the data to the desired structure..
-    //             // Meaning, we only get those we need
-
-    //             return [
-    //                 'hashedId'      => $this->tutorHashids->encode($tutorId),
-    //                 'profilePic'    => User::getPhotoUrl($request->{UserFields::Photo}),
-    //                 'fullname'      => implode(' ', [$request->{UserFields::Firstname}, $request->{UserFields::Lastname}]),
-    //                 'verified'      => $request->{UserFields::IsVerified} == 1,
-    //                 'bioNotes'      => $request->profile->{ProfileFields::Bio} ?? "No Bio Available",
-    //                 'isHired'       => $isHired,
-
-    //                 'hiredIndicator'     => !$isHired ? 'd-none' : '',
-    //                 'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],
-    //                 'fluencyBadgeColor'  => $fluencyLevel['Badge Color'],
-    //                 'fluencyLevelText'   => $fluencyLevel['Level'],
-    //             ];
-    //         });
-
-    //     $fluencyFilters = FluencyLevels::ToSelectOptions(FluencyLevels::SELECT_OPTIONS_TUTOR);
-
-    //     return view('learner.list-tutors', compact('tutors', 'totalTutors', 'fluencyFilters'))
-    //            ->with('hashids', $this->tutorHashids);
-    // }
-
     public function listAllTutors($learnerId)
     {
         $data           = $this->getTutors($learnerId);
@@ -96,7 +30,7 @@ class TutorServiceForLearner
         $fluencyFilters = $data['fluencyFilters'];
         $hashids        = $data['hashids'];
 
-        return view('learner.list-tutors', compact('tutors', 'totalTutors', 'fluencyFilters', 'hashids'));
+        return view('learner.find-tutors', compact('tutors', 'totalTutors', 'fluencyFilters', 'hashids'));
     }
 
     public function listAllTutorsWithFilter(Request $request, $learnerId)
@@ -124,7 +58,7 @@ class TutorServiceForLearner
         $fluencyFilters = $data['fluencyFilters'];
         $hashids        = $data['hashids'];
 
-        return view('learner.list-tutors', compact('tutors', 'totalTutors', 'fluencyFilters', 'hashids', 'inputs'));
+        return view('learner.find-tutors', compact('tutors', 'totalTutors', 'fluencyFilters', 'hashids', 'inputs'));
     }
 
     private function getTutors($learnerId, $options = [])

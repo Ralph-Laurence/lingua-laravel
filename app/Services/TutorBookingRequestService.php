@@ -111,7 +111,7 @@ class TutorBookingRequestService
                 $bookingReq->sender->{UserFields::Firstname},
                 $bookingReq->sender->{UserFields::Lastname}
             ]);
-            $learnerName = $this->toPossessiveName($learnerName);
+            $learnerName = User::toPossessiveName($learnerName);
 
             // Delete the request. We no longer need it.
             $bookingReq->deleteOrFail();
@@ -133,8 +133,8 @@ class TutorBookingRequestService
     }
 
     // Add an 's or not. This is depending on the name's last letter.
-    function toPossessiveName($name)
-    {
-        return $name . (substr($name, -1) === 's' ? "'" : "'s");
-    }
+    // function toPossessiveName($name)
+    // {
+    //     return $name . (substr($name, -1) === 's' ? "'" : "'s");
+    // }
 }

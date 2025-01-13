@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Utils\Constants;
 use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
+use App\Http\Utils\Helper;
 use App\Models\Booking;
 use App\Models\BookingRequest;
 use App\Models\FieldNames\BookingFields;
 use App\Models\FieldNames\BookingRequestFields;
 use App\Models\FieldNames\ProfileFields;
+use App\Models\FieldNames\RatingsAndReviewFields;
 use App\Models\FieldNames\UserFields;
+use App\Models\RatingsAndReview;
 use App\Models\User;
 use App\Services\LearnerServiceForTutor;
+use App\Services\LearnerSvc;
 use App\Services\RegistrationService;
 use App\Services\TutorBookingRequestService;
 use App\Services\TutorService;
@@ -32,113 +37,12 @@ class TutorController extends Controller
         private RegistrationService         $registrationService,
         private LearnerServiceForTutor      $learnerServiceForTutor,
         private TutorService                $tutorService,
-        private TutorBookingRequestService  $tutorBookingRequestService
+        private TutorBookingRequestService  $tutorBookingRequestService,
+        private LearnerSvc $learnerSvc
     )
     {
         $this->hashids = new Hashids(HashSalts::Tutors, 10);
     }
-    // Traditional:
-    // public function __construct(RegistrationService $regSvc, LearnerServiceForTutor $lrnSvc, TutorService $tutSvc, TutorBookingRequestService $tutBookReqSvc)
-    // {
-    //     $this->hashids = new Hashids(HashSalts::Tutors, 10);
-    //     $this->registrationService = $regSvc;
-    //     $this->learnerServiceForTutor = $lrnSvc;
-    //     $this->tutorService = $tutSvc;
-    //     $this->tutorBookingRequestService = $tutBookReqSvc;
-    // }
-
-    // public function listTutors()
-    // {
-    //     $user = Auth::user();
-
-    //     // Get all list of tutors
-    //     // Perform the query with eager loading
-    //     $listOfTutors = User::where(UserFields::Role, User::ROLE_TUTOR)
-    //                 ->where(UserFields::IsVerified, 1)
-    //                 ->with('profile')
-    //                 ->get();
-
-    //     // Store here the ids of tutors that were already hired
-    //     // Fetch the hired tutors' IDs as a single dimension indexed array
-    //     $hiredTutors = Booking::where(BookingFields::LearnerId, $user->id)
-    //                  ->pluck(BookingFields::TutorId)
-    //                  ->toArray();
-
-    //     $tutors = [];
-
-    //     foreach ($listOfTutors as $key => $obj)
-    //     {
-    //         $photo   = $obj->{UserFields::Photo};
-    //         $tutorId = $obj['id'];
-    //         $isHired = !empty($hiredTutors) && in_array($tutorId, $hiredTutors);
-
-    //         $fluencyLevel = FluencyLevels::Tutor[$obj->profile->{ProfileFields::Fluency}];
-
-    //         if (empty($photo))
-    //             $photo = asset('assets/img/default_avatar.png');
-
-    //         else
-    //             $photo = Storage::url("public/uploads/profiles/$photo");
-
-    //         $tutors[] = [
-    //             'hashedId'      => $this->hashids->encode($tutorId),
-    //             'profilePic'    => $photo,
-    //             'fullname'      => implode(' ', [$obj->{UserFields::Firstname}, $obj->{UserFields::Lastname}]),
-    //             'verified'      => $obj->{UserFields::IsVerified} == 1,
-    //             'bioNotes'      => $obj->profile->{ProfileFields::Bio} ?? "No Bio Available",
-    //             'isHired'       => $isHired,
-
-    //             'hiredIndicator'     => !$isHired ? 'd-none' : '',
-    //             'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],
-    //             'fluencyBadgeColor'  => $fluencyLevel['Badge Color'],
-    //             'fluencyLevelText'   => $fluencyLevel['Level'],
-    //         ];
-    //     }
-
-    //     return view('learner.list-tutors')
-    //            ->with('tutors', $tutors)
-    //            ->with('totalTutors', count($tutors))
-    //            ->with('hashids', $this->hashids);
-    // }
-
-    //
-    // A learner sends a hire request to the tutor ...
-    //
-    // public function hireTutor(Request $request)
-    // {
-    //     $hashedId = $request->input('tutor_id');
-    //     $error = response()->view('errors.500', [], 500);
-
-    //     if (empty($hashedId))
-    //         return $error;
-
-    //     $decodeTutorId = $this->hashids->decode($hashedId);
-
-    //     if (empty($decodeTutorId))
-    //         return $error;
-
-    //     $tutorId = $decodeTutorId[0];
-
-    //     try
-    //     {
-    //         $tutorExists = User::where('id', $tutorId)->exists();
-
-    //         if (!$tutorExists) {
-    //             return $error;
-    //         }
-
-    //         Booking::create([
-    //             BookingFields::LearnerId => Auth::user()->id,
-    //             BookingFields::TutorId   => $tutorId
-    //         ]);
-
-    //         return redirect(route('tutor.show', $hashedId));
-    //     }
-    //     catch (Exception $ex)
-    //     {
-    //         return $error;
-    //     }
-    // }
 
     public function endContract(Request $request)
     {
@@ -200,21 +104,96 @@ class TutorController extends Controller
             }
 
             // Fetch the tutor along with their profile
-            $tutorId      = $decodedId[0];
-            $tutor        = User::with('profile')->findOrFail($tutorId);
-            $fluencyLevel = FluencyLevels::Tutor[$tutor->profile->{ProfileFields::Fluency}];
+            $tutorId = $decodedId[0];
+            $learnerId = Auth::user()->id;
+            // $tutor   = User::with(['profile', 'receivedRatings' => function($query) {
+            //     $query->select(DB::raw('FORMAT(avg(' . RatingsAndReviewFields::Rating . '), 1) as averageRating'));
+            // }])->findOrFail($tutorId);
+            $userFields = Helper::prependFields('users.', [
+                'id',
+                'email',
+                UserFields::Firstname,
+                UserFields::Lastname,
+                UserFields::Address,
+                UserFields::Photo,
+                UserFields::IsVerified,
+                UserFields::Contact
+            ]);
+
+            $selectFields = $userFields + [
+                DB::raw('IFNULL(FORMAT(AVG(ratings_and_reviews.rating), 1), 0.0) as averageRating'),
+            ];
+
+            $tutor = User::select(array_merge($userFields, [
+                DB::raw('(SELECT IFNULL(FORMAT(AVG(' . RatingsAndReviewFields::Rating . '), 1), 0.0) FROM ratings_and_reviews WHERE ' . RatingsAndReviewFields::TutorId . ' = users.id) as averageRating'),
+                DB::raw('(SELECT COUNT(DISTINCT ' . BookingFields::LearnerId . ') FROM bookings WHERE ' . BookingFields::TutorId . ' = users.id) as totalLearners')
+            ]))
+            ->with([
+                'profile',
+                'receivedRatings' => function ($query) {
+                    $query->select([
+                        RatingsAndReviewFields::TutorId,
+                        RatingsAndReviewFields::LearnerId,
+                        RatingsAndReviewFields::Rating,
+                        RatingsAndReviewFields::Review
+                    ]);
+                },
+                'receivedRatings.learner' => function ($query) {
+                    $query->select(['id']); // Only retrieve learner ID
+                }
+            ])
+            ->where('users.id', $tutorId)
+            ->where(UserFields::Role, User::ROLE_TUTOR)
+            ->firstOrFail();
+
+            $fluencyLevel  = FluencyLevels::Tutor[$tutor->profile->{ProfileFields::Fluency}];
+
+            // Calculate total learners
+            $totalLearners = $tutor->totalLearners; //->bookingsAsTutor->count();
+
+            $learnerReview = RatingsAndReview::select([
+                RatingsAndReviewFields::Rating,
+                RatingsAndReviewFields::Review
+            ])
+            ->where(RatingsAndReviewFields::TutorId, $tutorId)
+            ->where(RatingsAndReviewFields::LearnerId, $learnerId)
+            ->first();
+
+            // Determine hire status
+            // $hireStatus = -1;
+
+            // if ($tutor->bookingRequestsReceived->isNotEmpty()) {
+            //     // Tutor hasn't accepted the hire request yet
+            //     $hireStatus = 2;
+            // }
+
+            // if ($hireStatus == -1 && Booking::where(BookingFields::TutorId, $tutorId)
+            //     ->where(BookingFields::LearnerId, Auth::user()->id)
+            //     ->exists())
+            // {
+            //     // Tutor is hired by learner ...
+            //     $hireStatus = 1;
+            // }
+
+            // if ($tutor->bookingsAsTutor->isNotEmpty()) {
+            //     // Tutor is hired by learner
+            //     $hireStatus = 1;
+            // } elseif ($tutor->bookingRequestsReceived->isNotEmpty()) {
+            //     // Tutor hasn't accepted the hire request yet
+            //     $hireStatus = 2;
+            // }
 
             $hireStatus = -1;
 
             if (Booking::where(BookingFields::TutorId, $tutorId)
-                ->where(BookingFields::LearnerId, Auth::user()->id)
+                ->where(BookingFields::LearnerId, $learnerId)
                 ->exists())
             {
                 // Tutor is hired by learner ...
                 $hireStatus = 1;
             }
             else if (BookingRequest::where(BookingRequestFields::ReceiverId, $tutorId)
-                ->where(BookingRequestFields::SenderId, Auth::user()->id)
+                ->where(BookingRequestFields::SenderId, $learnerId)
                 ->exists())
             {
                 // Tutor havent accepted the hire request yet
@@ -238,9 +217,11 @@ class TutorController extends Controller
                 }
             }
 
+            $firstname = $tutor->{UserFields::Firstname};
             $tutorDetails = [
                 'hashedId'           => $id,
-                'firstname'          => $tutor->{UserFields::Firstname},
+                'firstname'          => $firstname,
+                'possessiveName'     => User::toPossessiveName($firstname),
                 'fullname'           => implode(' ', [$tutor->{UserFields::Firstname}, $tutor->{UserFields::Lastname}]),
                 'email'              => $tutor->email,
                 'contact'            => $tutor->{UserFields::Contact},
@@ -257,10 +238,14 @@ class TutorController extends Controller
                 'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],
                 'fluencyBadgeColor'  => $fluencyLevel['Badge Color'],
                 'fluencyLevelText'   => $fluencyLevel['Level'],
+                'averageRating'      => $tutor->averageRating,
+                'ratingsAndReviews'  => $tutor->receivedRatings
             ];
 
+            $starRatings = Constants::StarRatings;
+
             // Return the view with the tutor data
-            return view('tutor.show', compact('tutorDetails'));
+            return view('tutor.show', compact('tutorDetails', 'totalLearners', 'starRatings', 'learnerReview'));
         }
         catch (ModelNotFoundException $e)
         {
@@ -269,43 +254,124 @@ class TutorController extends Controller
         }
         catch (Exception $e)
         {
+            error_log($e->getMessage());
             // Return custom 404 page
             return view('errors.500');
         }
     }
     //
     //..............................................
-    //                FOR LEARNERS
+    //           FOR VIEWING THE LEARNERS
     //..............................................
     //
     public function find_learners(Request $request)
     {
-        $tutorId = Auth::user()->id;
-        return $this->learnerServiceForTutor->listAllLearners($request, $tutorId);
+        $availableFilters = [
+            'search'  => '',
+            'fluency' => -1,
+            'exceptConnected' => Auth::user()->id
+            // Add other filters here with default values
+        ];
+
+        $options = $this->learnerSvc->createRequestFilterRules($request, $availableFilters);
+
+        $minEntries = $request->input('min-entries');
+
+        if (in_array($minEntries, Constants::PageEntries))
+        {
+            $options['minEntries'] = $minEntries;
+            session()->flash('minEntries', $minEntries);
+        }
+
+        $learners = $this->learnerSvc->getLearnersListForTutor($options);
+        $fluencyFilter = FluencyLevels::ToSelectOptions(FluencyLevels::SELECT_OPTIONS_LEARNER);
+
+        // Determine if any filters are applied
+        $filtersApplied = $this->learnerSvc->areFiltersApplied($options, $availableFilters);
+
+        session()->flash('search', $options['search']);
+        session()->flash('fluency', $options['fluency']);
+        // ...Flash other filters as needed
+
+        $entriesOptions = Constants::PageEntries;
+
+        return view('tutor.find-learners', compact('learners', 'fluencyFilter', 'filtersApplied', 'entriesOptions'));
     }
 
-    public function myLearners(Request $request)
+    public function find_learners_clear_filter()
     {
-        $tutorId = Auth::user()->id;
-        return $this->learnerServiceForTutor->listMyLearners($request, $tutorId);
+        session()->forget('fluency', 'search');
+        return redirect()->route('tutor.find-learners');
     }
 
-    public function myLearners_show(Request $request)
+    public function my_learners_clear_filter()
     {
-        return $this->learnerServiceForTutor->showLearnerDetails($request);
+        session()->forget('fluency', 'search');
+        return redirect()->route('tutor.my-learners');
     }
 
-    public function myLearners_filter(Request $request)
+    public function my_learners(Request $request)
     {
-        $filter = ['forTutor' => Auth::user()->id];
-        return $this->learnerServiceForTutor->filterMyLearners($request, $filter);
-    }
+        $availableFilters = [
+            'search'  => '',
+            'fluency' => -1,
+            'mode'    => 'myLearners',
+            'tutorId' => Auth::user()->id
+            // Add other filters here with default values
+        ];
 
-    public function myLearners_clear_filter(Request $request)
-    {
-        return $this->learnerServiceForTutor->clearMyLearnerFilters($request);
-    }
+        $options = $this->learnerSvc->createRequestFilterRules($request, $availableFilters);
 
+        $minEntries = $request->input('min-entries');
+
+        if (in_array($minEntries, Constants::PageEntries))
+        {
+            $options['minEntries'] = $minEntries;
+            session()->flash('minEntries', $minEntries);
+        }
+
+        $learners = $this->learnerSvc->getLearnersListForTutor($options);
+        $fluencyFilter = FluencyLevels::ToSelectOptions(FluencyLevels::SELECT_OPTIONS_LEARNER);
+
+        // Determine if any filters are applied
+        $filtersApplied = $this->learnerSvc->areFiltersApplied($options, $availableFilters);
+
+        session()->flash('search', $options['search']);
+        session()->flash('fluency', $options['fluency']);
+        // ...Flash other filters as needed
+
+        $entriesOptions = Constants::PageEntries;
+
+        return view('tutor.mylearners', compact('learners', 'fluencyFilter', 'filtersApplied', 'entriesOptions'));
+
+
+
+
+
+
+        // $options = [
+        //     'search'  => $request->input('search', ''),
+        //     'mode'    => 'myLearners',
+        //     'tutorId' => Auth::user()->id
+        // ];
+
+        // $minEntries = $request->input('min-entries');
+
+        // if (in_array($minEntries, Constants::PageEntries))
+        //     $options['minEntries'] = $minEntries;
+
+        // $learners       = $this->learnerSvc->getLearnersListForTutor($options);
+        // $fluencyFilter  = FluencyLevels::ToSelectOptions(FluencyLevels::SELECT_OPTIONS_LEARNER);
+
+        // return view('tutor.mylearners', compact('learners', 'fluencyFilter'));
+        // $tutorId = Auth::user()->id;
+        // return $this->learnerServiceForTutor->listMyLearners($request, $tutorId);
+    }
+    //
+    //..............................................
+    //      FOR MANAGING LEARNER HIRE REQUESTS
+    //..............................................
+    //
     public function hire_requests()
     {
         return $this->tutorService->getHireRequests(Auth::user()->id);

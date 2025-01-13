@@ -27,9 +27,7 @@
         <button type="button" class="btn btn-primary btn-sm w-100 btn-close-popover">OK, Close</button>
     </div>
 </section>
-<form class="d-none" id="frm-fetch-learner">
-    <input type="hidden" id="fetch-url" value="{{ route('tutor.learners-show') }}">
-</form>
+<input type="hidden" id="fetch-learner-url" value="{{ route('learner.fetch-details') }}">
 @push('styles')
     <style>
         .popover {
@@ -79,5 +77,5 @@
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('assets/js/learner-popover.js') }}"></script>
+    <script src="{{ asset('assets/js/learner-details-popover.js') }}"></script>
 @endpush

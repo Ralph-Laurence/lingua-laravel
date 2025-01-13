@@ -14,7 +14,7 @@
             </p>
         </div>
         <div class="col text-center">
-            <img src="{{ asset('assets/img/section-choose-tutors-2.png') }}" alt="tutor-session" height="320">
+            <img src="{{ asset('assets/img/section-choose-tutors-2.png') }}" alt="tutor-session" height="320" class="rounded-half-rem shadow">
         </div>
     </div>
 

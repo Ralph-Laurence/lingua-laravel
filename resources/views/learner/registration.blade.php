@@ -5,19 +5,19 @@
 @extends('shared.base-members')
 
 @section('content')
-<section class="container w-100 h-100 flex-center">
-    <form action="{{ route('learner.register-submit') }}" method="post" class="needs-validation" novalidate>
-        @csrf
-        <div class="forms-card">
-            <div class="logo-wrapper flex-center mb-4">
-                <img id="logo" src="{{ asset('assets/img/logo-brand-sm.png') }}" alt="" srcset="">
-            </div>
-            <div class="w-100 card shadow-sm">
-                <div class="card-body">
+<div class="forms-card m-auto py-4">
+        <div class="logo-wrapper flex-center mb-4">
+            <img id="logo" src="{{ asset('assets/img/logo-brand-sm.png') }}" alt="" srcset="">
+        </div>
+        <div class="w-100 card shadow-sm">
+            <div class="card-body">
+
+                <form action="{{ route('learner.register-submit') }}" method="post" class="needs-validation" novalidate>
+                    @csrf
                     <h6 class="text-center mb-3">Learner Registration</h6>
-                    <div class="border p-2 mb-3">
+                    <div class="border p-2 mb-2">
                         <h6 class="text-13 text-secondary mb-2">Basic Information</h6>
-                        <div class="row mb-2">
+                        <div class="row">
                             <div class="col">
                                 <label class="text-12" for="firstname">Firstname *</label>
                                 <input type="text" class="form-control text-13 {{ $errors->any() && $errors->has('firstname') ? 'is-invalid' : '' }}" id="firstname" name="firstname" maxlength="32"
@@ -47,20 +47,27 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row mb-3">
+                        <div class="row mb-2">
                             <div class="col">
+    
                                 <label class="text-12" for="contact">Contact No. *</label>
-                                <input type="tel" class="form-control text-13 {{ $errors->any() && $errors->has('contact') ? 'is-invalid' : '' }}" id="contact" name="contact" maxlength="32"
-                                    value="{{ old('contact') }}" required>
-                                <div class="invalid-feedback text-12">
-                                    @if ($errors->has('contact'))
-                                        @error('contact')
-                                            {{ $message }}
-                                        @enderror
-                                    @else
-                                        Please add a contact number
-                                    @endif
+                                <div class="input-group">
+                                    <span class="input-group-text text-12">
+                                        <i class="fi fi-ph"></i> +63
+                                    </span>
+                                    <input type="tel" class="form-control text-13 rounded-end {{ $errors->any() && $errors->has('contact') ? 'is-invalid' : '' }}" id="contact" name="contact"
+                                    value="{{ old('contact') }}" placeholder="9123456789" maxlength="10" required>
+                                    <span class="invalid-feedback text-12">
+                                        @if ($errors->has('contact'))
+                                            @error('contact')
+                                                {{ $message }}
+                                            @enderror
+                                        @else
+                                            Please add a contact number
+                                        @endif
+                                    </span>
                                 </div>
+                                
                             </div>
                             <div class="col">
                                 <label class="text-12" for="address">Address *</label>
@@ -93,10 +100,10 @@
                             </div>
                         </div>
                     </div>
-
+    
                     <div class="border p-2">
                         <h6 class="text-13 text-secondary mb-2">Your Account</h6>
-                        <div class="row mb-2">
+                        <div class="row">
                             <div class="col">
                                 <label class="text-12" for="email">Email *</label>
                                 <input type="email" class="form-control text-13 {{ $errors->any() && $errors->has('email') ? 'is-invalid' : '' }}" id="email" name="email" maxlength="32"
@@ -149,7 +156,7 @@
                             </div>
                         </div>
                     </div>
-
+    
                     <div class="d-flex justify-content-between align-items-center pt-3">
                         <p class="text-13 mb-0">
                             Already a member?
@@ -157,21 +164,34 @@
                         </p>
                         <button type="submit" class="btn btn-primary btn-sm">Register</button>
                     </div>
+                </form>
 
-                </div>
             </div>
         </div>
-    </form>
-</section>
+</div>
 @endsection
 @push('scripts')
     <script src="{{ asset('assets/js/bootstrap5-form-novalidate.js') }}"></script>
+    <script src="{{ asset('assets/js/utils.js') }}"></script>
+    <script>
+        $(() => {
+            initFieldNoSpaces('#username', 'Username should NOT contain spaces');
+            
+            $('#email').attr('data-bs-toggle', 'tooltip').tooltip({
+                trigger: 'focus',
+                title: 'Please use a valid email address so we can reach you.',
+                placement: 'auto'
+            });
+        });
+    </script>
 @endpush
 @push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/lib/flagicons7.2.3/css/flag-icons.min.css') }}">
     <style>
         body {
             background: #F3F4F6;
             background-repeat: no-repeat;
+            background-attachment: fixed;
             background-image:
                 linear-gradient(
                     to right,

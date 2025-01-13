@@ -44,7 +44,7 @@
             <form action="{{ route('learner.find-filtered-tutors') }}" method="get">
                 <div class="d-flex flex-row align-items-center justify-content-end gap-2">
 
-                    <select style="height: 38px;" class="form-select p-2 w-25 text-secondary" name="select-fluency" id="select-fluency">
+                    {{-- <select style="height: 38px;" class="form-select p-2 w-25 text-secondary" name="select-fluency" id="select-fluency">
                         @php
                             // Add option "All"
                             $fluencyFilters = ['-1' => 'All'] + $fluencyFilters;
@@ -54,6 +54,18 @@
                         @foreach ($fluencyFilters as $k => $v)
                             @php
                                 $isSelected = ($selectedFluency == $k) ? 'selected' : '';
+                            @endphp
+                            <option class="text-14" {{ $isSelected }} value="{{ $k }}">{{ $v }}</option>
+                        @endforeach
+                    </select> --}}
+
+                    <select class="form-select p-1 text-13" name="fluency">
+                        @php
+                            $fluencyFilter = ['-1' => 'All'] + $fluencyFilter;
+                        @endphp
+                        @foreach ($fluencyFilter as $k => $v)
+                            @php
+                                $isSelected = (session('fluency') ?? -1) == $k  ? 'selected' : '';
                             @endphp
                             <option class="text-14" {{ $isSelected }} value="{{ $k }}">{{ $v }}</option>
                         @endforeach
@@ -94,11 +106,11 @@
             <div class="card-body">
             <div class="row px-3">
                 <div class="col-4 gx-0">
-                    <img src="{{ $obj['profilePic'] }}" class="profile-photo" alt="profile-photo">
+                    <img src="{{ $obj['photo'] }}" class="profile-photo" alt="profile-photo">
                 </div>
                 <div class="col pe-0">
                     <div class="flex-end">
-                        <a role="button" href="{{ route('tutor.show', $obj['hashedId']) }}" data-tutor-id="{{ $obj['hashedId'] }} ?>" class="btn btn-sm btn-secondary btn-more-details">More Details</a>
+                        <a role="button" href="{{ route('tutor.show', $obj['tutorId']) }}" data-tutor-id="{{ $obj['tutorId'] }} ?>" class="btn btn-sm btn-secondary btn-more-details">More Details</a>
                     </div>
                 </div>
             </div>

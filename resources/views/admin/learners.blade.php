@@ -102,7 +102,7 @@
                     </div>
                 </div>
                 <div class="col-2 flex-center">
-                    <span class="badge {{ $obj['fluencyBadge'] }}">{{ $obj['fluencyStr'] }}</span>
+                    <span title="{{ $obj['fluencyDesc'] }}" class="fluency-tooltip badge {{ $obj['fluencyBadge'] }}">{{ $obj['fluencyStr'] }}</span>
                 </div>
                 <div class="col-2 flex-center">
                     @if ($obj['needsReview'])
@@ -132,4 +132,10 @@
 @endsection
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/css/breadcrumb.css') }}">
+@endpush
+@push('scripts')
+    <script src="{{ asset('assets/js/utils.js') }}"></script>
+    <script>
+        $(() => initFluencyTooltips());
+    </script>
 @endpush

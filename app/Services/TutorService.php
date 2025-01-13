@@ -366,7 +366,8 @@ class TutorService
             $fluency = $obj->{ProfileFields::Fluency};
             $obj['fluencyStr']   = $fluencyFilter[$fluency];
             $obj['fluencyBadge'] = FluencyLevels::Tutor[$fluency]['Badge Color'];
-
+            $obj['fluencyDesc'] = FluencyLevels::Tutor[$fluency]['Description'];
+            
             $photo = $obj->{UserFields::Photo};
             $obj['photo'] = $defaultPic;
 

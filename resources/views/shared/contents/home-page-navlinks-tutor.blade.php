@@ -1,9 +1,9 @@
 @php
 $isReqFindLearners  = request()->routeIs('tutor.find-learners');
-$isReqMyLearners    = request()->routeIs('mylearners');
+$isReqMyLearners    = request()->routeIs('tutor.my-learners');
 $isRouteHireReq     = request()->routeIs('tutor.hire-requests');
 
-$routeMyLearners    = route('mylearners');
+$routeMyLearners    = route('tutor.my-learners');
 $routeHireReq       = route('tutor.hire-requests');
 $routeFindLearners  = route('tutor.find-learners');
 @endphp

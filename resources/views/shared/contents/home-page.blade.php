@@ -110,7 +110,7 @@
                             learners, we truly understand the art of language learning.</p>
                     </div>
                     <div class="col">
-                        <img src="{{ asset('assets/img/section-guaranteed.png') }}" class="rounded rounded-3" height="320">
+                        <img src="{{ asset('assets/img/section-guaranteed.png') }}" class="rounded-half-rem shadow" height="320">
                     </div>
                 @endif
             </div>

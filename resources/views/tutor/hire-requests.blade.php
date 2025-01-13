@@ -3,7 +3,7 @@
 
 @push('dialogs')
     @include('partials.messagebox')
-    @include('partials.learner-popover')
+    @include('partials.learner-details-popover')
 @endpush
 
 @section('content')
@@ -28,7 +28,7 @@
                         <div class="learner-name w-100 mb-1">
                             <div class="text-truncate text-center">{{ $obj['name']}}</div>
                         </div>
-                        <button type="button" data-learner-id="{{ $obj['user_id'] }}" class="btn btn-sm btn-outline-secondary btn-details-popover w-100 text-12">See Profile</button>
+                        <button type="button" data-learner-id="{{ $obj['user_id'] }}" class="btn btn-sm btn-outline-secondary btn-learner-details-popover w-100 text-12">See Profile</button>
                         <div class="d-flex w-100 align-items-center pt-2 gap-2">
                             <button type="button" data-learner-id="{{ $obj['user_id'] }}" class="btn btn-sm btn-outline-secondary flex-fill text-12 btn-decline-request">Decline</button>
                             <button type="button" data-learner-id="{{ $obj['user_id'] }}" class="btn btn-sm btn-primary flex-fill text-12 btn-accept-request action-button">Accept</button>
@@ -57,7 +57,6 @@
 @push('scripts')
     <script src="{{ asset('assets/js/utils.js') }}"></script>
     <script src="{{ asset('assets/lib/waitingfor/bootstrap-waitingfor.min.js') }}"></script>
-    <script src="{{ asset('assets/js/shared/fetch-learner-details.js') }}"></script>
     <script src="{{ asset('assets/js/tutor-hire-requests.js') }}"></script>
 @endpush
 

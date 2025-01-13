@@ -1,6 +1,24 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/lib/bootstrap5/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/lib/croppie/croppie.css') }}">
+    <style>
+        #photo-preview-wrapper {
+            width: 180px;
+            height: 180px;
+            overflow: hidden;
+            border-radius: 50%;
+            border: 2px solid #aaa;
+        }
+        #photo-preview {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;          /* Scale the image to cover the container */
+            object-position: center;    /* Center the image horizontally and vertically */
+            border: 1px solid #ccc;   /* Optional: add a border to see the image boundaries */
+            display: block;             /* Make sure the image behaves like a block element */
+            margin: 0 auto;             /* Center the image horizontally if needed */
+        }
+    </style>
 @endpush
 @push('scripts')
     <script src="{{ asset('assets/lib/jquery3.7.1/jquery-3.7.1.min.js') }}"></script>
@@ -47,9 +65,23 @@ $(document).ready(function() {
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-            {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}
+            {{ __('Ensure your profile is always up-to-date with a recent photo.') }}
         </p>
     </header>
+
+    <div class="d-flex flex-column align-items-center gap-3 w-50">
+        <div id="photo-preview-wrapper">
+            @php
+                use Illuminate\Support\Facades\Auth;
+                use App\Models\FieldNames\UserFields;
+                use App\Models\User;
+
+                $photo = User::getPhotoUrl(Auth::user()->{UserFields::Photo});
+            @endphp
+            <img id="photo-preview" src="{{ $photo }}">
+        </div>
+        <button type="button" class="btn btn-sm btn-dark btn-update-photo" onclick="$('#upload').click()">Update Photo</button>
+    </div>
 
     <div class="modal fade" id="cropModal" tabindex="-1" aria-labelledby="cropModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -74,9 +106,9 @@ $(document).ready(function() {
     <form method="POST" action="{{ route('profile.update.photo') }}" enctype="multipart/form-data" id="photo-form">
         @csrf
         @method('PUT')
-        <input type="file" name="photo" id="upload" accept="image/*">
+        <input class="d-none" type="file" name="photo" id="upload" accept="image/*">
         <input type="hidden" name="cropped_photo" id="cropped_photo">
-        <button type="submit">Update Photo</button>
+        {{-- <button type="submit">Update Photo</button> --}}
     </form>
 
 

@@ -3,10 +3,13 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LearnerController;
+use App\Http\Controllers\MyProfileController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TutorController;
+use App\Http\Utils\ChatifyUtils;
 use App\Models\FieldNames\UserFields;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 /*
@@ -24,13 +27,11 @@ use Illuminate\Support\Facades\Route;
 Route::controller(HomeController::class)->group(function()
 {
     Route::get('/', 'index');
-    //Route::get('/sign-lingua/become-tutor', 'becomeTutor_index')->name('guest-become-tutor');
-    // Route::get('/sign-lingua/register-tutor/forms', 'becomeTutor_create')->name('guest-become-tutor.forms');
 });
 
-Route::get('/dashboard', function () {
+Route::get('/dashboard', function ()
+{
     // return view('dashboard');
-    // return view('shared.common-home-page');
 
     if (Auth::check())
     {
@@ -44,17 +45,6 @@ Route::get('/dashboard', function () {
         {
             return redirect()->to('/');
         }
-        // switch ($role) {
-        //     case User::ROLE_LEARNER:
-        //     case User::ROLE_LEARNER:
-        //     case User::ROLE_STR_TUTOR:
-        //         return redirect()->to('/');
-        //         break;
-
-        //     case User::ROLE_ADMIN:
-        //         return redirect()->route('admin.dashboard');
-        //         break;
-        // }
     }
 
     return redirect()->to('/');
@@ -65,14 +55,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-
-    Route::put('/profile/update-photo', [ProfileController::class, 'updatePhoto'])->name('profile.update.photo');
 });
 
 require __DIR__.'/auth.php';
 
 $RoleMw = 'role-mw:'; // Role middleware
+
+Route::controller(MyProfileController::class)->prefix('/signlingua/my-profile')->middleware('auth')->group(function()
+{
+    Route::get('/view', 'index')->name('myprofile.index');
+    Route::put('/update-photo', 'updatePhoto')->name('profile.update.photo');
+});
 
 Route::middleware(['auth', $RoleMw . User::ROLE_ADMIN])->group(function ()
 {
@@ -87,14 +80,14 @@ Route::middleware(['auth', $RoleMw . User::ROLE_ADMIN])->group(function ()
         Route::get('/admin/tutors/details/{id}',                'tutors_show')->name('admin.tutors-show');
         Route::post('/admin/tutors/filter',                     'tutors_filter')->name('admin.tutors-filter');
 
-        Route::get('/admin/learners',                           'learners_index')->name('admin.learners-index');
+        Route::get('/admin/learners/list',                      'learners_index')->name('admin.learners-index');
         Route::get('/admin/learners/filter/clear',              'learners_clear_filter')->name('admin.learners-clear-filter');
         Route::get('/admin/learners/details/{id}',              'learners_show')->name('admin.learners-show');
         Route::post('/admin/learners/filter',                   'learners_filter')->name('admin.learners-filter');
     });
 });
 
-Route::controller(LearnerController::class)->group(function() use ($RoleMw)
+Route::controller(LearnerController::class)->prefix('/signlingua/learner')->group(function() use ($RoleMw)
 {
     // The default user role is Learner. Pending or unregistered tutors are
     // given a role of "learner", meaning they have access to learner routes.
@@ -102,48 +95,56 @@ Route::controller(LearnerController::class)->group(function() use ($RoleMw)
     // unless their profile has been verified, thus "ensureNotPending" .
     Route::middleware(['auth', 'ensureNotPending', $RoleMw . User::ROLE_LEARNER])->group(function()
     {
-        Route::get('/learner',                                  'index')->name('learner.index');
-        Route::get('/signlingua/learner/find-tutors',           'findTutors')->name('learner.find-tutors');
-        Route::get('/signlingua/learner/find-tutors/filter',    'filterTutors')->name('learner.find-filtered-tutors');
-        Route::get('/signlingua/learner/my-tutors',             'myTutors')->name('mytutors');
-        Route::post('/learner/hire-tutor',                      'hireTutor')->name('learner.hire-tutor');
-        Route::post('/learner/cancel-hire-tutor',               'cancelHireTutor')->name('learner.cancel-hire-tutor');
-        Route::get('/sign-lingua/become-tutor',                 'becomeTutor_index')->name('become-tutor');
-        Route::get('/sign-lingua/become-tutor/forms',           'becomeTutor_create')->name('become-tutor.forms');
-        Route::post('/sign-lingua/become-tutor/forms/submit',   'becomeTutor_store')->name('become-tutor.forms.submit');
+        Route::get('/find-tutors',                  'find_tutors')->name('learner.find-tutors');
+        Route::get('/find-tutors/filter',           'filterTutors')->name('learner.find-filtered-tutors');
+        Route::get('/find-tutors/clear',            'clearFilterTutors')->name('learner.find-tutors-clear');
+        Route::get('/my-tutors',                    'myTutors')->name('mytutors');
+        Route::get('/become-tutor',                 'becomeTutor_index')->name('become-tutor');
+        Route::get('/become-tutor/forms',           'becomeTutor_create')->name('become-tutor.forms');
+
+        Route::post('/hire-tutor',                  'hireTutor')->name('learner.hire-tutor');
+        Route::post('/cancel-hire-tutor',           'cancelHireTutor')->name('learner.cancel-hire-tutor');
+        Route::post('/become-tutor/forms/submit',   'becomeTutor_store')->name('become-tutor.forms.submit');
+        Route::post('/rate-tutor',                  'storeTutorReview')->name('tutor.store-review');
+        Route::post('/delete-review',               'deleteTutorReview')->name('tutor.delete-review');
     });
 
     Route::middleware('guest')->group(function()
     {
-        // These cant be accessed by an authenticated learner
-        // as these should be a guest-only route
-        Route::get('/signlingua/learner/register',  'registerLearner_create')->name('learner.register');
-        Route::post('/signlingua/learner/register', 'registerLearner_store')->name('learner.register-submit');
+        Route::get('/register',  'registerLearner_create')->name('learner.register');
+        Route::post('/register', 'registerLearner_store')->name('learner.register-submit');
     });
 
-    Route::get('/sign-lingua/become-tutor/success', 'becomeTutor_success')->name('become-tutor.success');
+    // Move this to API routes
+    Route::middleware(['auth'])->group(function()
+    {
+        Route::get('/fetch/show', 'fetchLearnerDetails')->name('learner.fetch-details');
+    });
+
+    Route::get('/become-tutor/success', 'becomeTutor_success')->name('become-tutor.success');
 });
 
 Route::controller(TutorController::class)->group(function() use ($RoleMw)
 {
-    Route::middleware(['auth', 'ensureNotPending', $RoleMw . User::ROLE_LEARNER])->group(function()
+    Route::prefix('/signlingua/learner')->middleware(['auth', 'ensureNotPending', $RoleMw . User::ROLE_LEARNER])
+    ->group(function()
     {
-
-        Route::get('/signlingua/learner/tutor-details/{id}', 'show')->name('tutor.show');
-        Route::post('/learner/leave-tutor', 'endContract')->name('tutor.end');
+        Route::get('/tutor-details/{id}',   'show')->name('tutor.show');
+        Route::post('/leave-tutor',         'endContract')->name('tutor.end');
     });
 
-    Route::middleware(['auth', 'ensureNotPending', $RoleMw . User::ROLE_TUTOR])->group(function()
+    Route::prefix('/signlingua/tutor')->middleware(['auth', 'ensureNotPending', $RoleMw . User::ROLE_TUTOR])
+    ->group(function()
     {
-        Route::get('/tutor/my-learners',              'myLearners')->name('mylearners');
-        Route::get('/tutor/find-learners',            'find_learners')->name('tutor.find-learners');
-        Route::get('/tutor/requests',                 'hire_requests')->name('tutor.hire-requests');
-        Route::get('/tutor/my-learners/filter/clear', 'myLearners_clear_filter')->name('tutor.learners-clear-filter');
-        Route::get('/tutor/my-learner-details',       'myLearners_show')->name('tutor.learners-show');
+        Route::get('/find-learners',        'find_learners')->name('tutor.find-learners');
+        Route::get('/find-learners/clear',  'find_learners_clear_filter')->name('tutor.find-learners.clear');
 
-        Route::post('/tutor/requests/accept',          'hire_request_accept')->name('tutor.accept-hire-request');
-        Route::post('/tutor/requests/decline',         'hire_request_decline')->name('tutor.decline-hire-request');
-        Route::post('/tutor/my-learners/filter',      'myLearners_filter')->name('tutor.learners-filter');
+        Route::get('/my-learners',          'my_learners')->name('tutor.my-learners');
+        Route::get('/my-learners/clear',    'my_learners_clear_filter')->name('tutor.my-learners.clear');
+
+        Route::get('/requests',             'hire_requests')->name('tutor.hire-requests');
+        Route::post('/requests/accept',     'hire_request_accept')->name('tutor.accept-hire-request');
+        Route::post('/requests/decline',    'hire_request_decline')->name('tutor.decline-hire-request');
     });
 
     Route::middleware('guest', 'ensureNotPending')->group(function()
@@ -165,6 +166,11 @@ Route::middleware(['auth', $RoleMw . User::ROLE_TUTOR])->group(function ()
     Route::get('/tutor', function (){
         return view('tutor.dashboard');
     });
+});
+
+Route::get('/chat-hash/{id}', function (Request $request, $id) {
+    // $id = 'Z2ornMK8kL';
+    echo ChatifyUtils::toHashedChatId($id);
 });
 
 // Route::get('/generate-password', function () {
