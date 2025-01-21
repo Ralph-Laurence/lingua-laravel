@@ -10,6 +10,7 @@ use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\RatingsAndReviewFields;
 use App\Models\FieldNames\UserFields;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
@@ -150,6 +151,11 @@ class User extends Authenticatable
         return $this->hasMany(RatingsAndReview::class, RatingsAndReviewFields::TutorId);
     }
 
+    // Pending Email Updates Relationships
+    public function pendingEmailUpdate() : HasOne
+    {
+        return $this->hasOne(PendingEmailUpdate::class);
+    }
     //
     //---------------------------------------------------
     //                  Helper Functions
@@ -177,12 +183,56 @@ class User extends Authenticatable
      */
     public static function getPhotoUrl($photo)
     {
-        //if (!empty($photo))
         if (!empty($photo) && Storage::exists("public/uploads/profiles/$photo"))
         {
             return asset(Storage::url("public/uploads/profiles/$photo"));
         }
 
         return asset('assets/img/default_avatar.png');
+    }
+
+    /**
+     * Non-static accessor.
+     * Transforms separate Firstname and Lastname into a single Name.
+     * Use it like $user->name
+     */
+    public function getNameAttribute()
+    {
+        return implode(' ', [$this->{UserFields::Firstname}, $this->{UserFields::Lastname}]);
+    }
+
+    /**
+     * Non-static accessor.
+     * Transforms raw photo filename into full URL.
+     * Use it like $user->photoUrl
+     */
+    public function getPhotoUrlAttribute()
+    {
+        $photo    = $this->{UserFields::Photo};
+        $photoUrl = User::getPhotoUrl($photo);
+
+        return $photoUrl;
+    }
+
+    /**
+     * Non-static accessor.
+     * Transforms fullname into possessive (*'s) name.
+     * Use it like $user->possessiveName
+     */
+    public function getPossessiveNameAttribute()
+    {
+        $name = $this->getNameAttribute();
+        return $name . (substr($name, -1) === 's' ? "'" : "'s");
+    }
+
+    /**
+     * Non-static accessor.
+     * Transforms firstname into possessive (*'s) name.
+     * Use it like $user->possessiveFirstName
+     */
+    public function getPossessiveFirstNameAttribute()
+    {
+        $name = $this->{UserFields::Firstname};
+        return $name . (substr($name, -1) === 's' ? "'" : "'s");
     }
 }

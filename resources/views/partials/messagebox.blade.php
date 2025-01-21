@@ -10,9 +10,22 @@
         $preRenderModal = 'show';
     }
 @endphp
-@push('styles')
+@once
+    @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/css/message-box.css') }}">
-@endpush
+    @endpush
+@endonce
+@once
+    @push('scripts')
+        <script src="{{ asset('assets/js/message-box.js') }}"></script>
+        @if ($preRenderModal)
+            <script>
+                $(() => $('.message-box').modal('show'));
+            </script>
+        @endif
+    @endpush
+@endonce
+
 <!-- Modal -->
 <div class="modal fade message-box" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
@@ -35,11 +48,4 @@
         </div>
     </div>
 </div>
-@push('scripts')
-    <script src="{{ asset('assets/js/message-box.js') }}"></script>
-    @if ($preRenderModal)
-        <script>
-            $(() => $('.message-box').modal('show'));
-        </script>
-    @endif
-@endpush
+

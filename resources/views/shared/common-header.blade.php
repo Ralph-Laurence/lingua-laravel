@@ -100,7 +100,7 @@
                     </a>
                     <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
                         <li>
-                            <a class="dropdown-item text-14 text-secondary" href="/profile">
+                            <a class="dropdown-item text-14 text-secondary" href="{{ route('myprofile.edit') }}">
                                 <i class="fas fa-user me-2"></i>My Profile
                             </a>
                         </li>

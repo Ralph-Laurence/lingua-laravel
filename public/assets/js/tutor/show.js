@@ -10,6 +10,9 @@ var starControlsBlocker = undefined;
 var btnCancelEditReview = undefined;
 var btnSubmitEditReview = undefined;
 var btnDeleteReview     = undefined;
+var btnHireTutor        = undefined;
+var btnLeaveTutor       = undefined;
+var btnCancelHire       = undefined;
 
 function initializeSelectorElements()
 {
@@ -23,19 +26,21 @@ function initializeSelectorElements()
     btnCancelEditReview = $('#btn-cancel-update-review');
     btnSubmitEditReview = $('#btn-submit-update-review');
     btnDeleteReview     = $('#btn-delete-review');
+    btnHireTutor        = $('.btn-hire-tutor');
+    btnLeaveTutor       = $('.btn-leave-tutor');
+    btnCancelHire       = $('.btn-cancel-hire-req');
 }
 
 $(document).ready(function()
 {
     initializeSelectorElements();
 
-    btnCancelEditReview.on('click', handleCancelEditReview);
-    btnEditReview.on('click', handleAllowEditReview);
-    btnDeleteReview.on('click', handleDeleteReview);
-
-    $('.btn-hire-tutor').on('click', handleHireTutor);
-    $('.btn-end-tutor').on('click',  handleEndTutor);
-    $('.btn-cancel-hire-req').on('click', handleCancelHireTutor);
+    btnCancelEditReview .on('click', handleCancelEditReview);
+    btnEditReview       .on('click', handleAllowEditReview);
+    btnDeleteReview     .on('click', handleDeleteReview);
+    btnHireTutor        .on('click', handleHireTutor);
+    btnLeaveTutor       .on('click', handleEndTutor);
+    btnCancelHire       .on('click', handleCancelHireTutor);
 
     $('.star-rating-control').on('click', function()
     {
@@ -64,11 +69,19 @@ $(document).ready(function()
         fillStars(lastStarRating);
     });
 
+    var fullReviewPopperTriggers = [].slice.call(document.querySelectorAll('.popover-fullreview-toggle[data-bs-toggle="popover"]'));
+    fullReviewPopperTriggers.map(function (popoverTriggerEl)
+    {
+        return new bootstrap.Popover(popoverTriggerEl)
+    });
+
     // From utils.js
     initializeBsTooltips();
 
     // Display the max allowed length of review textarea
     updateCharLengthCounter();
+
+    showReviewReadMoreTextOnOverflow();
 
     reviewTextarea.on('input', () => updateCharLengthCounter());
 });
@@ -77,21 +90,6 @@ $(document).ready(function()
 //      C L I C K   E V E N T   C A L L B A C K S
 //===================================================
 //
-function handleDeleteReview()
-{
-    let form      = $('#tutor-hiring-action-form');
-    let action    = form.data('action-delete-review');
-    let prompt    = 'Are you sure you want to delete your review?';
-
-    ConfirmBox.show(prompt, 'Delete Review',
-    {
-        onOK: () => {
-            form.attr('action', action);
-            form.submit();
-        }
-    });
-}
-
 function handleAllowEditReview()
 {
     btnEditReview.hide();
@@ -126,6 +124,23 @@ function handleCancelEditReview()
     reviewTextarea.prop('readonly', true);
 }
 
+function handleDeleteReview()
+{
+    let form      = $('#tutor-hiring-action-form');
+    let action    = form.data('action-delete-review');
+    let prompt    = 'Are you sure you want to delete your review?';
+
+    ConfirmBox.show(prompt, 'Delete Review',
+    {
+        onOK: () => {
+            disableButton(btnDeleteReview);
+            form.attr('action', action);
+            showProcessingDialog();
+            form.submit();
+        }
+    });
+}
+
 function handleHireTutor()
 {
     let form      = $('#tutor-hiring-action-form');
@@ -136,7 +151,9 @@ function handleHireTutor()
     ConfirmBox.show(prompt, 'Hire Tutor',
     {
         onOK: () => {
+            disableButton(btnHireTutor);
             form.attr('action', action);
+            showProcessingDialog();
             form.submit();
         }
     });
@@ -152,7 +169,9 @@ function handleEndTutor()
     ConfirmBox.show(prompt, 'Leave Tutor',
     {
         onOK: () => {
+            disableButton(btnLeaveTutor);
             form.attr('action', action);
+            showProcessingDialog();
             form.submit();
         }
     });
@@ -168,7 +187,9 @@ function handleCancelHireTutor()
     ConfirmBox.show(prompt, 'Cancel Hire',
     {
         onOK: () => {
+            disableButton(btnCancelHire);
             form.attr('action', action);
+            showProcessingDialog();
             form.submit();
         }
     });
@@ -188,6 +209,42 @@ function fillStars(selectedRating)
 
 function updateCharLengthCounter()
 {
+    if (!reviewTextarea.length)
+        return;
+
     let currentLength = reviewTextarea.val().length;
     reviewCharCtr.text(`${currentLength}/${reviewMaxLength}`);
+}
+
+function disableButton(targetButton)
+{
+    if (!targetButton.length)
+        return;
+
+    targetButton.prop('disabled', true);
+}
+
+function showProcessingDialog()
+{
+    waitingDialog.show("Processing...", {
+        headerSize: 6,
+        headerText: "Hold on, this shouldn't take long...",
+        dialogSize: 'sm',
+        contentClass: 'text-13'
+    });
+}
+
+function showReviewReadMoreTextOnOverflow()
+{
+    const reviewElements = $('.review-text');
+
+    $.each(reviewElements, function(index, el)
+    {
+        if (el.scrollHeight > el.clientHeight)
+        {
+            // Content is truncated, show the "See More" button
+            const seeMoreButton = $(el).next('.popover-fullreview-toggle');
+            seeMoreButton.removeClass('d-none');
+        }
+    });
 }

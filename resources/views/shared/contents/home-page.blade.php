@@ -147,7 +147,8 @@
                         professionals. Feel free to download this printable chart for personal use. You can also share it
                         with your friends, family, and teachers.
                     </p>
-                    <a href="{{ asset('assets/img/asl_alphabet.jpg') }}" download>
+                    <a class="text-decoration-none" href="{{ asset('assets/img/asl_alphabet.jpg') }}" download>
+                        <i class="fas fa-download"></i>
                         Download ASL Chart
                     </a>
                 </div>

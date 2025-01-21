@@ -49,7 +49,7 @@
                         </div>
                         <div class="row mb-2">
                             <div class="col">
-    
+
                                 <label class="text-12" for="contact">Contact No. *</label>
                                 <div class="input-group">
                                     <span class="input-group-text text-12">
@@ -67,11 +67,11 @@
                                         @endif
                                     </span>
                                 </div>
-                                
+
                             </div>
                             <div class="col">
                                 <label class="text-12" for="address">Address *</label>
-                                <input type="text" class="form-control text-13 {{ $errors->any() && $errors->has('address') ? 'is-invalid' : '' }}" id="address" name="address" maxlength="64"
+                                <input type="text" class="form-control text-13 {{ $errors->any() && $errors->has('address') ? 'is-invalid' : '' }}" id="address" name="address" maxlength="150"
                                     value="{{ old('address') }}" required>
                                 <div class="invalid-feedback text-12">
                                     @if ($errors->has('address'))
@@ -100,7 +100,7 @@
                             </div>
                         </div>
                     </div>
-    
+
                     <div class="border p-2">
                         <h6 class="text-13 text-secondary mb-2">Your Account</h6>
                         <div class="row">
@@ -120,8 +120,8 @@
                             </div>
                             <div class="col">
                                 <label class="text-12" for="username">Username *</label>
-                                <input type="text" class="form-control text-13 {{ $errors->any() && $errors->has('username') ? 'is-invalid' : '' }}" id="username" name="username" maxlength="32"
-                                    value="{{ old('username') }}" required>
+                                <input type="text" class="form-control text-13 no-spaces {{ $errors->any() && $errors->has('username') ? 'is-invalid' : '' }}" id="username" name="username" data-label="Username"
+                                    value="{{ old('username') }}" maxlength="32" required>
                                 <div class="invalid-feedback text-12">
                                     @if ($errors->has('username'))
                                         @error('username')
@@ -156,7 +156,7 @@
                             </div>
                         </div>
                     </div>
-    
+
                     <div class="d-flex justify-content-between align-items-center pt-3">
                         <p class="text-13 mb-0">
                             Already a member?
@@ -175,8 +175,6 @@
     <script src="{{ asset('assets/js/utils.js') }}"></script>
     <script>
         $(() => {
-            initFieldNoSpaces('#username', 'Username should NOT contain spaces');
-            
             $('#email').attr('data-bs-toggle', 'tooltip').tooltip({
                 trigger: 'focus',
                 title: 'Please use a valid email address so we can reach you.',

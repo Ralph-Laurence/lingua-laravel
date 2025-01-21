@@ -51,7 +51,7 @@
     </div>
     <div class="col">
         <label class="text-14" for="address">Address *</label>
-        <input type="text" class="form-control text-13 {{ $errors->any() && $errors->has('address') ? 'is-invalid' : '' }}" id="address" name="address" maxlength="64"
+        <input type="text" class="form-control text-13 {{ $errors->any() && $errors->has('address') ? 'is-invalid' : '' }}" id="address" name="address" maxlength="150"
             value="{{ old('address') }}" required>
         <div class="invalid-feedback text-12">
             @if ($errors->has('address'))

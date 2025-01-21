@@ -28,7 +28,7 @@ return new class extends Migration
 
             // Common Details
             $table->string(UserFields::Contact, 20);
-            $table->string(UserFields::Address, 128);
+            $table->string(UserFields::Address, 150);
             $table->string(UserFields::Photo)->nullable();
             $table->integer(UserFields::IsVerified)->default(0);
 

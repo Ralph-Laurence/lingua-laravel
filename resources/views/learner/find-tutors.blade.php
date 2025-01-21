@@ -109,7 +109,7 @@
                                 @else
 
                                     <div class="text-center">
-                                        <div class="ms-1 mb-0 font-semi-bold mb-1">
+                                        <div class="ms-1 mb-0 poppins-semibold mb-1">
                                             <i class="fas fa-star me-1 text-16"></i>
                                             <span class="text-13">{{ $obj['ratings'] }}</span>
                                         </div>

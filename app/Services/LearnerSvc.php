@@ -28,7 +28,11 @@ class LearnerSvc extends CommonModelService
     {
 
     }
-
+    //
+    //==========================================
+    //      Q U E R Y  B U I L D E R S
+    //==========================================
+    //
     /**
      * Base query for getting the list of learners,
      * including basic filtrations
@@ -81,7 +85,11 @@ class LearnerSvc extends CommonModelService
 
         return $builder;
     }
-
+    //
+    //==========================================
+    //      F O R M A T T E D   D A T A
+    //==========================================
+    //
     /**
      * Beautify the returned dataset into human readable form
      */
@@ -108,7 +116,6 @@ class LearnerSvc extends CommonModelService
             return $returnData;
         });
     }
-
     /**
      * Retrieve all students for viewing by tutor
      */
@@ -139,7 +146,11 @@ class LearnerSvc extends CommonModelService
 
         return $this->mapLearnersQueryResult($query, $options['minEntries']);
     }
-
+    //
+    //==========================================
+    //    C O N T R O L L E R   A C T I O N S
+    //==========================================
+    //
     /**
      * Delete the review made by learner on target tutor
      */
@@ -167,24 +178,9 @@ class LearnerSvc extends CommonModelService
         }
         catch (Exception $ex)
         {
-            error_log($ex->getMessage());
             return response()->view('errors.500', [], 500);
         }
     }
-    /**
-     * Retrieve the list of all Tutor IDs booked with the learner
-     * @return Array
-     */
-    // public function getBookedTutorIds($learnerId) : array
-    // {
-    //     // Retrieve all userids of tutors tied to the learner
-    //     $tutorIds = Booking::where(BookingFields::LearnerId, $learnerId)
-    //               ->pluck(BookingFields::TutorId)
-    //               ->toArray();
-
-    //     return $tutorIds ?? [];
-    // }
-
     /**
      * This must be accessed via Asynchronous GET
      */
@@ -239,7 +235,31 @@ class LearnerSvc extends CommonModelService
             ], 500);
         }
     }
+    //
+    //==========================================
+    //    S E R V I C E   M E T H O D S
+    //==========================================
+    //
+    /**
+     * Retrieve the rating and review created by learner for target tutor.
+     */
+    public function getReviewOnTutor($tutorId, $learnerId)
+    {
+        $res = RatingsAndReview::select([
+                RatingsAndReviewFields::Rating,
+                RatingsAndReviewFields::Review
+            ])
+            ->where(RatingsAndReviewFields::TutorId, $tutorId)
+            ->where(RatingsAndReviewFields::LearnerId, $learnerId)
+            ->first();
 
+        return $res;
+    }
+    //
+    //==========================================
+    //              H A S H I N G
+    //==========================================
+    //
     public static function getHashidInstance()
     {
         if (self::$hashids == null)

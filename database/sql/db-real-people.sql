@@ -200,7 +200,7 @@ CREATE TABLE `users` (
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `role` tinyint(3) UNSIGNED NOT NULL DEFAULT 2,
   `contact` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `address` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `address` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
   `photo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_verified` int(11) NOT NULL DEFAULT 0,
   `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,

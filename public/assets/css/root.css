@@ -101,8 +101,20 @@ body {
 .rounded-1rem { border-radius: 1rem; }
 .rounded-2rem { border-radius: 2rem; }
 .z-idx-1 { z-index: 1;}
-.font-semi-bold {
-    font-family: 'Poppins-SemiBold';
+.poppins-semibold { font-family: 'Poppins-SemiBold'; }
+.poppins-medium   { font-family: 'Poppins-Medium'; }
+.w-0 { width: 0; }
+.w-15 { width: 15% !important;}
+
+/*============= OVERRIDDEN CLASSES ============*/
+.was-validated .form-control:valid {
+    border-color: #9A7FB7 !important;
+    box-shadow: 0 0 0 .25rem rgba(44, 26, 78, .25) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%235A4095' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+}
+
+.needs-validation .invalid-feedback {
+    font-size: 12px;
 }
 
 /*============= OTHER CLASSES ============*/
@@ -113,13 +125,15 @@ footer {
     /* background-color: #0D1226; */
     color: white;
 }
-
-.w-20px {
-    width: 20px;
-}
+.w-20px { width: 20px; }
+.h-20px { height: 20px; }
 
 .darker-text {
     color: #121117;
+}
+
+.sl-button {
+    font-size: 0.8125rem;
 }
 
 .sign-lingua-red-text {
@@ -145,6 +159,17 @@ footer {
 }
 .sign-lingua-purple-button:disabled {
     opacity: 0.75;
+}
+
+.sign-lingua-gray-button {
+    background-color: #e7eaec !important;
+    border: 1px solid rgb(175, 177, 180) !important;
+    color: rgb(59, 59, 59) !important;
+}
+
+.sign-lingua-gray-button:hover {
+    background-color: #CED1D3 !important;
+    color: #121117 !important;
 }
 
 .grad-btn-danger

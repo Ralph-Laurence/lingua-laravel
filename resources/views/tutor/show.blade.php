@@ -1,6 +1,8 @@
 @php
-    $isCurrentlyHired = $tutorDetails['hireStatus'] == 1;
-    $isHireRequested = $tutorDetails['hireStatus'] == 2;
+    $isCurrentlyHired   = $tutorDetails['hireStatus'] == 1;
+    $isHireRequested    = $tutorDetails['hireStatus'] == 2;
+    $totalReviews       = $tutorDetails['totalReviews'];
+    $strTotalReviews    = $totalReviews .' '. ($totalReviews == 1 ? 'Review' : 'Reviews');
 @endphp
 {{-- @dd($tutorDetails) --}}
 @extends('shared.base-members')
@@ -66,7 +68,7 @@
                     </p>
                 </div>
 
-                <div class="resume-wrapper">
+                <div class="resume-wrapper mb-5">
                     <h5 class="title-about-me darker-text mb-3">Resume</h5>
                     <!-- Nav tabs -->
                     <ul class="nav nav-tabs" role="tablist">
@@ -147,6 +149,7 @@
                     </div>
                 </div>
 
+                @include('tutor.show-learner-reviews', ['tutorDetails' => $tutorDetails])
             </div>
             <div class="col-4 p-4">
 
@@ -167,8 +170,7 @@
                         @if ($tutorDetails['hireStatus'] == 1)
                             <h5 class="text-center text-14 my-3">
                                 <i class="fas fa-link sign-lingua-red-text"></i>
-                                <span class="text-secondary">{{ $tutorDetails['firstname'] }} is currently your ASL
-                                    tutor</span>
+                                <span class="text-secondary">{{ $tutorDetails['firstname'] }} is currently your ASL tutor</span>
                             </h5>
                         @else
                             <h5 class="text-center title-session mb-1">ASL Tutorial Session</h5>
@@ -177,18 +179,38 @@
                         @endif
 
                         <div class="row px-2 mt-4">
-                            <div class="col darker-text">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-graduation-cap text-16"></i>
-                                    {{ $totalLearners }} Learners
-                                </h6>
-                            </div>
-                            <div class="col darker-text">
-                                @if ($tutorDetails['verified'])
-                                    <h6 class="mb-0">
-                                        <i class="fas fa-circle-check"></i>
-                                        <small>Verified</small>
+                            <div class="col">
+                                <div class="text-center">
+                                    <h6 class="mb-1">
+                                        <i class="fas fa-star text-16"></i>
+                                        {{ $tutorDetails['averageRating'] }}
                                     </h6>
+                                    <p class="text-muted text-13 mb-0">
+                                        {{ $strTotalReviews }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="text-center">
+                                    <h6 class="mb-1">
+                                        <i class="fas fa-graduation-cap text-16"></i>
+                                        {{ $totalLearners }}
+                                    </h6>
+                                    <p class="text-muted text-13 mb-0">
+                                        {{ $totalLearners == 1 ? 'Learner' : 'Learners' }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col">
+                                @if ($tutorDetails['verified'])
+                                    <div class="text-center">
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-circle-check text-16"></i>
+                                        </h6>
+                                        <p class="text-muted text-13 mb-0">
+                                            Verified
+                                        </p>
+                                    </div>
                                 @endif
                             </div>
 
@@ -196,7 +218,7 @@
 
                         @if ($isCurrentlyHired)
                             <div class="w-100 flex-center button-wrapper">
-                                <button class="btn btn-danger sign-lingua-red-button mt-4 mx-2 w-100 btn-end-tutor">
+                                <button class="btn btn-danger sign-lingua-red-button mt-4 mx-2 w-100 btn-leave-tutor">
                                     <i class="fa-solid fa-link-slash me-2"></i>Leave Tutor
                                 </button>
                             </div>
@@ -230,7 +252,7 @@
                         <div class="card-body">
 
                             <div class="d-flex align-items-center justify-content-around" style="height: 30px;">
-                                <h6 class="darker-text font-semi-bold flex-fill mb-0">Rate Your Tutor</h6>
+                                <h6 class="darker-text poppins-semibold flex-fill mb-0">Rate Your Tutor</h6>
                                 @if ($hasRateReview)
                                 <button class="btn btn-sm btn-link text-decoration-none text-12 btn-edit-review">
                                     <i class="fas fa-pen"></i>
@@ -285,7 +307,7 @@
                                     <input type="hidden" id="rating" name="rating" data-original="{{ $learnerRating }}" value="{{ $learnerRating }}">
 
                                     {{-- The interactable review textarea box --}}
-                                    @if (!empty($learnerReview))
+                                    @if (!empty($learnerRating))
                                         <textarea {!! $textAreaAttrs !!} readonly>{{ $learnerReview }}</textarea>
                                     @else
                                         <textarea {!! $textAreaAttrs !!}></textarea>
@@ -332,27 +354,6 @@
         <input type="hidden" name="tutor_id" value="{{ $tutorDetails['hashedId'] }}">
     </form>
 
-
-    {{-- <form class="d-none" id="frm-hire-tutor" action="{{ route('learner.hire-tutor') }}" method="post">
-        @csrf
-        <input type="hidden" id="tutor_name" value="{{ $tutorDetails['firstname'] }}">
-        <input type="hidden" name="tutor_id" value="{{ $tutorDetails['hashedId'] }}">
-    </form>
-    <form class="d-none" id="frm-delete-tutor" action="{{ route('tutor.delete-review') }}" method="post">
-        @csrf
-        <input type="hidden" id="tutor_name" value="{{ $tutorDetails['firstname'] }}">
-        <input type="hidden" name="tutor_id" value="{{ $tutorDetails['hashedId'] }}">
-    </form>
-    <form class="d-none" id="frm-cancel-hire" action="{{ route('learner.cancel-hire-tutor') }}" method="post">
-        @csrf
-        <input type="hidden" id="tutor_name" value="{{ $tutorDetails['firstname'] }}">
-        <input type="hidden" name="tutor_id" value="{{ $tutorDetails['hashedId'] }}">
-    </form>
-    <form class="d-none" id="frm-end-contract" action="{{ route('tutor.end') }}" method="post">
-        @csrf
-        <input type="hidden" id="tutor_name" value="{{ $tutorDetails['firstname'] }}">
-        <input type="hidden" name="tutor_id" value="{{ $tutorDetails['hashedId'] }}">
-    </form> --}}
 @endsection
 
 @push('styles')
@@ -378,10 +379,18 @@
         .star-rating-control.filled {
             background-image: url({{ asset('assets/img/rating_star_filled.png') }});
         }
+
+        .learner-reviews {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 20px;
+        }
+
     </style>
 @endpush
 
 @push('scripts')
+    <script src="{{ asset('assets/lib/waitingfor/bootstrap-waitingfor.min.js') }}"></script>
     <script src="{{ asset('assets/js/tooltips.js') }}"></script>
     <script src="{{ asset('assets/lib/dompurify/purify.min.js') }}"></script>
     <script src="{{ asset('assets/js/tutor/show.js') }}"></script>
@@ -418,6 +427,7 @@
                 'toastMessage'  => session('review_msg'),
                 'toastTitle'    => 'Rate and Review',
                 'useOKButton'   => 'true',
+                'autoClose'     => 'true'
             ])
         @endif
 

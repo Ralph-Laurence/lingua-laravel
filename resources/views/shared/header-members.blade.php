@@ -24,18 +24,20 @@
                             class="border border-2 bg-white border-secondary rounded-circle">
                     </a>
                     <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
-                        <li>
-                            <a class="dropdown-item text-14" href="/profile">
-                                <i class="fas fa-user me-2"></i>My Profile
-                            </a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
+                        @if (!request()->routeIs('myprofile.edit'))
+                            <li>
+                                <a class="dropdown-item text-14" href="{{ route('myprofile.edit') }}">
+                                    <i class="fas fa-user me-2"></i>My Profile
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                        @endif
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <a class="dropdown-item text-14"  onclick="event.preventDefault(); this.closest('form').submit();">
+                                <a class="dropdown-item text-14 cursor-pointer"  onclick="event.preventDefault(); this.closest('form').submit();">
                                     <i class="fas fa-power-off me-2"></i>Sign Out
                                 </a>
                             </form>

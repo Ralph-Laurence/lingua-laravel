@@ -27,6 +27,9 @@ use Illuminate\Support\Facades\Route;
 Route::controller(HomeController::class)->group(function()
 {
     Route::get('/', 'index');
+    Route::get('/signlingua', function() {
+        return redirect('/');
+    });
 });
 
 Route::get('/dashboard', function ()
@@ -63,8 +66,9 @@ $RoleMw = 'role-mw:'; // Role middleware
 
 Route::controller(MyProfileController::class)->prefix('/signlingua/my-profile')->middleware('auth')->group(function()
 {
-    Route::get('/view', 'index')->name('myprofile.index');
-    Route::put('/update-photo', 'updatePhoto')->name('profile.update.photo');
+    Route::get('/edit',             'index')->name('myprofile.edit');
+    Route::put('/update-photo',     'updatePhoto')->name('profile.update.photo');
+    Route::post('/update-password', 'updatePassword')->name('profile.update-password');
 });
 
 Route::middleware(['auth', $RoleMw . User::ROLE_ADMIN])->group(function ()

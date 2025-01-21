@@ -20,6 +20,7 @@ use App\Services\LearnerSvc;
 use App\Services\RegistrationService;
 use App\Services\TutorBookingRequestService;
 use App\Services\TutorService;
+use App\Services\TutorSvc;
 use Exception;
 use Hashids\Hashids;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -38,7 +39,8 @@ class TutorController extends Controller
         private LearnerServiceForTutor      $learnerServiceForTutor,
         private TutorService                $tutorService,
         private TutorBookingRequestService  $tutorBookingRequestService,
-        private LearnerSvc $learnerSvc
+        private LearnerSvc $learnerSvc,
+        private TutorSvc $tutorSvc
     )
     {
         $this->hashids = new Hashids(HashSalts::Tutors, 10);
@@ -93,171 +95,7 @@ class TutorController extends Controller
 
     public function show($id)
     {
-        try
-        {
-            // Decode the hashed ID
-            $decodedId = $this->hashids->decode($id);
-
-            // Check if the ID is empty
-            if (empty($decodedId)) {
-                return view('errors.404');
-            }
-
-            // Fetch the tutor along with their profile
-            $tutorId = $decodedId[0];
-            $learnerId = Auth::user()->id;
-            // $tutor   = User::with(['profile', 'receivedRatings' => function($query) {
-            //     $query->select(DB::raw('FORMAT(avg(' . RatingsAndReviewFields::Rating . '), 1) as averageRating'));
-            // }])->findOrFail($tutorId);
-            $userFields = Helper::prependFields('users.', [
-                'id',
-                'email',
-                UserFields::Firstname,
-                UserFields::Lastname,
-                UserFields::Address,
-                UserFields::Photo,
-                UserFields::IsVerified,
-                UserFields::Contact
-            ]);
-
-            $selectFields = $userFields + [
-                DB::raw('IFNULL(FORMAT(AVG(ratings_and_reviews.rating), 1), 0.0) as averageRating'),
-            ];
-
-            $tutor = User::select(array_merge($userFields, [
-                DB::raw('(SELECT IFNULL(FORMAT(AVG(' . RatingsAndReviewFields::Rating . '), 1), 0.0) FROM ratings_and_reviews WHERE ' . RatingsAndReviewFields::TutorId . ' = users.id) as averageRating'),
-                DB::raw('(SELECT COUNT(DISTINCT ' . BookingFields::LearnerId . ') FROM bookings WHERE ' . BookingFields::TutorId . ' = users.id) as totalLearners')
-            ]))
-            ->with([
-                'profile',
-                'receivedRatings' => function ($query) {
-                    $query->select([
-                        RatingsAndReviewFields::TutorId,
-                        RatingsAndReviewFields::LearnerId,
-                        RatingsAndReviewFields::Rating,
-                        RatingsAndReviewFields::Review
-                    ]);
-                },
-                'receivedRatings.learner' => function ($query) {
-                    $query->select(['id']); // Only retrieve learner ID
-                }
-            ])
-            ->where('users.id', $tutorId)
-            ->where(UserFields::Role, User::ROLE_TUTOR)
-            ->firstOrFail();
-
-            $fluencyLevel  = FluencyLevels::Tutor[$tutor->profile->{ProfileFields::Fluency}];
-
-            // Calculate total learners
-            $totalLearners = $tutor->totalLearners; //->bookingsAsTutor->count();
-
-            $learnerReview = RatingsAndReview::select([
-                RatingsAndReviewFields::Rating,
-                RatingsAndReviewFields::Review
-            ])
-            ->where(RatingsAndReviewFields::TutorId, $tutorId)
-            ->where(RatingsAndReviewFields::LearnerId, $learnerId)
-            ->first();
-
-            // Determine hire status
-            // $hireStatus = -1;
-
-            // if ($tutor->bookingRequestsReceived->isNotEmpty()) {
-            //     // Tutor hasn't accepted the hire request yet
-            //     $hireStatus = 2;
-            // }
-
-            // if ($hireStatus == -1 && Booking::where(BookingFields::TutorId, $tutorId)
-            //     ->where(BookingFields::LearnerId, Auth::user()->id)
-            //     ->exists())
-            // {
-            //     // Tutor is hired by learner ...
-            //     $hireStatus = 1;
-            // }
-
-            // if ($tutor->bookingsAsTutor->isNotEmpty()) {
-            //     // Tutor is hired by learner
-            //     $hireStatus = 1;
-            // } elseif ($tutor->bookingRequestsReceived->isNotEmpty()) {
-            //     // Tutor hasn't accepted the hire request yet
-            //     $hireStatus = 2;
-            // }
-
-            $hireStatus = -1;
-
-            if (Booking::where(BookingFields::TutorId, $tutorId)
-                ->where(BookingFields::LearnerId, $learnerId)
-                ->exists())
-            {
-                // Tutor is hired by learner ...
-                $hireStatus = 1;
-            }
-            else if (BookingRequest::where(BookingRequestFields::ReceiverId, $tutorId)
-                ->where(BookingRequestFields::SenderId, $learnerId)
-                ->exists())
-            {
-                // Tutor havent accepted the hire request yet
-                $hireStatus = 2;
-            }
-
-            $photo = $tutor->{UserFields::Photo};
-            $profilePic = asset('assets/img/default_avatar.png');
-
-            if (!empty($photo))
-                $profilePic = Storage::url("public/uploads/profiles/$photo");
-
-
-            $skills = [];
-
-            if ($tutor->profile->{ProfileFields::Skills})
-            {
-                foreach($tutor->profile->{ProfileFields::Skills} as $skill)
-                {
-                    $skills[] = User::SOFT_SKILLS[$skill];
-                }
-            }
-
-            $firstname = $tutor->{UserFields::Firstname};
-            $tutorDetails = [
-                'hashedId'           => $id,
-                'firstname'          => $firstname,
-                'possessiveName'     => User::toPossessiveName($firstname),
-                'fullname'           => implode(' ', [$tutor->{UserFields::Firstname}, $tutor->{UserFields::Lastname}]),
-                'email'              => $tutor->email,
-                'contact'            => $tutor->{UserFields::Contact},
-                'address'            => $tutor->{UserFields::Address},
-                'verified'           => $tutor->{UserFields::IsVerified} == 1,
-                'work'               => $tutor->profile->{ProfileFields::Experience},
-                'bio'                => $tutor->profile->{ProfileFields::Bio},
-                'about'              => $tutor->profile->{ProfileFields::About},
-                'education'          => $tutor->profile->{ProfileFields::Education},
-                'certs'              => $tutor->profile->{ProfileFields::Certifications},
-                'skills'             => $skills,
-                'photo'              => $profilePic,
-                'hireStatus'         => $hireStatus,
-                'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],
-                'fluencyBadgeColor'  => $fluencyLevel['Badge Color'],
-                'fluencyLevelText'   => $fluencyLevel['Level'],
-                'averageRating'      => $tutor->averageRating,
-                'ratingsAndReviews'  => $tutor->receivedRatings
-            ];
-
-            $starRatings = Constants::StarRatings;
-
-            // Return the view with the tutor data
-            return view('tutor.show', compact('tutorDetails', 'totalLearners', 'starRatings', 'learnerReview'));
-        }
-        catch (ModelNotFoundException $e)
-        {
-            // Return custom 404 page
-            return view('errors.404');
-        }
-        catch (Exception $e)
-        {
-            error_log($e->getMessage());
-            // Return custom 404 page
-            return view('errors.500');
-        }
+        return $this->tutorSvc->showTutorDetails($id);
     }
     //
     //..............................................
