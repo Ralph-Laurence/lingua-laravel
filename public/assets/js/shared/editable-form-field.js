@@ -1,13 +1,9 @@
 const editableFormFields = (function()
 {
     const tooltipAttr = 'with-tooltip';
-    var callCount = 0;
 
     let addTooltip = function(targetElement, tooltipMsg)
     {
-        callCount++;
-        console.log(callCount);
-
         // Add a tooltip to the field
         targetElement.attr('data-bs-toggle', 'tooltip').tooltip({
             trigger: 'focus',

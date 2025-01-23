@@ -35,10 +35,10 @@ class LearnerBookingRequestService
             // Disable AVAST Mail Shield "Outbound SMTP" before sending emails
             $emailData = [
                 'name'      => $learnerName,
-                'action'    => route('tutor.hire-requests'),
+                'action'    => url(route('tutor.hire-requests')),
                 'logo'      => public_path('assets/img/logo-brand-sm.png')
             ];
-        
+
             Mail::to($tutor->email)->send(new HireTutorRequestMail($emailData));
 
             return 200;

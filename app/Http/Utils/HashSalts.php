@@ -7,4 +7,19 @@ class HashSalts {
     const Learners  = 'BwVZZ8I2ZD';
     const Files     = 'auxr5zcg63';
     const Chat      = 'iPNuHXALDp';
+    const Profile   = 'DUzenmawOT';
 }
+
+/*
+Here are your random strings:
+
+mKvAnPyiTv
+WAaHIFbQyH
+FXKGylvgYq
+McpProqkmm
+XUTYaqkBZD
+KvxdonbIjn
+haLCioJbaD
+TIkLyLAokn
+dcCxoozoVK
+*/

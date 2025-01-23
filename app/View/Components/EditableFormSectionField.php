@@ -10,18 +10,21 @@ use Illuminate\Support\Str;
 class EditableFormSectionField extends Component
 {
     private $m_inputClassList = 'form-control text-13';
+    private $m_rootClassList  = 'input-group has-validation';
 
     /**
      * Create a new component instance.
      */
     public function __construct(
-        public $name = '',
-        public $value = '',
-        public $placeholder = '',
-        public $allowSpaces = 'true',
+        public $name            = '',
+        public $value           = '',
+        public $originalValue   = '',
+        public $placeholder     = '',
+        public $allowSpaces     = 'true',
         public $invalidFeedback = '',
-        public $inputClassList = '',
-        public $locked = false
+        public $inputClassList  = '',
+        public $rootClassList   = '',
+        public $locked          = false
     )
     {
         $defaultName = 'input-'.Str::random(10);
@@ -39,6 +42,11 @@ class EditableFormSectionField extends Component
         // We wont add an automatic placeholder when there is no element name.
         if (empty($this->placeholder) && $this->name != $defaultName)
             $this->placeholder = ucwords($this->name);
+
+        if (empty($rootClassList))
+            $this->m_rootClassList .= ' mb-3';
+        else
+            $this->m_rootClassList .= ' '. $rootClassList;
     }
 
     /**
@@ -47,7 +55,8 @@ class EditableFormSectionField extends Component
     public function render(): View|Closure|string
     {
         return view('x-components.editable-form-section-field', [
-            'inputClasses' => $this->m_inputClassList
+            'inputClasses' => $this->m_inputClassList,
+            'rootClasses'  => $this->m_rootClassList
         ]);
     }
 }

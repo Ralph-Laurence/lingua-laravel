@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger(PendingEmailUpdateFields::UserId);
             $table->string(PendingEmailUpdateFields::OldEmail);
             $table->string(PendingEmailUpdateFields::NewEmail);
+            $table->string(PendingEmailUpdateFields::VerificationCode);
             $table->timestamps();
 
             $table->foreign(PendingEmailUpdateFields::UserId)

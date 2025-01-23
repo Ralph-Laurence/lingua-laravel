@@ -1,10 +1,17 @@
-<div class="input-group has-validation mb-3">
+@php
+    $classList = $inputClasses;
+
+    if ($errors->has($name))
+        $classList = "$classList is-invalid";
+
+@endphp
+<div class="{{ $rootClasses }}">
     @if ($attributes->has('type') && $attributes->get('type') === 'tel')
         <span class="input-group-text text-12">
             <i class="fi fi-ph"></i> +63
         </span>
     @endif
-    <input {{ $attributes->merge(['class' => $inputClasses]) }}
+    <input {{ $attributes->merge(['class' => $classList]) }}
         id="{{ $name }}" value="{{ $value }}" name="{{ $name }}"
         @if($placeholder !== 'false')
             placeholder="{{ $placeholder }}"
@@ -12,6 +19,10 @@
 
         @if ($locked)
             {{ 'readonly' }}
+        @endif
+
+        @if ($originalValue !== 'false' && !empty($originalValue))
+            data-original-value="{{ $originalValue }}"
         @endif>
 
     @if (!empty($invalidFeedback))
@@ -19,7 +30,6 @@
         {{ $invalidFeedback }}
     </div>
     @endif
-
 </div>
 
 @once

@@ -7,4 +7,5 @@ class PendingEmailUpdateFields
     const UserId    = 'user_id';
     const OldEmail  = 'old_email';
     const NewEmail  = 'new_email';
+    const VerificationCode = 'verification_code';
 }

@@ -367,7 +367,7 @@ class TutorService
             $obj['fluencyStr']   = $fluencyFilter[$fluency];
             $obj['fluencyBadge'] = FluencyLevels::Tutor[$fluency]['Badge Color'];
             $obj['fluencyDesc'] = FluencyLevels::Tutor[$fluency]['Description'];
-            
+
             $photo = $obj->{UserFields::Photo};
             $obj['photo'] = $defaultPic;
 
@@ -492,7 +492,7 @@ class TutorService
             // Disable AVAST Mail Shield "Outbound SMTP" before sending emails
             $emailData = [
                 'firstname' => $applicant->{UserFields::Firstname},
-                'login'     => route('login'),
+                'login'     => url(route('login')),
                 'logo'      => public_path('assets/img/logo-brand-sm.png')
             ];
 

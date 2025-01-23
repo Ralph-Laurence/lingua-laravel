@@ -170,6 +170,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\ViewComposerServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
+        App\Providers\CustomValidationServiceProvider::class,
     ])->toArray(),
 
     /*

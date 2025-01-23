@@ -18,7 +18,8 @@ class SLButton extends Component
         public $id    = '',
         public $type  = 'button',
         public $text  = 'Button',
-        public $style = 'primary'
+        public $style = 'primary',
+        public $icon  = ''
     )
     {
         if (empty($this->id))

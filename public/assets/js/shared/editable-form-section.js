@@ -1,4 +1,7 @@
-$(() => allowEditOnFormSectionHeader());
+$(() => {
+    allowEditOnFormSectionHeader();
+    //handleOriginalDataReset();
+});
 //
 // Disable readonly attribute on all forms with class "allow-edit"
 // and show the cancel button
@@ -26,9 +29,9 @@ function allowEditOnFormSectionHeader()
         targetForm.find('.btn-save-edit').removeClass('disabled');
     });
 
-    $('.btn-cancel-edit').on('click', function()
+    $('.btn-cancel-edit').on('click', function(e)
     {
-        let targetForm = $(this).closest('form');
+        const targetForm = $(this).closest('form');
 
         if (targetForm == null)
         {
@@ -44,6 +47,33 @@ function allowEditOnFormSectionHeader()
 
         targetForm.find('.btn-edit-form-section').show();
         targetForm.find('.btn-save-edit').addClass('disabled');
+
+        // Hide all invalid feedbacks
+        targetForm.removeClass('was-validated');
+
+        $.each(targetForm.find('.is-invalid'), function()
+        {
+            $(this).removeClass('is-invalid');
+        });
+
+        e.preventDefault();
+
+        // Reset inputs to their original values
+        targetForm.find('input').each(function()
+        {
+            // Check if input has data-original-value attribute
+            if ($(this).attr('data-original-value'))
+            {
+                const original = $(this).data('original-value');
+                $(this).val(original);
+            }
+        });
+        // Reset inputs to their original values
+        // targetForm.find('input[data-original-value]').each(function ()
+        // {
+        //     const original = $(this).data('original-value');
+        //     $(this).val(original);
+        // });
     });
 }
 
@@ -58,3 +88,32 @@ function makeFieldsReadonly(targetForm, makeReadonly)
         $(this).attr('readonly', makeReadonly);
     });
 }
+
+function handleOriginalDataReset()
+{
+    $('form').on('reset', function(e)
+    {
+        e.preventDefault();
+        const form = $(this);
+
+        form.find('input').each(function() {
+            const input = $(this);
+
+            // Check if input has data-original-value attribute
+            if (input.attr('data-original-value')) {
+                input.val(input.data('original-value'));
+            }
+        });
+    });
+}
+
+//
+    // Set the input fields original value when its
+    // parent form has been reset
+    //
+    let bindOriginalValuesOnReset = function()
+    {
+        let parentForm = $(this).closest('form');
+
+        console.log('closest form is: ' + parentForm.attr('id'));
+    };
