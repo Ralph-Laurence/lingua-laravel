@@ -1,0 +1,115 @@
+var croppieInstance;
+
+$(document).ready(function ()
+{
+    $('#upload').on('change', function ()
+    {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            handleImageUploaded(e);
+        };
+        reader.readAsDataURL(this.files[0]);
+    });
+
+    $('#crop-btn').on('click', function () {
+        croppieInstance.croppie('result', {
+            type: 'base64', // Get the result as a base64 string
+            size: 'viewport'
+        }).then(function (response) {
+            $('#cropped_photo').val(response);
+            $('#photo-form').submit();
+        });
+    });
+});
+
+function handleImageUploaded(e)
+{
+    // $('#cropModal').modal('show');
+    var img = new Image();
+    img.src = e.target.result;
+
+    img.onload = function ()
+    {
+        console.log('reached');
+
+        var width = img.width;
+        var height = img.height;
+
+        // Check if the image meets the minimum dimensions
+        if (width < 200 || height < 200)
+        {
+            alert('Image dimensions must be at least 200x200 pixels.');
+            return; // Stop further processing
+        }
+
+        $('#crop-image').croppie('destroy'); // Destroy previous Croppie instance if any
+
+        croppieInstance = $('#crop-image').croppie({
+            url: e.target.result,
+            viewport: {
+                width: 200,
+                height: 200,
+                type: 'square'
+            },
+            boundary: {
+                width: 250,
+                height: 250
+            },
+            enforceBoundary: true,
+            enableExif: true,
+            minZoom: calculateMinZoom(width, height)
+        });
+
+        // Calculate min and max zoom levels
+        var minZoom = calculateMinZoom(width, height);
+        var maxZoom = calculateMaxZoom(width, height);
+
+        // // Set min and max attributes for the slider
+        // $('.cr-slider').attr({
+        //     'min': minZoom,
+        //     'max': maxZoom
+        // });
+
+        // Center the image
+        // var points = calculateCenterPoints(width, height, 200, 200);
+        // croppieInstance.croppie('bind', {
+        //     url: e.target.result,
+        //     points: points
+        // })
+        // .then(function () {
+        //     console.log('Croppie bind complete');
+        // });
+
+        $('#cropModal').modal('show');
+    };
+
+    $('#cropModal').on('shown.bs.modal', function() {
+        croppieInstance.croppie('bind');
+    })
+}
+
+function calculateMinZoom(width, height) {
+    var viewportWidth = 200;
+    var viewportHeight = 200;
+
+    var minZoomWidth = viewportWidth / width;
+    var minZoomHeight = viewportHeight / height;
+
+    return Math.max(minZoomWidth, minZoomHeight);
+}
+
+function calculateMaxZoom(width, height) {
+    var viewportWidth = 200;
+    var viewportHeight = 200;
+
+    var maxZoomWidth = width / viewportWidth;
+    var maxZoomHeight = height / viewportHeight;
+
+    return Math.min(maxZoomWidth, maxZoomHeight);
+}
+
+function calculateCenterPoints(imageWidth, imageHeight, viewportWidth, viewportHeight) {
+    var centerX = (imageWidth - viewportWidth) / 2;
+    var centerY = (imageHeight - viewportHeight) / 2;
+    return [centerX, centerY, centerX + viewportWidth, centerY + viewportHeight];
+}

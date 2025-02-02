@@ -67,13 +67,21 @@ $RoleMw = 'role-mw:'; // Role middleware
 Route::controller(MyProfileController::class)->prefix('/signlingua/my-profile')->middleware('auth')->group(function()
 {
     Route::get('/edit',                 'index')->name('myprofile.edit');
-    Route::put('/update-photo',         'updatePhoto')->name('profile.update.photo');
+    Route::put('/update-photo',         'updatePhoto')->name('myprofile.update-photo');
+    Route::post('/remove-photo',        'removePhoto')->name('myprofile.remove-photo');
     Route::post('/update-password',     'updatePassword')->name('profile.update-password');
     Route::post('/update-identity',     'updateIdentity')->name('profile.update-identity');
     Route::post('/update-account',      'updateAccount')->name('profile.update-account');
+    Route::post('/update-bio',          'updateBio')->name('profile.update-bio');
+
     Route::post('/revert-email',        'revertEmailUpdate')->name('myprofile.revert-email');
     Route::get('/confirm-email/{id}',   'showEmailConfirmation')->name('myprofile.email-confirmation');
     Route::post('/confirm-email',       'confirmEmailUpdate')->name('myprofile.confirm-email');
+
+    Route::get('/fetch-education',      'fetchEducation')->name('myprofile.fetch-education');
+    Route::post('/add-education',       'addEducation')->name('myprofile.add-education');
+    Route::post('/update-education',    'updateEducation')->name('myprofile.update-education');
+    Route::post('/remove-education',    'removeEducation')->name('myprofile.remove-education');
 });
 
 Route::middleware(['auth', $RoleMw . User::ROLE_ADMIN])->group(function ()

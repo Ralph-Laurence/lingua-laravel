@@ -12,4 +12,11 @@ class Constants {
         '4' => 'Very Good',
         '5' => 'Excellent'
     ];
+    const Disabilities = [
+        '0' => 'No Impairments',
+        '1' => 'Deaf or Hard of Hearing',
+        '2' => 'Non-Verbal',
+        '3' => 'Both Deaf and Non-Verbal'
+    ];
+    const DocPathEducation = 'public/documentary_proofs/education/';
 }

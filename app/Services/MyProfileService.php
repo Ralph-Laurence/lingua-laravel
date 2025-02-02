@@ -2,12 +2,19 @@
 
 namespace App\Services;
 
+use App\Http\Utils\Constants;
 use App\Http\Utils\HashSalts;
 use App\Mail\RevertEmailUpdateMail;
+use App\Models\FieldNames\DocProofFields;
 use App\Models\FieldNames\PendingEmailUpdateFields;
+use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
 use App\Models\PendingEmailUpdate;
+use App\Models\Profile;
 use App\Models\User;
+use App\Rules\CheckCurrentPassword;
+use App\Rules\CheckOldPassword;
+use App\Rules\PreventPasswordReuse;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -30,24 +37,52 @@ class MyProfileService
     //
     public function index()
     {
-        $user = Auth::user();
+        $userObj = null; //Auth::user();
+
+        try
+        {
+            $userObj = User::where('id', Auth::id())->with('profile')->firstOrFail();
+        }
+        catch (ModelNotFoundException $ex)
+        {
+            return response()->view('errors.404', [], 404);
+        }
 
         // Trim contact number to not show trailing zero
-        $phone = $user->{UserFields::Contact};
+        $phone = $userObj->{UserFields::Contact};
 
         if ($phone[0] == '0')
             $phone = ltrim($phone, $phone[0]);
 
+        $photo = $userObj->{UserFields::Photo};
+        $photoExists = false;
+
+        if (!empty($photo) && Storage::exists("public/uploads/profiles/$photo"))
+        {
+            $photoExists = true;
+            $photo = asset(Storage::url("public/uploads/profiles/$photo"));
+        }
+        else
+        {
+            $photo = asset('assets/img/default_avatar.png');
+        }
+
+        $role = $userObj->{UserFields::Role};
         $user = [
-            'firstname' => $user->{UserFields::Firstname},
-            'lastname'  => $user->{UserFields::Lastname},
-            'username'  => $user->{UserFields::Username},
-            'email'     => $user->email,
-            'photo'     => $user->photoUrl,
-            'contact'   => $phone,
-            'address'   => $user->{UserFields::Address}
+            'firstname'     => $userObj->{UserFields::Firstname},
+            'lastname'      => $userObj->{UserFields::Lastname},
+            'username'      => $userObj->{UserFields::Username},
+            'email'         => $userObj->email,
+            'photo'         => $photo,//$userObj->photoUrl,
+            'photoExists'   => $photoExists,
+            'contact'       => $phone,
+            'address'       => $userObj->{UserFields::Address},
+            'role'          => $role
         ];
 
+        //
+        // Handle cases when the user has pending email change
+        //
         $pendingEmailUpdate = PendingEmailUpdate::where(
             PendingEmailUpdateFields::UserId, Auth::id()
         );
@@ -59,23 +94,88 @@ class MyProfileService
             $pendingEmail = $pendingEmail->{PendingEmailUpdateFields::NewEmail};
             $hasPendingEmailUpdate = true;
         }
+        //
+        //
+        //
+        if ($role == User::ROLE_TUTOR)
+        {
+            $educationProof = $userObj->profile->{ProfileFields::Education};
+            $workProof      = $userObj->profile->{ProfileFields::Experience};
+            $certProof      = $userObj->profile->{ProfileFields::Certifications};
 
-        return view('myprofile.edit', compact('user', 'hasPendingEmailUpdate', 'pendingEmail'));
+            if (!empty($educationProof))
+            {
+                foreach ($educationProof as $k => $obj)
+                {
+                    $pdfPath = $obj[DocProofFields::FullPath];
+
+                    // Ensure the PDF path is sanitized and validated
+                    if (!Storage::exists($pdfPath))
+                        $educationProof[$k]['docUrl'] = '-1'; // 'corrupted'
+
+                    // Generate a secure URL for the PDF file
+                    $educationProof[$k]['docUrl'] = asset(Storage::url($pdfPath)).'#toolbar=0';
+                    $educationProof[$k]['docId'] = $obj[DocProofFields::DocId];
+
+                    unset(
+                        $educationProof[$k][DocProofFields::FullPath],
+                        $educationProof[$k][DocProofFields::FileUpload]
+                    );
+                }
+
+                $userObj->profile->{ProfileFields::Education} = $educationProof;
+            }
+
+            // if (!empty($workProof))
+            // {
+            //     foreach ($workProof as $k => $obj)
+            //     {
+            //         $pdfPath = $obj['full_path'];
+
+            //         // Ensure the PDF path is sanitized and validated
+            //         if (!Storage::exists($pdfPath))
+            //             $workProof[$k]['docProof'] = '-1'; // 'corrupted'
+
+            //         // Generate a secure URL for the PDF file
+            //         $workProof[$k]['docProof'] = Storage::url($pdfPath);
+            //     }
+            // }
+
+            // if (!empty($certProof))
+            // {
+            //     foreach ($certProof as $k => $obj)
+            //     {
+            //         $pdfPath = $obj['full_path'];
+
+            //         // Ensure the PDF path is sanitized and validated
+            //         if (!Storage::exists($pdfPath))
+            //             $certProof[$k]['docProof'] = '-1'; // 'corrupted'
+
+            //         // Generate a secure URL for the PDF file
+            //         $certProof[$k]['docProof'] = Storage::url($pdfPath);
+            //     }
+            // }
+
+            $user['profile'] = $userObj->profile;
+        }
+
+        return view('myprofile.edit', compact('user', 'hasPendingEmailUpdate', 'pendingEmail'))
+            ->with('disabilities', Constants::Disabilities);
     }
 
     public function updatePassword(Request $request)
     {
         // Define validation rules
         $rules = [
-            'current_password'      => 'required|string|passwordCheck', // |min:8
-            'new_password'          => 'required|string|min:4|not_regex:/\s/',
+            'current_password'      => ['required', 'string', new CheckCurrentPassword], // |min:8
+            'new_password'          => ['required', 'string', 'min:8', 'not_regex:/\s/', new PreventPasswordReuse],
             'password_confirmation' => 'required|string|same:new_password'
         ];
 
         // Define custom error messages
         $messages = [
             'current_password.required'         => 'Please enter your current password.',
-            'current_password.password_check'   => 'The current password is incorrect.',
+            //'current_password.password_check'   => 'The current password is incorrect.',
             'new_password.required'             => 'Please enter a new password.',
             'new_password.min'                  => 'The new password must be at least 8 characters.',
             'new_password.not_regex'            => 'The new password must not contain spaces.',
@@ -141,6 +241,76 @@ class MyProfileService
 
         return redirect()->route('myprofile.edit');
     }
+
+    public function updateBio(Request $request)
+    {
+        $rules    = [ 'bio' => 'required|string|max:180' ];
+        $messages = ['bio.required' => 'Please write a short note about yourself'];
+
+        $validator = Validator::make($request->only('bio'), $rules, $messages);
+
+        if ($validator->fails())
+        {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        DB::beginTransaction();
+
+        try
+        {
+            $profile = Profile::where(ProfileFields::UserId, Auth::id())->firstOrFail();
+
+            // Update the bio
+            $profile->{ProfileFields::Bio} = $request->bio;
+            $profile->save();
+
+            DB::commit();
+            session()->flash('profile_update_message', "Your bio has been successfully updated.");
+        }
+        catch (Exception $ex)
+        {
+            DB::rollBack();
+            session()->flash('profile_update_message', "An error occurred while trying to update your bio. Please try again later.");
+        }
+
+        return redirect()->back();
+    }
+
+    public function removePhoto()
+    {
+        $user = Auth::user();
+        $photo = $user->{UserFields::Photo};
+        $photoExists = (!empty($photo) && Storage::exists("public/uploads/profiles/$photo"));
+
+        if (!$photoExists)
+        {
+            session()->flash('profile_update_message', "We were unable to remove your profile picture. It may have already been removed or can't be accessed.");
+            return redirect()->back();
+        }
+
+        DB::beginTransaction();
+
+        try
+        {
+            // Remove photo from the file system
+            Storage::delete("public/uploads/profiles/$photo");
+
+            // Remove photo from the database
+            $user->{UserFields::Photo} = null;
+            $user->save();
+
+            DB::commit();
+            session()->flash('profile_update_message', "Your profile picture has been successfully removed.");
+        }
+        catch (Exception $ex)
+        {
+            DB::rollBack();
+            session()->flash('profile_update_message', "An error occurred while trying to remove your profile picture. Please try again.");
+        }
+
+        return redirect()->back();
+    }
+
 
     /**
      * This function handles the updating of the user's username and email

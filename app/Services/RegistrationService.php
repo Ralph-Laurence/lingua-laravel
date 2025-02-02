@@ -4,8 +4,7 @@ namespace App\Services;
 
 use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
-use App\Mail\RegistrationApprovedMail;
-use App\Mail\RegistrationDeclinedMail;
+use App\Models\FieldNames\DocProofFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
 use App\Models\PendingRegistration;
@@ -15,10 +14,8 @@ use Exception;
 use Hashids\Hashids;
 use HTMLPurifier_Config;
 use HTMLPurifier;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -329,12 +326,13 @@ class RegistrationService
                 ];
 
                 $educ[] = [
-                    'from'          => $value,
-                    'to'            => $inputs["education-year-to-$index"],
-                    'institution'   => $inputs["education-institution-$index"],
-                    'degree'        => $inputs["education-degree-$index"],
-                    'file_upload'   => $filePath,
-                    'full_path'     => "$filePath/$fileName",
+                    DocProofFields::DocId           => Str::random(),
+                    DocProofFields::YearFrom        => $value,
+                    DocProofFields::YearTo          => $inputs["education-year-to-$index"],
+                    DocProofFields::EducInstitution => $inputs["education-institution-$index"],
+                    DocProofFields::EducDegree      => $inputs["education-degree-$index"],
+                    DocProofFields::FileUpload      => $filePath,
+                    DocProofFields::FullPath        => "$filePath/$fileName",
                 ];
             }
 
@@ -356,12 +354,13 @@ class RegistrationService
                 ];
 
                 $work[] = [
-                    'from'          => $value,
-                    'to'            => $inputs["work-year-to-$index"],
-                    'company'       => $inputs["work-company-$index"],
-                    'role'          => $inputs["work-role-$index"],
-                    'file_upload'   => $filePath,
-                    'full_path'     => "$filePath/$fileName",
+                    DocProofFields::DocId           => Str::random(),
+                    DocProofFields::YearFrom        => $value,
+                    DocProofFields::YearTo          => $inputs["work-year-to-$index"],
+                    DocProofFields::WorkCompany     => $inputs["work-company-$index"],
+                    DocProofFields::WorkRole        => $inputs["work-role-$index"],
+                    DocProofFields::FileUpload      => $filePath,
+                    DocProofFields::FullPath        => "$filePath/$fileName",
                 ];
             }
 
@@ -383,11 +382,12 @@ class RegistrationService
                 ];
 
                 $cert[] = [
-                    'from'          => $value,
-                    'title'         => $inputs["certification-title-$index"],
+                    DocProofFields::DocId           => Str::random(),
+                    DocProofFields::YearFrom        => $value,
+                    DocProofFields::CertTitle       => $inputs["certification-title-$index"],
                     'description'   => $inputs["certification-description-$index"],
-                    'file_upload'   => $filePath,
-                    'full_path'     => "$filePath/$fileName",
+                    DocProofFields::FileUpload      => $filePath,
+                    DocProofFields::FullPath        => "$filePath/$fileName",
                 ];
             }
         }
@@ -417,19 +417,6 @@ class RegistrationService
             ],
             "upload" => $uploadQueue
         ];
-
-        // if ($request->has('is_guest'))
-        // {
-        //     $returnData["usersModel"] = [
-        //         UserFields::Firstname   => $inputs['firstname'],
-        //         UserFields::Lastname    => $inputs['lastname'],
-        //         UserFields::Contact     => $inputs['contact'],
-        //         UserFields::Address     => $inputs['address'],
-        //         UserFields::Username    => $inputs['username'],
-        //         'email'                 => $inputs['email'],
-        //         'password'              => $inputs['password']
-        //     ];
-        // }
 
         return $returnData;
     }

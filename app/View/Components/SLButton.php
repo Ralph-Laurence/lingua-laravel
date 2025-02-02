@@ -23,7 +23,7 @@ class SLButton extends Component
     )
     {
         if (empty($this->id))
-            $this->id = 'input-'.Str::random(10);
+            $this->id = 'button-'.Str::random(10);
 
         switch ($style)
         {

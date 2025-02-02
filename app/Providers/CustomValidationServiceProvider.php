@@ -10,7 +10,8 @@ class CustomValidationServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        Validator::extend('passwordCheck', function ($attribute, $value, $parameters, $validator) {
+        Validator::extend('passwordCheck', function ($attribute, $value, $parameters, $validator)
+        {
             return Hash::check($value, Auth::user()->password);
         });
     }

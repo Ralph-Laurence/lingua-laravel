@@ -32,4 +32,9 @@ class Profile extends Model
     public function user() {
         return $this->belongsTo(User::class, ProfileFields::UserId);
     }
+
+    // public function getBioAttribute()
+    // {
+    //     return $this->{ProfileFields::Bio};
+    // }
 }

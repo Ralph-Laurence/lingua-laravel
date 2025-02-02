@@ -189,4 +189,6 @@ return [
         'Image' => Intervention\Image\Facades\Image::class,
     ])->toArray(),
 
+
+    'feature_send_mails' => env('FEATURE_SEND_MAILS', true),
 ];

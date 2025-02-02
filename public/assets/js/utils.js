@@ -17,3 +17,13 @@ function initFluencyTooltips()
         });
     })
 }
+
+function showWaiting()
+{
+    waitingDialog.show("Processing...", {
+        headerSize: 6,
+        headerText: "Hold on, this shouldn't take long...",
+        dialogSize: 'sm',
+        contentClass: 'text-13'
+    });
+}

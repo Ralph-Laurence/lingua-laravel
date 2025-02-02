@@ -39,13 +39,16 @@
         .card {
             border-radius: .75rem;
         }
+        .card .error-card {
+            max-width: 300px;
+        }
     </style>
 </head>
 
 <body>
     <div class="flex-center w-100 h-100">
         <div class="card shadow-sm p-4">
-            <div class="card-body text-center">
+            <div class="card-body text-center error-card">
                 {{-- @if (!empty($errCode))
 
                     @switch($errCode)
@@ -62,7 +65,14 @@
                     @endswitch
                 @endif --}}
                 @yield('content')
-                <a href="/" class="btn btn-primary btn-go-back shadow">Back to Safety</a>
+                @php
+                    $back = '/';
+
+                    if (!empty($redirect))
+                        $back = $redirect;
+
+                @endphp
+                <a href="{{ $back }}" class="btn btn-primary btn-go-back shadow">Back to Safety</a>
             </div>
         </div>
 

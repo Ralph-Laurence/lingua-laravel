@@ -44,7 +44,8 @@
 
     <x-editable-form-section-field
         type="password" name="new_password" placeholder="New Password"
-        allowSpaces="false" with-tooltip="false" required="true" :locked="$lockStateReadonly" maxlength="64"
+        allowSpaces="false" with-tooltip="Your new password must be atleast 8 characters long"
+        required="true" :locked="$lockStateReadonly" maxlength="64" minlength="8"
         invalidFeedback="{{ $errMsg['new_password'] }}" autocomplete="new-password"/>
 
     <x-editable-form-section-field

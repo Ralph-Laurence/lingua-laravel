@@ -113,22 +113,18 @@
     @include('partials.confirmbox')
 @endpush
 @push('scripts')
-    <script src="{{ asset('assets/lib/waitingfor/bootstrap-waitingfor.min.js') }}"></script>
     <script>
         $(document).ready(function()
         {
-            function showWaiting()
-            {
-                waitingDialog.show("Processing...", {
-                    headerSize: 6,
-                    headerText: "Hold on, this shouldn't take long...",
-                    dialogSize: 'sm',
-                    contentClass: 'text-13'
-                });
-            }
-
             $('#form-section-account').on('submit', function(e) {
                 showWaiting();
+            });
+
+            $('#form-section-account').on('submit', function(e)
+            {
+                e.preventDefault();
+                showWaiting();
+                $(this)[0].submit();
             });
 
             $('#frm-revert-email').on('submit', function(e)

@@ -47,6 +47,11 @@ class HomeController extends Controller
                     $viewData['showJoinCommunity'] = false;
                     break;
 
+                case User::ROLE_PENDING:
+                    $viewData['currentRole'] = 'pending';
+                    $viewData['showJoinCommunity'] = false;
+                    break;
+
                 case User::ROLE_ADMIN:
                     return redirect()->route('admin.dashboard');
                     break;

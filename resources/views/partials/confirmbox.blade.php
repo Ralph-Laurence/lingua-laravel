@@ -1,5 +1,5 @@
 <!-- Modal -->
-<div class="modal fade confirm-box" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade confirm-box" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -7,7 +7,7 @@
                     <span class="message-box-icon me-2">
                         <i class="fas fa-circle-question text-primary"></i>
                     </span>
-                    <h6 class="modal-title" id="staticBackdropLabel"></h6>
+                    <h6 class="modal-title"></h6>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>

@@ -5,5 +5,11 @@
     <h1 class="fw-bold mb-0">OOPS!</h1>
 </div>
 <h6>Error 500: Internal Server Error</h6>
-<p class="mb-5">Something went wrong on our end.</p>
+<p class="mb-5">
+    @if (!empty($message))
+        {{ $message }}
+    @else
+        {{ 'Something went wrong on our end.' }}
+    @endif
+</p>
 @endsection

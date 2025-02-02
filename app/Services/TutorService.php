@@ -496,7 +496,8 @@ class TutorService
                 'logo'      => public_path('assets/img/logo-brand-sm.png')
             ];
 
-            Mail::to($applicant->email)->send(new RegistrationApprovedMail($emailData));
+            if (config('app.feature_send_mails'))
+                Mail::to($applicant->email)->send(new RegistrationApprovedMail($emailData));
 
             // Commit the transaction
             DB::commit();

@@ -59,7 +59,7 @@ function allowEditOnFormSectionHeader()
         e.preventDefault();
 
         // Reset inputs to their original values
-        targetForm.find('input').each(function()
+        targetForm.find('input, textarea').each(function()
         {
             // Check if input has data-original-value attribute
             if ($(this).attr('data-original-value'))
@@ -67,26 +67,36 @@ function allowEditOnFormSectionHeader()
                 const original = $(this).data('original-value');
                 $(this).val(original);
             }
+
+            if ($(this).prop('tagName').toLowerCase() === 'textarea')
+            {
+                let id = $(this).attr('id');
+
+                if (id.includes('-original'))
+                    return;
+
+                let original = targetForm.find(`#${id}-original`);
+                if (original == undefined)
+                    return;
+
+                $(this).val(original.val());
+            }
         });
-        // Reset inputs to their original values
-        // targetForm.find('input[data-original-value]').each(function ()
-        // {
-        //     const original = $(this).data('original-value');
-        //     $(this).val(original);
-        // });
     });
 }
 
 function makeFieldsReadonly(targetForm, makeReadonly)
 {
     // Find all input fields inside the form
-    let fields = targetForm.find('input');
+    let fields = targetForm.find('input, textarea');
 
     // Unlock the readonly fields for edit
     $.each(fields, function()
     {
         $(this).attr('readonly', makeReadonly);
     });
+
+    $(document).trigger('')
 }
 
 function handleOriginalDataReset()
@@ -96,7 +106,7 @@ function handleOriginalDataReset()
         e.preventDefault();
         const form = $(this);
 
-        form.find('input').each(function() {
+        form.find('input, textarea').each(function() {
             const input = $(this);
 
             // Check if input has data-original-value attribute

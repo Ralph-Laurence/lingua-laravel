@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\MyProfileDocumentsService;
 use App\Services\MyProfileService;
 use Illuminate\Http\Request;
 
 class MyProfileController extends Controller
 {
     public function __construct(
-        private MyProfileService $myProfileService
+        private MyProfileService $myProfileService,
+        private MyProfileDocumentsService $documentService
     )
     {
 
@@ -17,6 +19,16 @@ class MyProfileController extends Controller
     public function index()
     {
         return $this->myProfileService->index();
+    }
+
+    public function removePhoto()
+    {
+        return $this->myProfileService->removePhoto();
+    }
+
+    public function updatePhoto(Request $request)
+    {
+        return $this->myProfileService->updatePhoto($request);
     }
 
     public function updatePassword(Request $request)
@@ -34,6 +46,11 @@ class MyProfileController extends Controller
         return $this->myProfileService->updateIdentity($request);
     }
 
+    public function updateBio(Request $request)
+    {
+        return $this->myProfileService->updateBio($request);
+    }
+
     public function revertEmailUpdate()
     {
         return $this->myProfileService->revertEmailUpdate();
@@ -47,5 +64,25 @@ class MyProfileController extends Controller
     public function confirmEmailUpdate(Request $request)
     {
         return $this->myProfileService->confirmEmailUpdate($request);
+    }
+
+    public function updateEducation(Request $request)
+    {
+        return $this->documentService->updateEducation($request);
+    }
+
+    public function removeEducation(Request $request)
+    {
+        return $this->documentService->removeEducation($request);
+    }
+
+    public function addEducation(Request $request)
+    {
+        return $this->documentService->addEducation($request);
+    }
+
+    public function fetchEducation(Request $request)
+    {
+        return $this->documentService->fetchEducationDetails($request);
     }
 }
