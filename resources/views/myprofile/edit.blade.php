@@ -1,8 +1,28 @@
 @extends('shared.base-members')
 
+@push('scripts')
+<script src="{{ asset('assets/js/bootstrap5-form-novalidate.js') }}"></script>
+<script src="{{ asset('assets/lib/waitingfor/bootstrap-waitingfor.min.js') }}"></script>
+<script src="{{ asset('assets/lib/jquery-ui-1.14.1/jquery-ui.min.js') }}"></script>
+<script src="{{ asset('assets/lib/pdfjs-3.11.174/pdf.js') }}"></script>
+<script src="{{ asset('assets/js/utils.js') }}"></script>
+<script src="{{ asset('assets/js/components/pdf-thumbnail.js') }}"></script>
+<script src="{{ asset('assets/lib/croppie/croppie.min.js') }}"></script>
+@endpush
+
 @push('dialogs')
     @include('partials.messagebox')
+    @include('partials.confirmbox')
     <x-document-viewer-dialog />
+    <x-toast-container>
+        @if (session('profile_update_message'))
+            @include('partials.toast', [
+                'toastMessage'  => session('profile_update_message'),
+                'toastTitle'    => 'Update Profile',
+                'autoClose'     => 'true'
+            ])
+        @endif
+    </x-toast-container>
 @endpush
 
 @push('styles')
@@ -103,40 +123,7 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('assets/js/utils.js') }}"></script>
-    <script src="{{ asset('assets/js/bootstrap5-form-novalidate.js') }}"></script>
-    <script src="{{ asset('assets/lib/waitingfor/bootstrap-waitingfor.min.js') }}"></script>
-    <script src="{{ asset('assets/lib/jquery-ui-1.14.1/jquery-ui.min.js') }}"></script>
-    <script src="{{ asset('assets/lib/pdfjs-3.11.174/pdf.js') }}"></script>
-    <script src="{{ asset('assets/js/components/pdf-thumbnail.js') }}"></script>
-    <script>
-        docViewerEvt = DocumentViewerDialog.events;
-
-        $(document).on(docViewerEvt.NotFound, function()
-        {
-            MsgBox.showError("Sorry, we're unable to find the document. It might have already been removed.");
-        })
-        .on(docViewerEvt.LoadStarted,  () => showWaiting())
-        .on(docViewerEvt.LoadFinished, () => waitingDialog.hide())
-        .on('showWaitingDialog', () => showWaiting())
-        .on('hideWaitingDialog', () => waitingDialog.hide())
-        .on('showError', (event) => {
-            MsgBox.showError(event.detail.message);
-        });
-
-    </script>
+    <script src="{{ asset('assets/js/my-profile/my-profile.js') }}"></script>
     <script src="{{ asset("assets/js/shared/editable-form-section.js") }}"></script>
     <script src="{{ asset('assets/js/my-profile/edit-section-education.js') }}"></script>
-@endpush
-
-@push('dialogs')
-    <x-toast-container>
-        @if (session('profile_update_message'))
-            @include('partials.toast', [
-                'toastMessage'  => session('profile_update_message'),
-                'toastTitle'    => 'Update Profile',
-                'autoClose'     => 'true'
-            ])
-        @endif
-    </x-toast-container>
 @endpush

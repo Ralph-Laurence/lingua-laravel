@@ -1,3 +1,9 @@
+@once
+    @push('scripts')
+        <script src="{{ asset('assets/js/components/document-viewer-dialog.js') }}"></script>
+    @endpush
+@endonce
+
 <div id="pdf-viewer" class="modal" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -14,9 +20,3 @@
         </div>
     </div>
 </div>
-
-@once
-    @push('scripts')
-        <script src="{{ asset('assets/js/components/document-viewer-dialog.js') }}"></script>
-    @endpush
-@endonce

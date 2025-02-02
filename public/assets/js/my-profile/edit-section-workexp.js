@@ -1,26 +1,13 @@
-const EditSectionEducation = (function ()
+const EditSectionWorkExp = (function ()
 {
-    const updateFormSelector = '#frm-update-education';
-
     const bindEventHandlers = function()
     {
-        // Handle closing of both Add and Edit modals
-        // $('.educationModal').on('hide.bs.modal', function ()
-        // {
-        //     $('.educationModal .year-select').val(currentYear).selectmenu('refresh');
-        //     $('.educationModal form .is-invalid').removeClass('is-invalid');
-        //     $('.educationModal form').trigger('reset').removeClass('was-validated');
-        // });
-
-        resetFormOnModalClosed('.educationModal');
-
-        $('#modalAddEducation #btn-save').on('click', function ()
-        {
-            $('#frm-add-education .hdn-submit').trigger('click');
+        $('#modalAddEducation #btn-save').on('click', function () {
+            $('#frm-add-education .hdn-submit').trigger('click')
         });
 
-        $('#modalEditEducation #btn-save').on('click', function (){
-            $(`${updateFormSelector} .hdn-submit`).trigger('click');
+        $('#modalEditEducation #btn-save').on('click', function () {
+            $('#frm-update-education .hdn-submit').trigger('click')
         });
 
         $('.btn-view-doc-proof').on('click', function()
@@ -57,13 +44,13 @@ const EditSectionEducation = (function ()
             appendEducationUploadForm();
         });
 
-        $(document).on('click', `${updateFormSelector} .btn-revert`, function()
+        $(document).on('click', '#frm-update-education .btn-revert', function()
         {
             // Your click handler logic here
             let container = $(this).closest('.file-upload-input-container');
             container.html(''); // Clear the container
 
-            let viewer = $(`${updateFormSelector} .documentary-proof-previewer`);
+            let viewer = $('#frm-update-education .documentary-proof-previewer');
             viewer.show();
         });
 
@@ -71,8 +58,9 @@ const EditSectionEducation = (function ()
 
     const appendEducationUploadForm = function()
     {
-        let viewer    = $(`${updateFormSelector} .documentary-proof-previewer`);
-        let container = document.querySelector(`${updateFormSelector} .file-upload-input-container`);
+        let form = '#frm-update-education';
+        let viewer    = $(`${form} .documentary-proof-previewer`);
+        let container = document.querySelector(`${form} .file-upload-input-container`);
         let template  = document.querySelector('#education-file-upload-input-template');
 
         if (container)
@@ -92,7 +80,7 @@ const EditSectionEducation = (function ()
     const fetchEducationDetails = async function(docId)
     {
         showWaitingDialog();
-        let form = $(updateFormSelector);
+        let form = $('#frm-update-education');
 
         try
         {
@@ -163,17 +151,10 @@ const EditSectionEducation = (function ()
         bindEventHandlers();
 
         // Useful when edit education failed
-        let frmUpdateEducation = $(updateFormSelector);
+        // let frmUpdateEducation = $('#frm-update-education');
 
-        // redrawPdfPreviewOnUpdateForm(frmUpdateEducation);
-        if (frmUpdateEducation.hasClass('has-errors'))
-        {
-            redrawPdfPreviewOnUpdateForm({
-                updateForm: frmUpdateEducation,
-                oldDocProofFilename: frmUpdateEducation.find('#old-docProofFilename').val(),
-                oldDocProofUrl: frmUpdateEducation.find('#old-docProofUrl').val()
-            });
-        }
+        // if (frmUpdateEducation.hasClass('has-errors'))
+        //     rebindFrmUpdatePdfPreview(frmUpdateEducation);
     };
 
     return {
@@ -183,5 +164,5 @@ const EditSectionEducation = (function ()
 
 $(document).ready(function()
 {
-    EditSectionEducation.init();
+    EditSectionWorkExp.init();
 });

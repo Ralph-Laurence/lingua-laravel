@@ -21,8 +21,7 @@
     </style>
 @endpush
 @push('scripts')
-    <script src="{{ asset('assets/lib/croppie/croppie.min.js') }}"></script>
-    <script src="{{ asset('assets/js/my-profile/edit-section-photo.js') }}"
+    <script src="{{ asset('assets/js/my-profile/edit-section-photo.js') }}"></script>
 @endpush
 <h6 class="poppins-semibold">Profile Photo</h6>
 <p class="text-muted text-12">Ensure your profile is always up-to-date with a recent photo.</p>

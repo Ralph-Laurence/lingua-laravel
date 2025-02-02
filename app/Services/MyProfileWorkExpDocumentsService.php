@@ -20,7 +20,7 @@ class MyProfileWorkExpDocumentsService extends MyProfileDocumentsService
 {
     public function addWorkExperience(Request $request)
     {
-        $validation = $this->getEducationValidationRules($request);
+        $validation = $this->getworkExpValidationRules($request);
 
         $validator = Validator::make(
             $request->only($validation['fields']),
@@ -140,27 +140,27 @@ class MyProfileWorkExpDocumentsService extends MyProfileDocumentsService
         return $workProof;
     }
 
-    private function getEducationValidationRules(Request $request, $mode = 'create')
+    private function getworkExpValidationRules(Request $request, $mode = 'create')
     {
         $yearValidation = $this->getYearRangeValidationRules($request);
         $pdfValidation  = $this->getPdfValidationRules();
 
-        $educationValidation = [
-            "institution"           => 'required|string|max:255',
-            "degree"                => 'required|string|max:255',
+        $workExpValidation = [
+            "company"           => 'required|string|max:255',
+            "role"                => 'required|string|max:255',
         ];
 
-        $educationErrMessages = [
-            "institution.required"  => "Please enter the name of the educational institution.",
-            "institution.string"    => "The institution name must be a valid string.",
-            "institution.max"       => "The institution name cannot exceed 255 characters.",
-            "degree.required"       => "Please enter the degree title.",
-            "degree.string"         => "The degree title must be a valid string.",
-            "degree.max"            => "The degree title cannot exceed 255 characters."
+        $workExpErrMessages = [
+            "company.required"      => "Please enter the name of the company you work on.",
+            "company.string"        => "The company name must be a valid string.",
+            "company.max"           => "The company name cannot exceed 255 characters.",
+            "role.required"         => "Please enter the role title.",
+            "role.string"           => "The role title must be a valid string.",
+            "role.max"              => "The role title cannot exceed 255 characters."
         ];
 
-        $messages = array_merge($yearValidation['messages'], $educationErrMessages);
-        $rules    = array_merge($yearValidation['rules'], $educationValidation);
+        $messages = array_merge($yearValidation['messages'], $workExpErrMessages);
+        $rules    = array_merge($yearValidation['rules'], $workExpValidation);
 
         switch ($mode)
         {

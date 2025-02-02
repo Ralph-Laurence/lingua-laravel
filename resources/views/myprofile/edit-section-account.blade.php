@@ -109,9 +109,6 @@
         </form>
     @endif
 
-@push('dialogs')
-    @include('partials.confirmbox')
-@endpush
 @push('scripts')
     <script>
         $(document).ready(function()
