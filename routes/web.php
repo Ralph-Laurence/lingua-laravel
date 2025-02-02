@@ -82,6 +82,10 @@ Route::controller(MyProfileController::class)->prefix('/signlingua/my-profile')-
     Route::post('/add-education',       'addEducation')->name('myprofile.add-education');
     Route::post('/update-education',    'updateEducation')->name('myprofile.update-education');
     Route::post('/remove-education',    'removeEducation')->name('myprofile.remove-education');
+
+    Route::post('/add-workexp',         'addWorkExp')->name('myprofile.add-work-exp');
+    Route::post('/update-workexp',      'updateWorkExp')->name('myprofile.update-work-exp');
+    Route::post('/remove-workexp',      'removeWorkExp')->name('myprofile.remove-work-exp');
 });
 
 Route::middleware(['auth', $RoleMw . User::ROLE_ADMIN])->group(function ()

@@ -19,4 +19,5 @@ class Constants {
         '3' => 'Both Deaf and Non-Verbal'
     ];
     const DocPathEducation = 'public/documentary_proofs/education/';
+    const DocPathWorkExp = 'public/documentary_proofs/work_experience/';
 }

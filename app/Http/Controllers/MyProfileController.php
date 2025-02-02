@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\MyProfileDocumentsService;
+use App\Services\MyProfileEducationDocumentsService;
 use App\Services\MyProfileService;
 use Illuminate\Http\Request;
 
@@ -10,7 +10,8 @@ class MyProfileController extends Controller
 {
     public function __construct(
         private MyProfileService $myProfileService,
-        private MyProfileDocumentsService $documentService
+        //private MyProfileDocumentsService $documentService,
+        private MyProfileEducationDocumentsService $educDocsService
     )
     {
 
@@ -68,21 +69,21 @@ class MyProfileController extends Controller
 
     public function updateEducation(Request $request)
     {
-        return $this->documentService->updateEducation($request);
+        return $this->educDocsService->updateEducation($request);
     }
 
     public function removeEducation(Request $request)
     {
-        return $this->documentService->removeEducation($request);
+        return $this->educDocsService->removeEducation($request);
     }
 
     public function addEducation(Request $request)
     {
-        return $this->documentService->addEducation($request);
+        return $this->educDocsService->addEducation($request);
     }
 
     public function fetchEducation(Request $request)
     {
-        return $this->documentService->fetchEducationDetails($request);
+        return $this->educDocsService->fetchEducationDetails($request);
     }
 }

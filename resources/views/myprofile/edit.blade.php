@@ -7,6 +7,34 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/lib/croppie/croppie.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/lib/jquery-ui-1.14.1/jquery-ui.min.css') }}">
+    <style>
+        .ui-selectmenu-menu .ui-menu {
+            max-height: 185px;
+        }
+
+        .ui-selectmenu-button {
+            flex: 1 1 auto !important;
+            width: auto !important;
+        }
+
+        .ui-selectmenu-open {
+            position: absolute;
+            z-index: 65535;
+        }
+
+        .ui-state-active,
+        .ui-widget-content .ui-state-active,
+        .ui-widget-header .ui-state-active,
+        a.ui-button:active,
+        .ui-button:active,
+        .ui-button.ui-state-active:hover {
+            border: 1px solid #F88D0C;
+            background: #FFA30E;
+            font-weight: normal;
+            color: #fff;
+        }
+    </style>
 @endpush
 @section('content')
     <div class="container">
@@ -68,6 +96,7 @@
                 </div>
             </div>
             @include('myprofile.edit-section-education')
+            @include('myprofile.edit-section-work')
         </div>
 
     @endif

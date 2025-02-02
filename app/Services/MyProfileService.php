@@ -30,6 +30,13 @@ use Hashids\Hashids;
 class MyProfileService
 {
     private static $hashids = null;
+
+    public function __construct(
+        private MyProfileEducationDocumentsService $educDocSvc,
+        private MyProfileWorkExpDocumentsService $workDocSvc
+    )
+    {
+    }
     //
     //==========================================
     //    C O N T R O L L E R   A C T I O N S
@@ -105,27 +112,15 @@ class MyProfileService
 
             if (!empty($educationProof))
             {
-                foreach ($educationProof as $k => $obj)
-                {
-                    $pdfPath = $obj[DocProofFields::FullPath];
-
-                    // Ensure the PDF path is sanitized and validated
-                    if (!Storage::exists($pdfPath))
-                        $educationProof[$k]['docUrl'] = '-1'; // 'corrupted'
-
-                    // Generate a secure URL for the PDF file
-                    $educationProof[$k]['docUrl'] = asset(Storage::url($pdfPath)).'#toolbar=0';
-                    $educationProof[$k]['docId'] = $obj[DocProofFields::DocId];
-
-                    unset(
-                        $educationProof[$k][DocProofFields::FullPath],
-                        $educationProof[$k][DocProofFields::FileUpload]
-                    );
-                }
-
-                $userObj->profile->{ProfileFields::Education} = $educationProof;
+                $education = $this->educDocSvc->formatEducationProofList($educationProof);
+                $userObj->profile->{ProfileFields::Education} = $education;
             }
 
+            if (!empty($workProof))
+            {
+                $work = $this->workDocSvc->formatWorkProofList($workProof);
+                $userObj->profile->{ProfileFields::Experience} = $work;
+            }
             // if (!empty($workProof))
             // {
             //     foreach ($workProof as $k => $obj)
