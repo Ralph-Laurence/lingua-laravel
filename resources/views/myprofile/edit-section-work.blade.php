@@ -1,7 +1,7 @@
 @php
     use App\Models\FieldNames\ProfileFields;
 
-    $workExp = $user['profile']->{ProfileFields::Experience}; //[]
+    $workExp = $user['profile']->{ProfileFields::Experience};
 @endphp
 @push('dialogs')
     <x-doc-proof-upsert-modal

@@ -57,7 +57,7 @@ class EditSectionWorkExp
             try
             {
                 const data = await this.upsertModal.fetchEditDetails(docId);
-                console.log('Fetch completed, data:', data);
+                // console.log('Fetch completed, data:', data);
 
                 let options = {
                     documentaryProof: {

@@ -2,13 +2,10 @@
 
 namespace App\Services;
 
-use App\Http\Utils\Constants;
-use App\Http\Utils\HashSalts;
 use App\Models\FieldNames\DocProofFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\Profile;
 use Exception;
-use Hashids\Hashids;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

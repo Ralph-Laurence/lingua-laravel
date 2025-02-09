@@ -124,6 +124,11 @@ $(document).ready(function()
                 ?? "Sorry, the requested action can't be processed right now. Please try again later.";
 
             MsgBox.showError(message);
+    })
+    .on('click', '.btn-view-doc-proof', function()
+    {
+        let pdfUrl = $(this).data('url');
+        DocumentViewerDialog.show(pdfUrl);
     });
 });
 

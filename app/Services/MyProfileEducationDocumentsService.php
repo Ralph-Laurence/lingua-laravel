@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Services\MyProfileDocumentsService;
-use App\Http\Utils\Constants;
-use App\Http\Utils\HashSalts;
 use App\Models\FieldNames\DocProofFields;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -12,7 +10,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\Profile;
 use Exception;
-use Hashids\Hashids;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,58 +17,98 @@ use Illuminate\Support\Facades\Storage;
 
 class MyProfileEducationDocumentsService extends MyProfileDocumentsService
 {
-    public function updateEducation(Request $request)
+    public function addEducation(Request $request)
     {
-        $validation = $this->getEducationValidationRules($request, 'update');
+        $validation = $this->getEducationValidationRules($request, 'create');
 
-        $validator = Validator::make(
-            $request->only($validation['fields']),
-            $validation['rules'],
-            $validation['messages']
-        );
+        // If we got any errors, we should go back
+        if ($validation instanceof \Illuminate\Http\RedirectResponse)
+            return $validation;
 
-        if ($validator->fails())
-        {
-            $errors = $validator->errors();
-
-            if ($request->has('file-upload') && !$errors->has('file-upload'))
-            {
-                // Make sure to add the error message for 'file-upload' only once
-                // $errors->forget('file-upload');
-                $errors->add('file-upload', 'Due to security reasons, you may need to reupload the PDF document.');
-            }
-
-            foreach ($errors->all() as $e)
-            {
-                error_log($e);
-            }
-
-            session()->flash('education_action_error_type', 'edit');
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        $inputs = $validator->validated();
+        // Otherwise, we'll retrieve the validated inputs
+        $inputs = $validation;
+        $uploadedFile = null;
 
         try
         {
             DB::beginTransaction();
 
-            $profile     = Profile::where(ProfileFields::UserId, Auth::id())->firstOrFail();
-            $education   = $profile->{ProfileFields::Education};
-            $targetEntry = [];
-            $targetEntryKey = null;
-            $uploadedFile = null;
+            $profile = Profile::where(ProfileFields::UserId, Auth::id())->firstOrFail();
+            $docOps  = $this->addDocument($inputs['file-upload'], DocumentTypes::Education);
 
-            foreach ($education as $k => $obj)
+            if (empty($docOps['status']))
+            {
+                session()->flash('profile_update_message', "Sorry, we encountered an error while trying to upload the file. Please try again later.");
+                return redirect()->back();
+            }
+
+            $uploadedFile = $docOps['uploadedFile'];
+
+            $educ   = $profile->{ProfileFields::Education};
+            $educ[] = [
+                DocProofFields::DocId               => Str::random(16),
+                DocProofFields::YearFrom            => $inputs['educ-year-from'],
+                DocProofFields::YearTo              => $inputs['educ-year-to'],
+                DocProofFields::EducInstitution     => $inputs['institution'],
+                DocProofFields::EducDegree          => $inputs['degree'],
+                DocProofFields::FullPath            => $uploadedFile,
+                DocProofFields::OriginalFileName    => $docOps['originalName']
+            ];
+
+            $profile->{ProfileFields::Education} = array_values($educ);
+            $created = $profile->save();
+
+            DB::commit();
+
+            if (!$created)
+                throw new Exception();
+
+            session()->flash('profile_update_message', "A new educational attainment entry has been successfully added.");
+            return redirect()->back();
+        }
+        catch (Exception $ex)
+        {
+            DB::rollBack();
+
+            if (!empty($uploadedFile))
+                Storage::delete($uploadedFile);
+
+            session()->flash('profile_update_message', "Sorry, we encountered an error while trying to create the record. Please try again later.");
+            return redirect()->back();
+        }
+    }
+
+    public function updateEducation(Request $request)
+    {
+        $validation = $this->getEducationValidationRules($request, 'update');
+
+        // If we got any errors, we should go back
+        if ($validation instanceof \Illuminate\Http\RedirectResponse)
+            return $validation;
+
+        // Otherwise, we'll retrieve the validated inputs
+        $inputs = $validation;
+        $uploadedFile = null;
+
+        try
+        {
+            DB::beginTransaction();
+
+            $profile        = Profile::where(ProfileFields::UserId, Auth::id())->firstOrFail();
+            $educ           = $profile->{ProfileFields::Education};
+            $targetEntry    = [];
+            $targetEntryKey = null;
+
+            foreach ($educ as $k => $obj)
             {
                 if ($obj[DocProofFields::DocId] == $inputs['doc_id'])
                 {
-                    $targetEntry = $education[$k];
+                    $targetEntry = $educ[$k];
 
-                    $targetEntry[DocProofFields::YearFrom]            = $inputs['year-from'];
-                    $targetEntry[DocProofFields::YearTo]              = $inputs['year-to'];
-                    $targetEntry[DocProofFields::EducInstitution]     = $inputs['institution'];
-                    $targetEntry[DocProofFields::EducDegree]          = $inputs['degree'];
+                    $targetEntry[DocProofFields::YearFrom]          = $inputs['educ-year-from'];
+                    $targetEntry[DocProofFields::YearTo]            = $inputs['educ-year-to'];
+                    $targetEntry[DocProofFields::EducInstitution]   = $inputs['institution'];
+                    $targetEntry[DocProofFields::EducDegree]        = $inputs['degree'];
 
                     $targetEntryKey = $k;
                     break;
@@ -80,53 +117,32 @@ class MyProfileEducationDocumentsService extends MyProfileDocumentsService
 
             if (empty($targetEntry) || $targetEntryKey === null)
             {
-                session()->flash('education_action_error_type', 'edit');
                 session()->flash('profile_update_message', "Sorry, we're unable to update the entry. Please try again later.");
-                return redirect()->back()->withErrors($validator)->withInput();
+                return redirect()->back();
             }
 
             if (array_key_exists('file-upload', $inputs))
             {
-                $hashids        = new Hashids(HashSalts::Files, 10);
-                $hashedUserId   = $hashids->encode(Auth::id());
-                $fileToUpload   = $inputs['file-upload'];
-                $fileUploadPath = Constants::DocPathEducation . $hashedUserId;
+                $docOps = $this->replaceDocument(
+                    $targetEntry,
+                    $inputs['file-upload'],
+                    DocumentTypes::Education
+                );
 
-                // Cache the filename of the currently uploaded file
-                $lastStoredFile = $targetEntry[DocProofFields::FullPath];
-
-                // Ensure $obj['file'] is an instance of UploadedFile and not treated as an array
-                if ($fileToUpload instanceof \Illuminate\Http\UploadedFile)
-                {
-                    // Generate a unique file name
-                    $fileName = Str::uuid() . '.pdf';
-                    $uploadedFile = $fileToUpload->storeAs($fileUploadPath, $fileName);
-                    $targetEntry[DocProofFields::FullPath] = $uploadedFile;
-
-                    // Get and store the original file name
-                    $targetEntry[DocProofFields::OriginalFileName] = $fileToUpload->getClientOriginalName();
-
-                    // After upload, remove the old uploaded file
-                    Storage::delete($lastStoredFile);
-                }
-                else
+                if (!$docOps)
                 {
                     session()->flash('profile_update_message', "Sorry, we encountered an error while trying to upload the file. Please try again later.");
                     return redirect()->back();
                 }
             }
 
-
-            // $education[DocProofFields::FullPath]            = $uploadedFile;
-            // $education[DocProofFields::OriginalFileName]    = $originalFileNam;
-
-            $education[$targetEntryKey] = $targetEntry;
-            $profile->{ProfileFields::Education} = array_values($education);
-            $created = $profile->save();
+            $educ[$targetEntryKey] = $targetEntry;
+            $profile->{ProfileFields::Education} = array_values($educ);
+            $updated = $profile->save();
 
             DB::commit();
 
-            if (!$created)
+            if (!$updated)
                 throw new Exception();
 
             session()->flash('profile_update_message', "An educational attainment entry has been successfully updated.");
@@ -165,27 +181,24 @@ class MyProfileEducationDocumentsService extends MyProfileDocumentsService
             DB::beginTransaction();
 
             $profile = Profile::where(ProfileFields::UserId, Auth::id())->firstOrFail();
-            $education = $profile->{ProfileFields::Education};
+            $educ = $profile->{ProfileFields::Education};
 
-            if (empty($education))
+            if (empty($educ))
                 throw new ModelNotFoundException();
 
-            /**
-             * [{"doc_id":"Vbt4R3QQXOOeSNAN","from":"2012", "to":"2016","degree":"Bachelors Degree in PolSci","institution":"Pangasinan State University","file_upload":"public\/documentary_proofs\/education\/5e9Q15Q4Ev","full_path":"public\/documentary_proofs\/education\/5e9Q15Q4Ev\/6946f41d-c7dc-44f4-bb02-d85821628b2e.pdf"},{"doc_id":"B37W0pA4dbITvLYt","from":"2017", "to":"2021","degree":"Masters Degree in Mass Comm","institution":"University of Oxford","file_upload":"public\/documentary_proofs\/education\/5e9Q15Q4Ev","full_path":"public\/documentary_proofs\/education\/5e9Q15Q4Ev\/6946f41d-c7dc-44f4-bb02-d85821628b2e.pdf"}]
-             */
-            for ($i = 0; $i < count($education); $i++)
+            for ($i = 0; $i < count($educ); $i++)
             {
-                $row = $education[$i];
+                $row = $educ[$i];
 
                 if ($row[DocProofFields::DocId] == $docId)
                 {
-                    Storage::delete($row[DocProofFields::FullPath]);
-                    unset($education[$i]);
+                    $this->removeDocProof($row[DocProofFields::FullPath]);
+                    unset($educ[$i]);
                     break;
                 }
             }
 
-            $profile->{ProfileFields::Education} = array_values($education);
+            $profile->{ProfileFields::Education} = array_values($educ);
             $updated = $profile->save();
 
             DB::commit();
@@ -193,7 +206,7 @@ class MyProfileEducationDocumentsService extends MyProfileDocumentsService
             if (!$updated)
                 throw new Exception();
 
-            session()->flash('profile_update_message', "An entry for educational attainment has been successfully removed.");
+            session()->flash('profile_update_message', "An educational attainment entry has been successfully removed.");
             return redirect()->back();
         }
         catch (ModelNotFoundException $ex)
@@ -212,130 +225,18 @@ class MyProfileEducationDocumentsService extends MyProfileDocumentsService
         }
     }
 
-    public function addEducation(Request $request)
-    {
-        $validation = $this->getEducationValidationRules($request);
-
-        $validator = Validator::make(
-            $request->only($validation['fields']),
-            $validation['rules'],
-            $validation['messages']
-        );
-
-        if ($validator->fails())
-        {
-            $errors = $validator->errors();
-
-            if (!$errors->has('file-upload'))
-            {
-                // Make sure to add the error message for 'file-upload' only once
-                // $errors->forget('file-upload');
-                $errors->add('file-upload', 'Due to security reasons, you may need to reupload the PDF document.');
-            }
-
-            session()->flash('education_action_error_type', 'add');
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        $inputs             = $validator->validated();
-        $hashids            = new Hashids(HashSalts::Files, 10);
-        $hashedUserId       = $hashids->encode(Auth::id());
-        $uploadedFile       = null;
-        $originalFileName   = null;
-
-        try
-        {
-            DB::beginTransaction();
-
-            $profile        = Profile::where(ProfileFields::UserId, Auth::id())->firstOrFail();
-            $fileToUpload   = $inputs['file-upload'];
-            $fileUploadPath = Constants::DocPathEducation . $hashedUserId;
-
-            // Ensure $obj['file'] is an instance of UploadedFile and not treated as an array
-            if ($fileToUpload instanceof \Illuminate\Http\UploadedFile)
-            {
-                // Generate a unique file name
-                $fileName = Str::uuid() . '.pdf';
-                $uploadedFile = $fileToUpload->storeAs($fileUploadPath, $fileName);
-
-                // Get the original file name
-                $originalFileName = $fileToUpload->getClientOriginalName();
-            }
-            else
-            {
-                session()->flash('profile_update_message', "Sorry, we encountered an error while trying to upload the file. Please try again later.");
-                return redirect()->back();
-            }
-
-            $education   = $profile->{ProfileFields::Education};
-            $education[] = [
-                DocProofFields::DocId               => Str::random(16),
-                DocProofFields::YearFrom            => $inputs['year-from'],
-                DocProofFields::YearTo              => $inputs['year-to'],
-                DocProofFields::EducInstitution     => $inputs['institution'],
-                DocProofFields::EducDegree          => $inputs['degree'],
-                DocProofFields::FullPath            => $uploadedFile,
-                DocProofFields::OriginalFileName    => $originalFileName
-            ];
-
-            $profile->{ProfileFields::Education} = array_values($education);
-            $created = $profile->save();
-
-            DB::commit();
-
-            if (!$created)
-                throw new Exception();
-
-            session()->flash('profile_update_message', "A new educational attainment entry has been successfully added.");
-            return redirect()->back();
-        }
-        catch (Exception $ex)
-        {
-            DB::rollBack();
-
-            Storage::delete($uploadedFile);
-
-            session()->flash('education_action_error_type', 'add');
-            session()->flash('profile_update_message', "Sorry, we encountered an error while trying to create the record. Please try again later.");
-            return redirect()->back();
-        }
-    }
-
-    public function formatEducationProofList($educationProof)
-    {
-        foreach ($educationProof as $k => $obj)
-        {
-            $pdfPath = $obj[DocProofFields::FullPath];
-
-            // Ensure the PDF path is sanitized and validated
-            if (!Storage::exists($pdfPath))
-                $educationProof[$k]['docUrl'] = '-1'; // 'corrupted'
-
-            // Generate a secure URL for the PDF file
-            $educationProof[$k]['docUrl'] = asset(Storage::url($pdfPath)) . '#toolbar=0';
-            $educationProof[$k]['docId'] = $obj[DocProofFields::DocId];
-
-            unset(
-                $educationProof[$k][DocProofFields::FullPath],
-                $educationProof[$k][DocProofFields::FileUpload]
-            );
-        }
-
-        return $educationProof;
-    }
-
     private function getEducationValidationRules(Request $request, $mode = 'create')
     {
-        $yearValidation = $this->getYearRangeValidationRules($request);
+        $yearValidation = $this->getYearRangeValidationRules($request, 'educ-');
         $pdfValidation  = $this->getPdfValidationRules();
 
-        $educationValidation = [
-            "institution"           => 'required|string|max:255',
-            "degree"                => 'required|string|max:255',
+        $educValidation = [
+            "institution" => 'required|string|max:255',
+            "degree"      => 'required|string|max:255',
         ];
 
-        $educationErrMessages = [
-            "institution.required"  => "Please enter the name of the educational institution.",
+        $educErrMessages = [
+            "institution.required"  => "Please enter the name of the educational institution you studied at.",
             "institution.string"    => "The institution name must be a valid string.",
             "institution.max"       => "The institution name cannot exceed 255 characters.",
             "degree.required"       => "Please enter the degree title.",
@@ -343,8 +244,8 @@ class MyProfileEducationDocumentsService extends MyProfileDocumentsService
             "degree.max"            => "The degree title cannot exceed 255 characters."
         ];
 
-        $messages = array_merge($yearValidation['messages'], $educationErrMessages);
-        $rules    = array_merge($yearValidation['rules'], $educationValidation);
+        $messages = array_merge($yearValidation['messages'], $educErrMessages);
+        $rules    = array_merge($yearValidation['rules'], $educValidation);
 
         switch ($mode)
         {
@@ -372,11 +273,66 @@ class MyProfileEducationDocumentsService extends MyProfileDocumentsService
                 break;
         }
 
-        return [
-            'rules'     => $rules,
-            'messages'  => $messages,
-            'fields'    => array_keys($rules)
-        ];
+        $validator = Validator::make(
+            $request->only(array_keys($rules)),
+            $rules,
+            $messages
+        );
+
+        if ($validator->fails())
+        {
+            $errors = $validator->errors();
+            $errBag = [
+                'last_action' => $mode
+            ];
+
+            foreach ($request->except('_token') as $k => $v)
+            {
+                $errBag['errors'][$k] = [
+                    'oldValue' => $v,
+                    'message' => $errors->first($k)
+                ];
+            }
+
+            if ($request->has('file-upload'))
+            {
+                $errBag['errors']['file-upload'] = [
+                    'message' => 'Due to security reasons, you may need to reupload the PDF document.'
+                ];
+            }
+
+            $errBagJson = json_encode($errBag, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+            session()->flash('validationErrors', $errBagJson);
+
+            return redirect()
+                    ->back()
+                    ->withErrors($validator);
+        }
+
+        return $validator->validated();
+    }
+
+    public function formatEducationProofList($educationProof)
+    {
+        foreach ($educationProof as $k => $obj)
+        {
+            $pdfPath = $obj[DocProofFields::FullPath];
+
+            // Ensure the PDF path is sanitized and validated
+            if (!Storage::exists($pdfPath))
+                $educationProof[$k]['docUrl'] = '-1'; // 'corrupted'
+
+            // Generate a secure URL for the PDF file
+            $educationProof[$k]['docUrl'] = asset(Storage::url($pdfPath)) . '#toolbar=0';
+            $educationProof[$k]['docId'] = $obj[DocProofFields::DocId];
+
+            unset(
+                $educationProof[$k][DocProofFields::FullPath],
+                $educationProof[$k][DocProofFields::FileUpload]
+            );
+        }
+
+        return $educationProof;
     }
     //
     //==========================================
@@ -394,19 +350,19 @@ class MyProfileEducationDocumentsService extends MyProfileDocumentsService
         try
         {
             $model = Profile::where(ProfileFields::UserId, Auth::id())->firstOrFail();
-            $educationDetails = $model->{ProfileFields::Education};
+            $educDetails = $model->{ProfileFields::Education};
 
-            if (empty($educationDetails))
+            if (empty($educDetails))
                 return $err404;
 
             // Find the entry with matching document id
             $entry = null;
 
-            foreach ($educationDetails as $k => $obj)
+            foreach ($educDetails as $k => $obj)
             {
                 if ($obj[DocProofFields::DocId] == $docId)
                 {
-                    $entry = $educationDetails[$k];
+                    $entry = $educDetails[$k];
                     break;
                 }
             }
@@ -420,7 +376,6 @@ class MyProfileEducationDocumentsService extends MyProfileDocumentsService
                 'degree'        => $entry[DocProofFields::EducDegree],
                 'yearFrom'      => $entry[DocProofFields::YearFrom],
                 'yearTo'        => $entry[DocProofFields::YearTo],
-                'docProofName'  => basename($entry[DocProofFields::FullPath]),
                 'docProofUrl'   => asset(Storage::url($entry[DocProofFields::FullPath])),
                 'docProofOrig'  => $entry[DocProofFields::OriginalFileName]
             ], 200);

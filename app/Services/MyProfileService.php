@@ -121,20 +121,6 @@ class MyProfileService
                 $work = $this->workDocSvc->formatWorkProofList($workProof);
                 $userObj->profile->{ProfileFields::Experience} = $work;
             }
-            // if (!empty($workProof))
-            // {
-            //     foreach ($workProof as $k => $obj)
-            //     {
-            //         $pdfPath = $obj['full_path'];
-
-            //         // Ensure the PDF path is sanitized and validated
-            //         if (!Storage::exists($pdfPath))
-            //             $workProof[$k]['docProof'] = '-1'; // 'corrupted'
-
-            //         // Generate a secure URL for the PDF file
-            //         $workProof[$k]['docProof'] = Storage::url($pdfPath);
-            //     }
-            // }
 
             // if (!empty($certProof))
             // {
