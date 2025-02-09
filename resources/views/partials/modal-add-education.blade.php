@@ -1,7 +1,25 @@
 @php
-    $formClass ??= '';
+    $formClassAddEducation = '';
+
+    $oldAddEducationInputs = [
+            'year-from'     => '',
+            'year-to'       => '',
+            'institution'   => '',
+            'degree'        => ''
+        ];
+
+    if (session()->has('education_action_error_type') && session('education_action_error_type') == 'add')
+    {
+        $formClassAddEducation = 'was-validated';
+        $oldAddEducationInputs = [
+            'year-from'             => old('year-from', null),
+            'year-to'               => old('year-to', null),
+            'institution'           => old('institution', null),
+            'degree'                => old('degree', null),
+        ];
+    }
 @endphp
-<div class="modal educationModal" tabindex="-1" id="modalAddEducation" data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal" tabindex="-1" id="modalAddEducation" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -10,7 +28,7 @@
             <div class="modal-body">
                 <form action="{{ route('myprofile.add-education') }}"
                       method="post"
-                      class="needs-validation {{ $formClass }}" novalidate
+                      class="needs-validation {{ $formClassAddEducation }}" novalidate
                       id="frm-add-education"
                       enctype="multipart/form-data">
                     @csrf
@@ -23,12 +41,12 @@
 
                         <div class="date-picker-wrapper d-flex flex-column flex-fill">
                             <label class="text-12 text-secondary">From Year</label>
-                            <x-year-combo-box as="year-from" class="year-from" data-value="{{ old('year-from', null) }}"/>
+                            <x-year-combo-box as="year-from" class="year-from" data-value="{{ $oldAddEducationInputs['year-from'] }}"/>
                         </div>
 
                         <div class="date-picker-wrapper d-flex flex-column flex-fill">
                             <label class="text-12 text-secondary">To Year</label>
-                            <x-year-combo-box as="year-to" class="year-to" data-value="{{ old('year-to', null) }}"/>
+                            <x-year-combo-box as="year-to" class="year-to" data-value="{{ $oldAddEducationInputs['year-to'] }}"/>
                         </div>
 
                     </div>
@@ -39,7 +57,7 @@
                         maxlength="200"
                         required="true"
                         placeholder="Educational Institution"
-                        invalidFeedback="{{ $errMsgInstitution }}" value="{{ old('institution') }}" />
+                        invalidFeedback="{{ $errMsgInstitution }}" value="{{ $oldAddEducationInputs['institution'] }}" />
 
                     <x-editable-form-section-field
                         type="text"
@@ -47,7 +65,7 @@
                         placeholder="Degree"
                         required="true"
                         maxlength="200"
-                        invalidFeedback="{{ $errMsgDegree }}" value="{{ old('degree') }}" />
+                        invalidFeedback="{{ $errMsgDegree }}" value="{{ $oldAddEducationInputs['degree'] }}" />
 
                     <div class="file-upload">
                         <label class="form-label text-secondary text-13">Upload

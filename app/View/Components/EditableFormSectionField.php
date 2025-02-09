@@ -22,6 +22,9 @@ class EditableFormSectionField extends Component
         public $placeholder     = '',
         public $allowSpaces     = 'true',
         public $invalidFeedback = '',
+        // backend  = allow the backend to print errors from blade view
+        // frontend = use frontend to display the errors
+        public $feedbackMode    = 'backend',
         public $inputClassList  = '',
         public $rootClassList   = '',
         public $locked          = false

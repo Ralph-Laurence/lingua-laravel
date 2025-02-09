@@ -1,0 +1,20 @@
+{{--
+THIS COMPONENT IS USED BY A MODAL
+MAKE SURE TO INCLUDE THIS ONLY ONCE.
+
+UNUSED FOR NOW...
+--}}
+<div class="d-none">
+    <div id="docproof-file-upload-input-template">
+        <label class="form-label text-secondary text-12">Upload Documentary Proof (PDF only):</label>
+        <div class="input-group has-validation">
+            <input type="file" name="file-upload" class="form-control text-13 rounded-end me-2" accept="application/pdf" required>
+            <div class="invalid-feedback">
+                {{ $errMsg }}
+            </div>
+            <div class="input-group-addon">
+                <x-sl-button type="button" class="btn-revert" style="danger" text="Revert" />
+            </div>
+        </div>
+    </div>
+</div>

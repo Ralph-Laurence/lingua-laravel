@@ -2,35 +2,55 @@
     use App\Models\FieldNames\ProfileFields;
 
     $workExp = $user['profile']->{ProfileFields::Experience}; //[]
-
-    $errMsgCompany = $errors->has('company')
-        ? $errors->first('company')
-        : 'Please enter a company name.'; // Please enter the name of the company you worked for
-
-    $errMsgRole = $errors->has('role') ? $errors->first('role') : 'Please provide a valid job title.';
-    $errMsgWorkExpDoc = $errors->has('file-upload')
-        ? $errors->first('file-upload')
-        : 'Please provide a documentary proof you claim to hold. (PDF max 5MB)';
-
-    $hasErrors = session()->has('workexp_action_error_type');
-    $targetModal = '';
-    $hasEditErrors = $hasErrors && session('workexp_action_error_type') == 'edit';
 @endphp
 @push('dialogs')
-    {{-- @if ($hasErrors && session('education_action_error_type') == 'add')
-        @include('partials.modal-add-education', ['formClass' => 'was-validated'])
-        @php $targetModal = 'modalAddEducation'; @endphp
-    @else
-        @include('partials.modal-add-education')
-    @endif
+    <x-doc-proof-upsert-modal
+        as="workExpModal"
+        createAction="{{ route('myprofile.add-work-exp') }}"
+        fetchAction="{{ route('myprofile.fetch-workexp') }}"
+        updateAction="{{ route('myprofile.update-work-exp') }}">
 
-    @if ($hasEditErrors)
-        @include('partials.modal-edit-education', ['formClass' => 'was-validated has-errors', 'oldInputs' => old()])
-        @php $targetModal = 'modalEditEducation'; @endphp
-    @else
-        @include('partials.modal-edit-education')
-    @endif --}}
-    @include('partials.modal-add-workexp')
+        <x-slot name="inputs">
+            <div class="d-flex align-items-center justify-content-around gap-3 w-100 mb-3">
+
+                <div class="date-picker-wrapper d-flex flex-column flex-fill">
+                    <label class="text-12 text-secondary">From Year</label>
+                    <x-year-combo-box id="work-year-from" class="year-from" name="work-year-from" {{-- data-value="{{ old('work-year-from', null) }}"--}}/>
+                </div>
+
+                <div class="date-picker-wrapper d-flex flex-column flex-fill">
+                    <label class="text-12 text-secondary">To Year</label>
+                    <x-year-combo-box id="work-year-to" class="year-to" name="work-year-to" {{-- data-value="{{ old('work-year-to', null) }}" --}}/>
+                </div>
+            </div>
+
+            <x-editable-form-section-field
+                type="text"
+                name="company"
+                maxlength="200"
+                required="true"
+                placeholder="Company or Organization"
+                invalidFeedback="Please enter the name of the company you worked for."
+                feedbackMode="manual" />
+
+            <x-editable-form-section-field
+                type="text"
+                name="role"
+                placeholder="Role or Position"
+                required="true"
+                maxlength="200"
+                invalidFeedback="Please provide a valid job title."
+                feedbackMode="manual" />
+                {{-- value="{{ old('role', null) }}" /> --}}
+        </x-slot>
+
+        <x-slot name="hiddenBodyContent">
+            @if (session()->has('validationErrors'))
+                <textarea class="error-bag">{{ session('validationErrors') }}</textarea>
+                <textarea class="old-inputs">{{ session('oldInputs') }}</textarea>
+            @endif
+        </x-slot>
+    </x-doc-proof-upsert-modal>
 @endpush
 <div class="card shadow-sm mb-5">
     <div class="card-body p-5">
@@ -68,7 +88,7 @@
 
                 </div>
                 <div class="col-12 col-lg-3 col-md-4  ps-md-2 ps-0 text-end">
-                    <x-sl-button style="secondary" icon="fa-pen" text="Edit" class="btn-edit-workexp"
+                    <x-sl-button style="secondary" icon="fa-pen" text="Edit" class="btn-edit-workexp disabled"
                         data-doc-id="{{ $obj['docId'] }}" />
                     <x-sl-button style="danger" icon="fa-trash" text="Delete" class="btn-remove-workexp"
                         data-doc-id="{{ $obj['docId'] }}" />
@@ -79,8 +99,7 @@
                 one.</div>
         @endforelse
 
-        <x-sl-button type="primary" text="Add" icon="fa-plus" data-bs-toggle="modal"
-            data-bs-target="#modalAddWorkExp" id="btn-add-workexp" />
+        <x-sl-button type="primary" text="Add" icon="fa-plus" id="btn-add-workexp" />
     </div>
 
     <div class="d-none">
@@ -90,37 +109,3 @@
         </form>
     </div>
 </div>
-
-@push('scripts')
-    @if($hasErrors)
-    {{-- <script>
-        document.addEventListener('DOMContentLoaded', function()
-        {
-            let targetModal = "{{ $targetModal }}";
-            let modalEducation = new bootstrap.Modal(document.getElementById(targetModal));
-            modalEducation.show();
-        });
-    </script> --}}
-    @endif
-
-    @if($hasEditErrors)
-        {{-- <script>
-            $(document).ready(function()
-            {
-                if ($('#frm-update-education #oldInputs').length < 1)
-                    return;
-
-                const form = $('#frm-update-education');
-                const old = JSON.parse( form.find('#oldInputs').val());
-                console.log(old)
-                for (const key in old)
-                {
-                    form.find(`#${key}`).val(old[key]);
-                }
-
-                form.find('#edit-year-from').selectmenu();
-                form.find('#edit-year-to').selectmenu();
-            });
-        </script> --}}
-    @endif
-@endpush

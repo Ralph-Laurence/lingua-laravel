@@ -41,7 +41,9 @@ const hideWaitingDialog = function()
 
 const showError = function(message)
 {
-    message = message || "Sorry, the requested action can't be processed right now. Please try again later.";
+    // const defaultMessage = "Sorry, the requested action can't be processed right now. Please try again later.";
+    // message = message || defaultMessage;
+
     let evt = new CustomEvent('showError', {
         detail: { message: message }
     });
@@ -69,14 +71,39 @@ const redrawPdfPreviewOnUpdateForm = function(options)
         updateForm.find('.documentary-proof-previewer').hide();
 }
 
-const resetFormOnModalClosed = function(modalSelector)
+/**
+ * When the "Revert" button was clicked from the update-form modal,
+ * we remove the file upload input, then bring back the previewer
+ */
+const revertFileUploadInputOnDocModal = function(form)
 {
+    let container = form.find('.file-upload-input-container');
+
+    if (container.length > 0)
+        container.html(''); // Clear the container
+
+    let viewer = form.find('.documentary-proof-previewer');
+
+    if (viewer)
+        viewer.show();
+};
+
+const resetFormOnModalClosed = function(modalSelector, options)
+{
+    let form = $(`${modalSelector} form`);
+
     // Handle closing of both Add and Edit modals
     $(modalSelector).on('hide.bs.modal', function ()
     {
         $(`${modalSelector} .year-select`).val(currentYear).selectmenu('refresh');
-        $(`${modalSelector} form .is-invalid`).removeClass('is-invalid');
-        $(`${modalSelector} form`).trigger('reset').removeClass('was-validated');
+        form.find('.is-invalid').removeClass('is-invalid');
+        form.trigger('reset').removeClass('was-validated');
+
+        revertFileUploadInputOnDocModal(form);
+
+        if (options && 'onResetAndClosed' in options && typeof options.onResetAndClosed === 'function')
+            options.onResetAndClosed();
+
     });
 };
 
@@ -93,7 +120,10 @@ $(document).ready(function()
     .on('showWaitingDialog', () => showWaiting())
     .on('hideWaitingDialog', () => waitingDialog.hide())
     .on('showError', (event) => {
-        MsgBox.showError(event.detail.message);
+            const message = event?.detail?.message
+                ?? "Sorry, the requested action can't be processed right now. Please try again later.";
+
+            MsgBox.showError(message);
     });
 });
 

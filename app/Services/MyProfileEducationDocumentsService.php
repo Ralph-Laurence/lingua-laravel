@@ -130,7 +130,7 @@ class MyProfileEducationDocumentsService extends MyProfileDocumentsService
                 throw new Exception();
 
             session()->flash('profile_update_message', "An educational attainment entry has been successfully updated.");
-            return redirect()->back();
+            return redirect()->route('myprofile.edit');
         }
         catch (Exception $ex)
         {

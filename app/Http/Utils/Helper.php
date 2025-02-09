@@ -2,10 +2,6 @@
 
 namespace App\Http\Utils;
 
-use App\Models\FieldNames\UserFields;
-use App\Models\User;
-use Hashids\Hashids;
-
 //#! This is a custom class and did NOT came from chatify installation
 class Helper
 {
@@ -24,5 +20,14 @@ class Helper
             return implode($implodeChar, $data);
 
         return $data;
+    }
+
+    public static function prefixArrayKeys(string $prefix, array $array): array
+    {
+        $prefixedArray = [];
+        foreach ($array as $key => $value) {
+            $prefixedArray[$prefix . $key] = $value;
+        }
+        return $prefixedArray;
     }
 }

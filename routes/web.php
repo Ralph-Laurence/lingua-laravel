@@ -83,6 +83,7 @@ Route::controller(MyProfileController::class)->prefix('/signlingua/my-profile')-
     Route::post('/update-education',    'updateEducation')->name('myprofile.update-education');
     Route::post('/remove-education',    'removeEducation')->name('myprofile.remove-education');
 
+    Route::get('/fetch-workexp',        'fetchWorkExp')->name('myprofile.fetch-workexp');
     Route::post('/add-workexp',         'addWorkExp')->name('myprofile.add-work-exp');
     Route::post('/update-workexp',      'updateWorkExp')->name('myprofile.update-work-exp');
     Route::post('/remove-workexp',      'removeWorkExp')->name('myprofile.remove-work-exp');

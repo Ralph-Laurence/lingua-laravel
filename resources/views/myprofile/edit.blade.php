@@ -126,4 +126,5 @@
     <script src="{{ asset('assets/js/my-profile/my-profile.js') }}"></script>
     <script src="{{ asset("assets/js/shared/editable-form-section.js") }}"></script>
     <script src="{{ asset('assets/js/my-profile/edit-section-education.js') }}"></script>
+    <script src="{{ asset('assets/js/my-profile/edit-section-workexp.js') }}"></script>
 @endpush

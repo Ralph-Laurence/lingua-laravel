@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\MyProfileEducationDocumentsService;
 use App\Services\MyProfileService;
+use App\Services\MyProfileWorkExpDocumentsService;
 use Illuminate\Http\Request;
 
 class MyProfileController extends Controller
@@ -11,7 +12,8 @@ class MyProfileController extends Controller
     public function __construct(
         private MyProfileService $myProfileService,
         //private MyProfileDocumentsService $documentService,
-        private MyProfileEducationDocumentsService $educDocsService
+        private MyProfileEducationDocumentsService $educDocsService,
+        private MyProfileWorkExpDocumentsService $workDocsService
     )
     {
 
@@ -66,7 +68,11 @@ class MyProfileController extends Controller
     {
         return $this->myProfileService->confirmEmailUpdate($request);
     }
-
+    //
+    //=======================================================
+    //      E D U C A T I O N A L  A T T A I N M E N T
+    //=======================================================
+    //
     public function updateEducation(Request $request)
     {
         return $this->educDocsService->updateEducation($request);
@@ -85,5 +91,29 @@ class MyProfileController extends Controller
     public function fetchEducation(Request $request)
     {
         return $this->educDocsService->fetchEducationDetails($request);
+    }
+    //
+    //=======================================================
+    //              W O R K  E X P E R I E N C E
+    //=======================================================
+    //
+    public function fetchWorkExp(Request $request)
+    {
+        return $this->workDocsService->fetchWorkExp($request);
+    }
+
+    public function addWorkExp(Request $request)
+    {
+        return $this->workDocsService->addWorkExperience($request);
+    }
+
+    public function removeWorkExp(Request $request)
+    {
+        return $this->workDocsService->removeWorkExperience($request);
+    }
+
+    public function updateWorkExp(Request $request)
+    {
+        return $this->workDocsService->updateWorkExperience($request);
     }
 }

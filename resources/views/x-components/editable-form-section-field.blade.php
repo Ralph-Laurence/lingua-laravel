@@ -1,7 +1,7 @@
 @php
     $classList = $inputClasses;
 
-    if ($errors->has($name))
+    if ($feedbackMode == 'backend' && $errors->has($name))
         $classList = "$classList is-invalid";
 
 @endphp

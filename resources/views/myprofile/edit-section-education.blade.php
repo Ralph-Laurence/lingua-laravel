@@ -16,21 +16,53 @@
     $hasErrors = session()->has('education_action_error_type');
     $targetModal = '';
     $hasEditErrors = $hasErrors && session('education_action_error_type') == 'edit';
-@endphp
-@push('dialogs')
-    @if ($hasErrors && session('education_action_error_type') == 'add')
-        @include('partials.modal-add-education', ['formClass' => 'was-validated'])
-        @php $targetModal = 'modalAddEducation'; @endphp
-    @else
-        @include('partials.modal-add-education')
-    @endif
 
-    @if ($hasEditErrors)
-        @include('partials.modal-edit-education', ['formClass' => 'was-validated has-errors', 'oldInputs' => old()])
-        @php $targetModal = 'modalEditEducation'; @endphp
-    @else
-        @include('partials.modal-edit-education')
-    @endif
+    if ($hasErrors && session('education_action_error_type') == 'add')
+        $targetModal = 'modalAddEducation';
+
+    elseif ($hasEditErrors)
+        $targetModal = 'modalEditEducation';
+@endphp
+@push('dialogsx')
+    <x-doc-proof-upsert-modal
+        as="modalUpsertEducation"
+        createAction="{{ route('myprofile.add-education') }}"
+        updateAction="{{ route('myprofile.update-education') }}"
+        fetchAction="{{ route('myprofile.fetch-education') }}">
+        <x-slot name="inputs">
+
+            <div class="d-flex align-items-center justify-content-around gap-3 w-100 mb-3">
+
+                <div class="date-picker-wrapper d-flex flex-column flex-fill">
+                    <label class="text-12 text-secondary">From Year</label>
+                    <x-year-combo-box id="edit-year-from" class="year-from" name="year-from" data-value="{{-- $oldEditEducationInputs['year-from'] --}}"/>
+                </div>
+
+                <div class="date-picker-wrapper d-flex flex-column flex-fill">
+                    <label class="text-12 text-secondary">To Year</label>
+                    <x-year-combo-box id="edit-year-to" class="year-to" name="year-to" data-value="{{-- $oldEditEducationInputs['year-to'] --}}"/>
+                </div>
+            </div>
+
+            <x-editable-form-section-field
+                type="text"
+                name="institution"
+                maxlength="200"
+                required="true"
+                placeholder="Educational Institution"
+                invalidFeedback="{{-- $errMsgInstitution --}}" value="{{-- $oldEditEducationInputs['institution'] --}}" />
+
+            <x-editable-form-section-field
+                type="text"
+                name="degree"
+                placeholder="Degree"
+                required="true"
+                maxlength="200"
+                invalidFeedback="{{-- $errMsgDegree --}}" value="{{-- $oldEditEducationInputs['degree'] --}}" />
+        </x-slot>
+    </x-doc-proof-upsert-modal>
+    {{-- @include('partials.modal-add-education')
+    @include('partials.modal-edit-education') --}}
 @endpush
 <div class="card shadow-sm mb-5">
     <div class="card-body p-5">
@@ -80,7 +112,9 @@
         @endforelse
 
         <x-sl-button type="primary" text="Add" icon="fa-plus" data-bs-toggle="modal"
-            data-bs-target="#modalAddEducation" id="btn-add-education" />
+            data-bs-target="#modalUpsertEducation"/>
+        {{-- <x-sl-button type="primary" text="Add" icon="fa-plus" data-bs-toggle="modal"
+            data-bs-target="#modalAddEducation" id="btn-add-education" /> --}}
     </div>
 
     <div class="d-none">

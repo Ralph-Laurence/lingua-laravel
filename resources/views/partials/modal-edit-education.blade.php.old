@@ -1,12 +1,36 @@
 @php
-    $formClass ??= '';
+    $formClassEditEducation = '';
+
+    $oldEditEducationInputs = [
+            'year-from'     => '',
+            'year-to'       => '',
+            'institution'   => '',
+            'degree'        => '',
+            'doc_id'                => '',
+            'old-docProofUrl'       => '',
+            'old-docProofFilename'  => '',
+        ];
+
+    if (session()->has('education_action_error_type') && session('education_action_error_type') == 'edit')
+    {
+        $formClassEditEducation = 'was-validated has-errors';
+        $oldEditEducationInputs = [
+            'year-from'             => old('year-from', null),
+            'year-to'               => old('year-to', null),
+            'institution'           => old('institution', null),
+            'degree'                => old('degree', null),
+            'doc_id'                => old('doc_id', null),
+            'old-docProofUrl'       => old('old-docProofUrl'),
+            'old-docProofFilename'  => old('old-docProofFilename')
+        ];
+    }
 @endphp
     {{-- @php
         $oldInputs = old();
         dd($oldInputs);
     @endphp --}}
 
-<div class="modal educationModal" tabindex="-1" id="modalEditEducation" data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal" tabindex="-1" id="modalEditEducation" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -16,7 +40,7 @@
                 <form action="{{ route('myprofile.update-education') }}"
                       data-action-fetch="{{ route('myprofile.fetch-education') }}"
                       method="post"
-                      class="needs-validation {{ $formClass }}" novalidate
+                      class="needs-validation {{ $formClassEditEducation }}" novalidate
                       id="frm-update-education"
                       enctype="multipart/form-data">
                     @csrf
@@ -36,12 +60,12 @@
 
                         <div class="date-picker-wrapper d-flex flex-column flex-fill">
                             <label class="text-12 text-secondary">From Year</label>
-                            <x-year-combo-box id="edit-year-from" class="year-from" name="year-from" data-value="{{ old('year-from', null) }}"/>
+                            <x-year-combo-box id="edit-year-from" class="year-from" name="year-from" data-value="{{ $oldEditEducationInputs['year-from'] }}"/>
                         </div>
 
                         <div class="date-picker-wrapper d-flex flex-column flex-fill">
                             <label class="text-12 text-secondary">To Year</label>
-                            <x-year-combo-box id="edit-year-to" class="year-to" name="year-to" data-value="{{ old('year-to', null) }}"/>
+                            <x-year-combo-box id="edit-year-to" class="year-to" name="year-to" data-value="{{ $oldEditEducationInputs['year-to'] }}"/>
                         </div>
 
                     </div>
@@ -52,7 +76,7 @@
                         maxlength="200"
                         required="true"
                         placeholder="Educational Institution"
-                        invalidFeedback="{{ $errMsgInstitution }}" value="{{ old('institution', null) }}" />
+                        invalidFeedback="{{ $errMsgInstitution }}" value="{{ $oldEditEducationInputs['institution'] }}" />
 
                     <x-editable-form-section-field
                         type="text"
@@ -60,7 +84,7 @@
                         placeholder="Degree"
                         required="true"
                         maxlength="200"
-                        invalidFeedback="{{ $errMsgDegree }}" value="{{ old('degree', null) }}" />
+                        invalidFeedback="{{ $errMsgDegree }}" value="{{ $oldEditEducationInputs['degree'] }}" />
 
                     <div class="documentary-proof-previewer">
                         <div class="form-label text-secondary text-13 mb-0">Documentary Proof</div>
@@ -95,10 +119,10 @@
                         @enderror
                     </div>
                     <div class="d-none">
-                        <input type="hidden" name="doc_id" id="doc_id" value="{{ old('doc_id', null) }}"/>
+                        <input type="hidden" name="doc_id" id="doc_id" value="{{ $oldEditEducationInputs['doc_id'] }}"/>
                         <input type="submit" class="hdn-submit"/>
-                        <input type="hidden" id="old-docProofUrl" name="old-docProofUrl" value="{{ old('old-docProofUrl', null) }}">
-                        <input type="hidden" id="old-docProofFilename" name="old-docProofFilename" value="{{ old('old-docProofFilename', null) }}">
+                        <input type="hidden" id="old-docProofUrl" name="old-docProofUrl" value="{{ $oldEditEducationInputs['old-docProofUrl'] }}">
+                        <input type="hidden" id="old-docProofFilename" name="old-docProofFilename" value="{{ $oldEditEducationInputs['old-docProofFilename'] }}">
                     </div>
                 </form>
             </div>
