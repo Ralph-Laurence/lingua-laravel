@@ -66,27 +66,36 @@ $RoleMw = 'role-mw:'; // Role middleware
 
 Route::controller(MyProfileController::class)->prefix('/signlingua/my-profile')->middleware('auth')->group(function()
 {
-    Route::get('/edit',                 'index')->name('myprofile.edit');
-    Route::put('/update-photo',         'updatePhoto')->name('myprofile.update-photo');
-    Route::post('/remove-photo',        'removePhoto')->name('myprofile.remove-photo');
-    Route::post('/update-password',     'updatePassword')->name('profile.update-password');
-    Route::post('/update-identity',     'updateIdentity')->name('profile.update-identity');
-    Route::post('/update-account',      'updateAccount')->name('profile.update-account');
-    Route::post('/update-bio',          'updateBio')->name('profile.update-bio');
+    Route::get('/edit',                     'index')->name('myprofile.edit');
+    Route::put('/update-photo',             'updatePhoto')->name('myprofile.update-photo');
+    Route::post('/remove-photo',            'removePhoto')->name('myprofile.remove-photo');
+    Route::post('/update-password',         'updatePassword')->name('profile.update-password');
+    Route::post('/update-identity',         'updateIdentity')->name('profile.update-identity');
+    Route::post('/update-account',          'updateAccount')->name('profile.update-account');
+    Route::post('/update-bio',              'updateBio')->name('profile.update-bio');
 
-    Route::post('/revert-email',        'revertEmailUpdate')->name('myprofile.revert-email');
-    Route::get('/confirm-email/{id}',   'showEmailConfirmation')->name('myprofile.email-confirmation');
-    Route::post('/confirm-email',       'confirmEmailUpdate')->name('myprofile.confirm-email');
+    Route::post('/revert-email',            'revertEmailUpdate')->name('myprofile.revert-email');
+    Route::get('/confirm-email/{id}',       'showEmailConfirmation')->name('myprofile.email-confirmation');
+    Route::post('/confirm-email',           'confirmEmailUpdate')->name('myprofile.confirm-email');
 
-    Route::get('/fetch-education',      'fetchEducation')->name('myprofile.fetch-education');
-    Route::post('/add-education',       'addEducation')->name('myprofile.add-education');
-    Route::post('/update-education',    'updateEducation')->name('myprofile.update-education');
-    Route::post('/remove-education',    'removeEducation')->name('myprofile.remove-education');
+    Route::get('/fetch-education',          'fetchEducation')->name('myprofile.fetch-education');
+    Route::post('/add-education',           'addEducation')->name('myprofile.add-education');
+    Route::post('/update-education',        'updateEducation')->name('myprofile.update-education');
+    Route::post('/remove-education',        'removeEducation')->name('myprofile.remove-education');
 
-    Route::get('/fetch-workexp',        'fetchWorkExp')->name('myprofile.fetch-workexp');
-    Route::post('/add-workexp',         'addWorkExp')->name('myprofile.add-work-exp');
-    Route::post('/update-workexp',      'updateWorkExp')->name('myprofile.update-work-exp');
-    Route::post('/remove-workexp',      'removeWorkExp')->name('myprofile.remove-work-exp');
+    Route::get('/fetch-workexp',            'fetchWorkExp')->name('myprofile.fetch-workexp');
+    Route::post('/add-workexp',             'addWorkExp')->name('myprofile.add-work-exp');
+    Route::post('/update-workexp',          'updateWorkExp')->name('myprofile.update-work-exp');
+    Route::post('/remove-workexp',          'removeWorkExp')->name('myprofile.remove-work-exp');
+
+    Route::get('/fetch-certification',      'fetchCertification')->name('myprofile.fetch-certification');
+    Route::post('/add-certification',       'addCertification')->name('myprofile.add-certification');
+    Route::post('/update-certification',    'updateCertification')->name('myprofile.update-certification');
+    Route::post('/remove-certification',    'removeCertification')->name('myprofile.remove-certification');
+
+    Route::post('/remove-skills',           'removeSkills')->name('myprofile.remove-skills');
+    Route::post('/update-skills',           'updateSkills')->name('myprofile.update-skills');
+    Route::post('/add-skills',              'addSkills')->name('myprofile.add-skills');
 });
 
 Route::middleware(['auth', $RoleMw . User::ROLE_ADMIN])->group(function ()

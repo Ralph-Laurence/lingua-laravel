@@ -122,7 +122,7 @@ class MyProfileDocumentsService
     //     V A L I D A T I O N  R U L E S
     //==========================================
     //
-    protected function getYearRangeValidationRules(Request $request, $prefix = '')
+    protected function getYearRangeValidationRules(Request $request, $prefix = '', $except = [])
     {
         $currentYear = date('Y');
         $rules = [
@@ -152,6 +152,18 @@ class MyProfileDocumentsService
             "year-to.max"           => "The end year cannot be after the current year.",
             "year-to.custom"        => "The end year must be greater than or equal to the start year.",
         ]);
+
+        if (!empty($except))
+        {
+            foreach ($except as $x)
+            {
+                if (array_key_exists($prefix.$x, $rules))
+                    unset($rules[$prefix.$x]);
+
+                if (array_key_exists($prefix.$x, $messages))
+                    unset($messages[$prefix.$x]);
+            }
+        }
 
         return [
             'rules' => $rules,

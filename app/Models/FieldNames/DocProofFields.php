@@ -17,5 +17,6 @@ class DocProofFields
     const WorkCompany       = 'company';
     const WorkRole          = 'role';
 
-    const CertTitle         = 'title';
+    const CertTitle         = 'certification';
+    const CertDescr         = 'description';
 }

@@ -27,3 +27,33 @@ function showWaiting()
         contentClass: 'text-13'
     });
 }
+
+function areObjectsEqual(object1, object2)
+{
+    // Get keys from both objects
+    const keys1 = Object.keys(object1);
+    const keys2 = Object.keys(object2);
+
+    // If they have different number of properties, not equal
+    if (keys1.length !== keys2.length) {
+        return false;
+    }
+
+    // Check each property in object1 matches object2
+    for (const key of keys1)
+    {
+        if (!object2.hasOwnProperty(key) || object1[key] !== object2[key])
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function decodeHtmlEntities(str)
+{
+    const parser = new DOMParser();
+    const decodedString = parser.parseFromString(`<!doctype html><body>${str}`, 'text/html').body.textContent;
+    return decodedString;
+}

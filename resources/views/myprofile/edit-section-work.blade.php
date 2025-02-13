@@ -1,7 +1,7 @@
 @php
     use App\Models\FieldNames\ProfileFields;
 
-    $workExp = $user['profile']->{ProfileFields::Experience};
+    $workExp = $user['profile']->{ProfileFields::Experience} ?? [];
 @endphp
 @push('dialogs')
     <x-doc-proof-upsert-modal
@@ -54,7 +54,7 @@
 @endpush
 <div class="card shadow-sm mb-5">
     <div class="card-body p-5">
-        @if ($errors->any())
+        {{-- @if ($errors->any())
         <div class="alert alert-danger">
             <ul>
                 @foreach ($errors->all() as $error)
@@ -62,7 +62,7 @@
                 @endforeach
             </ul>
         </div>
-        @endif
+        @endif --}}
         <div class="row">
             <div class="col-12 col-md-5">
                 <x-editable-form-section-header label="Work Experience"

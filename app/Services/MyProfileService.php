@@ -33,7 +33,8 @@ class MyProfileService
 
     public function __construct(
         private MyProfileEducationDocumentsService $educDocSvc,
-        private MyProfileWorkExpDocumentsService $workDocSvc
+        private MyProfileWorkExpDocumentsService $workDocSvc,
+        private MyProfileCertificationsDocumentsService $certDocSvc
     )
     {
     }
@@ -109,6 +110,7 @@ class MyProfileService
             $educationProof = $userObj->profile->{ProfileFields::Education};
             $workProof      = $userObj->profile->{ProfileFields::Experience};
             $certProof      = $userObj->profile->{ProfileFields::Certifications};
+            $skillsList     = $userObj->profile->{ProfileFields::Skills};
 
             if (!empty($educationProof))
             {
@@ -122,20 +124,23 @@ class MyProfileService
                 $userObj->profile->{ProfileFields::Experience} = $work;
             }
 
-            // if (!empty($certProof))
-            // {
-            //     foreach ($certProof as $k => $obj)
-            //     {
-            //         $pdfPath = $obj['full_path'];
+            if (!empty($certProof))
+            {
+                $cert = $this->certDocSvc->formatCertificationProofList($certProof);
+                $userObj->profile->{ProfileFields::Certifications} = $cert;
+            }
 
-            //         // Ensure the PDF path is sanitized and validated
-            //         if (!Storage::exists($pdfPath))
-            //             $certProof[$k]['docProof'] = '-1'; // 'corrupted'
+            if (!empty($skillsList))
+            {
+                $skills = [];
 
-            //         // Generate a secure URL for the PDF file
-            //         $certProof[$k]['docProof'] = Storage::url($pdfPath);
-            //     }
-            // }
+                foreach ($skillsList as $skill)
+                {
+                    $skills[$skill] = User::SOFT_SKILLS[$skill];
+                }
+
+                $userObj->profile->{ProfileFields::Skills} = $skills;
+            }
 
             $user['profile'] = $userObj->profile;
         }
@@ -291,7 +296,6 @@ class MyProfileService
 
         return redirect()->back();
     }
-
 
     /**
      * This function handles the updating of the user's username and email
@@ -550,6 +554,169 @@ class MyProfileService
         }
 
         return redirect()->route('myprofile.edit');
+    }
+
+    public function addSkills(Request $request)
+    {
+        $errMsg = "The requested action can't be processed right now. Please try again later.";
+        $err500 = response()->view('errors.500', ["message" => $errMsg], 500);
+        $err404 = response()->view('errors.500', ["message" => "The skills record doesn't exist or can't be found"], 404);
+
+        if (!$request->filled('skillsKeys'))
+        {
+            session()->flash('profile_update_message', $errMsg);
+            return redirect()->back();
+        }
+
+        // Convert the comma-separated string to an array
+        $keysArray = explode(',', $request->input('skillsKeys'));
+
+        $rules  = [
+            'skillsKeys'     => 'required|array',
+            'skillsKeys.*'   => 'required|numeric|in:'.implode(',',array_keys(User::SOFT_SKILLS))
+        ];
+
+        $messages = [
+            'skillsKeys.required'  => 'Please select atleast one skill!',
+            'skillsKeys.array'     => 'The data was not in a valid format.',
+            'skillsKeys.*.numeric' => 'The selected skill is invalid.',
+            'skillsKeys.*.in'      => 'One or more skills are not allowed.',
+        ];
+
+        $validator = Validator::make(['skillsKeys' => $keysArray], $rules, $messages);
+
+        if ($validator->fails())
+        {
+
+            // Use 422 status code for validation errors
+            session()->flash('profile_update_err_alert', $errMsg);
+            return redirect()->back()->withErrors($validator);
+        }
+
+        try
+        {
+            DB::beginTransaction();
+
+            $model = Profile::where(ProfileFields::UserId, Auth::id())->firstOrFail();
+            $model->{ProfileFields::Skills} = $keysArray;
+            $updated = $model->save();
+
+            if (!$updated)
+                return $err500;
+
+            DB::commit();
+
+            $message = count($keysArray) == 1
+                     ? 'A skill has been been successfully added.'
+                     : 'Skill entries has been successfully added.';
+
+            session()->flash('profile_update_message', $message);
+            return redirect()->route('myprofile.edit');
+        }
+        catch (ModelNotFoundException $ex)
+        {
+            return $err404;
+        }
+        catch (Exception $ex)
+        {
+            error_log($ex->getMessage());
+            DB::rollBack();
+            return $err500;
+        }
+    }
+
+    public function updateSkills(Request $request)
+    {
+        $err500Body = ["message" => "We're unable to read the record. Please try again later."];
+        $err500 = response()->json($err500Body, 500);
+        $err404 = response()->json(["message" => "The skills record doesn't exist or can't be found"], 404);
+        $rules  = [
+            'keys'     => 'required|array',
+            'keys.*'   => 'required|numeric|in:'.implode(',',array_keys(User::SOFT_SKILLS))
+        ];
+
+        $messages = [
+            'keys.required'  => 'Please select atleast one skill!',
+            'keys.array'     => 'The data was not in a valid format.',
+            'keys.*.numeric' => 'The selected skill is invalid.',
+            'keys.*.in'      => 'One or more skills are not allowed.',
+        ];
+
+        $validator = Validator::make($request->only(['keys']), $rules, $messages);
+
+        if ($validator->fails())
+        {
+            $err500Body['allowEdit'] = true;
+            $err500Body['errors'] = $validator->errors();
+
+            return response()->json($err500Body, 422); // Use 422 status code for validation errors
+        }
+
+        try
+        {
+            DB::beginTransaction();
+
+            $model = Profile::where(ProfileFields::UserId, Auth::id())->firstOrFail();
+            $model->{ProfileFields::Skills} = $request->keys;
+
+            $updated = $model->save();
+
+            if (!$updated)
+                return $err500;
+
+            $updatedSkills = [];
+
+            if (!empty($request->keys))
+                $updatedSkills = array_intersect_key(User::SOFT_SKILLS, array_flip($request->keys));
+
+            DB::commit();
+
+            return response()->json([
+                'message'   => 'Skills entry has been successfully updated!',
+                'data'      => $updatedSkills
+            ], 200);
+        }
+        catch (ModelNotFoundException $ex)
+        {
+            return $err404;
+        }
+        catch (Exception $ex)
+        {
+            DB::rollBack();
+            return $err500;
+        }
+    }
+
+    public function removeSkills(Request $request)
+    {
+        $err500 = response()->json(["message" => "We're unable to read the record. Please try again later."], 500);
+        $err404 = response()->json(["message" => "The skills record doesn't exist or can't be found"], 404);
+
+        try
+        {
+            DB::beginTransaction();
+
+            $model = Profile::where(ProfileFields::UserId, Auth::id())->firstOrFail();
+            $model->{ProfileFields::Skills} = [];
+            $updated = $model->save();
+
+            if (!$updated)
+                return $err500;
+
+            DB::commit();
+
+            session()->flash('profile_update_message', "Skill entries has been successfully cleared.");
+            return redirect()->route('myprofile.edit');
+        }
+        catch (ModelNotFoundException $ex)
+        {
+            return $err404;
+        }
+        catch (Exception $ex)
+        {
+            DB::rollBack();
+            return $err500;
+        }
     }
     //
     //==========================================

@@ -54,6 +54,20 @@
             font-weight: normal;
             color: #fff;
         }
+
+        .skill-item {
+            background-color: #e7eaec !important;
+            border: 1px solid rgb(175, 177, 180) !important;
+            color: rgb(59, 59, 59) !important;
+            /* font-weight: normal !important; */
+            font-family: 'Poppins';
+        }
+
+        .skill-item button {
+            background: none;
+            border: none;
+            color: #636970 !important;
+        }
     </style>
 @endpush
 @section('content')
@@ -117,6 +131,8 @@
             </div>
             @include('myprofile.edit-section-education')
             @include('myprofile.edit-section-work')
+            @include('myprofile.edit-section-certification')
+            @include('myprofile.edit-section-skills')
         </div>
 
     @endif
@@ -127,4 +143,15 @@
     <script src="{{ asset("assets/js/shared/editable-form-section.js") }}"></script>
     <script src="{{ asset('assets/js/my-profile/edit-section-education.js') }}"></script>
     <script src="{{ asset('assets/js/my-profile/edit-section-workexp.js') }}"></script>
+    <script src="{{ asset('assets/js/my-profile/edit-section-certification.js') }}"></script>
+    <script src="{{ asset('assets/js/my-profile/edit-section-skills.js') }}"></script>
+
+    @if (session()->has('profile_update_err_alert'))
+        <script>
+            $(() => {
+                let profileErrAlert = "{{ session('profile_update_err_alert') }}";
+                showError(decodeHtmlEntities(profileErrAlert));
+            })
+        </script>
+    @endif
 @endpush

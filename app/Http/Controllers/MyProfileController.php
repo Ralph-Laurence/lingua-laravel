@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\MyProfileCertificationsDocumentsService;
 use App\Services\MyProfileEducationDocumentsService;
 use App\Services\MyProfileService;
 use App\Services\MyProfileWorkExpDocumentsService;
@@ -11,7 +12,7 @@ class MyProfileController extends Controller
 {
     public function __construct(
         private MyProfileService $myProfileService,
-        //private MyProfileDocumentsService $documentService,
+        private MyProfileCertificationsDocumentsService $certDocsService,
         private MyProfileEducationDocumentsService $educDocsService,
         private MyProfileWorkExpDocumentsService $workDocsService
     )
@@ -115,5 +116,48 @@ class MyProfileController extends Controller
     public function updateWorkExp(Request $request)
     {
         return $this->workDocsService->updateWorkExperience($request);
+    }
+    //
+    //=======================================================
+    //              C E R T I F I C A T I O N S
+    //=======================================================
+    //
+    public function fetchCertification(Request $request)
+    {
+        return $this->certDocsService->fetchCertification($request);
+    }
+
+    public function addCertification(Request $request)
+    {
+        return $this->certDocsService->addCertification($request);
+    }
+
+    public function removeCertification(Request $request)
+    {
+        return $this->certDocsService->removeCertification($request);
+    }
+
+    public function updateCertification(Request $request)
+    {
+        return $this->certDocsService->updateCertification($request);
+    }
+     //
+    //=======================================================
+    //                      S K I L L S
+    //=======================================================
+    //
+    public function removeSkills(Request $request)
+    {
+        return $this->myProfileService->removeSkills($request);
+    }
+
+    public function addSkills(Request $request)
+    {
+        return $this->myProfileService->addSkills($request);
+    }
+
+    public function updateSkills(Request $request)
+    {
+        return $this->myProfileService->updateSkills($request);
     }
 }
