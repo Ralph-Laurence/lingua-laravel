@@ -68,8 +68,10 @@ class EditSectionSkills
                     case this.MODE_ADD:
                         let keys = Object.keys(newSelected).join(',');
 
+                        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
                         this.frmAddSkills.querySelector('#input-add-skills').value = keys;
-                        this.frmAddSkills.submit();
+                        this.frmAddSkills.dispatchEvent(submitEvent); // Triggers the submit event with preventDefault honored
+
                         break;
                 }
             }
@@ -87,7 +89,7 @@ class EditSectionSkills
 
         if (this.frmRemoveSkills !== null)
         {
-            this.frmRemoveSkills.addEventListener('submit', (e) => {
+            this.frmRemoveSkills.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 let prompt = 'Would you like to remove all skill entries?';
 
@@ -98,6 +100,18 @@ class EditSectionSkills
                         this.frmRemoveSkills.submit();
                     }
                 });
+            });
+        }
+
+        if (this.frmAddSkills !== null)
+        {
+            this.frmAddSkills.addEventListener('submit', (e) => {
+
+                showWaitingDialog();
+
+                setTimeout(() => {
+                    this.frmAddSkills.submit();
+                }, 400); // Delay form submission by 500 milliseconds
             });
         }
     }
