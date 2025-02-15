@@ -51,7 +51,7 @@ class TutorSvc extends CommonModelService
             UserFields::Lastname,
             UserFields::Photo,
             UserFields::Role,
-            ProfileFields::Fluency
+            ProfileFields::Disability
         ];
 
         if (isset($options['extraFields']))
@@ -89,7 +89,7 @@ class TutorSvc extends CommonModelService
             })
             ->when($hasFluencyFilter, function($query) use($options)
             {
-                $query->where(ProfileFields::Fluency, $options['fluency']);
+                $query->where(ProfileFields::Disability, $options['fluency']);
             })
             ->when(!empty($options['search']), function($query) use($options)
             {
@@ -199,7 +199,7 @@ class TutorSvc extends CommonModelService
     {
         return $query->paginate($minEntries)->through(function($result)
         {
-            $fluency = FluencyLevels::Tutor[$result->{ProfileFields::Fluency}];
+            //$fluency = FluencyLevels::Tutor[$result->{ProfileFields::Disability}];
 
             $returnData = [
                 'tutorId'       => self::toHashedId($result->id),
@@ -207,9 +207,9 @@ class TutorSvc extends CommonModelService
                 'name'          => implode(' ', [$result->{UserFields::Firstname}, $result->{UserFields::Lastname}]),
                 'photo'         => User::getPhotoUrl($result->{UserFields::Photo}),
                 //'email'         => $result->email,
-                'fluencyStr'    => $fluency['Level'],
-                'fluencyBadge'  => $fluency['Badge Color'],
-                'fluencyDesc'   => $fluency['Description'],
+                // 'fluencyStr'    => $fluency['Level'],
+                // 'fluencyBadge'  => $fluency['Badge Color'],
+                // 'fluencyDesc'   => $fluency['Description'],
                 'totalLearners' => $result->totalLearners
             ];
 
@@ -249,7 +249,7 @@ class TutorSvc extends CommonModelService
             $tutor      = $this->query_ShowTutor($tutorId)->firstOrFail();
 
             // Statistics (Both numeric and non-numeric)
-            $fluencyLevel   = FluencyLevels::Tutor[$tutor->profile->{ProfileFields::Fluency}];
+            $fluencyLevel   = FluencyLevels::Tutor[$tutor->profile->{ProfileFields::Disability}];
             $totalLearners  = $tutor->totalLearners;
             $starRatings    = Constants::StarRatings;
             $learnerReview  = $this->learnerSvc->getReviewOnTutor($tutorId, $learnerId);

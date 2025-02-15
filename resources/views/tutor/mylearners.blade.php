@@ -29,16 +29,16 @@
                 <h6 class="text-13 text-secondary">What to include:</h6>
                 <div class="row mb-3">
                     <div class="col col-4 text-13">
-                        <div class="h-100 flex-start">Fluency</div>
+                        <div class="h-100 flex-start">Accessibility</div>
                     </div>
                     <div class="col text-13">
-                        <select class="form-select p-1 text-13" name="fluency">
+                        <select class="form-select p-1 text-13" name="disability">
                             @php
-                                $fluencyFilter = ['-1' => 'All'] + $fluencyFilter;
+                                $disabilityFilter = ['-1' => 'All'] + $disabilityFilter;
                             @endphp
-                            @foreach ($fluencyFilter as $k => $v)
+                            @foreach ($disabilityFilter as $k => $v)
                                 @php
-                                    $isSelected = (session('fluency') ?? -1) == $k  ? 'selected' : '';
+                                    $isSelected = (session('disability') ?? -1) == $k  ? 'selected' : '';
                                 @endphp
                                 <option class="text-14" {{ $isSelected }} value="{{ $k }}">{{ $v }}</option>
                             @endforeach
@@ -72,7 +72,7 @@
         @if ($filtersApplied)
         <div id="breadcrumb">
             <a><i class="fas fa-filter me-1"></i>Filter</a>
-            <a href="#">Fluency: {{ $fluencyFilter[session('fluency')] }}</a>
+            <a href="#">Accessibility: {{ $disabilityFilter[session('disability')] }}</a>
             <a href="#">Entries: {{ session('minEntries') }} per page</a>
             <a href="#">Keyword: {{ session('search') ?? 'None' }}</a>
             {{-- Product --}}
@@ -81,17 +81,22 @@
         <div class="workarea-table-header mb-4">
             <div class="table-content-item row user-select-none">
                 <div class="col-1">#</div>
-                <div class="col-7">Learner</div>
-                <div class="col-2 flex-center">Fluency</div>
+                <div class="col-5">Learner</div>
+                <div class="col-4 flex-center">Accessibility</div>
                 <div class="col-2 flex-center">Actions</div>
             </div>
             <div class="rect-mask"></div>
         </div>
         <div class="workarea-table-body mb-3">
+            {{-- @forelse ($learners as $key => $obj)
+                <div>
+                    @json($obj)
+                </div>
+            @endforeach --}}
             @forelse ($learners as $key => $obj)
             <div class="table-content-item row user-select-none mb-3">
                 <div class="col-1 flex-start text-secondary">{{ ($learners->currentPage() - 1) * $learners->perPage() + $loop->index + 1 }}</div>
-                <div class="col-7">
+                <div class="col-5">
                     <div class="profile-info w-100 flex-start">
                         <img class="rounded profile-pic" src="{{ $obj['photo'] }}" alt="profile-pic">
                         <div class="ms-3 flex-fill">
@@ -104,8 +109,16 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-2 flex-center">
-                    <span title="{{ $obj['fluencyDesc'] }}" class="fluency-tooltip badge {{ $obj['fluencyBadge'] }}">{{ $obj['fluencyStr'] }}</span>
+                <div class="col-4 flex-center">
+
+                    @if (!empty($obj['disabilityBadge']))
+                        @php
+
+                        @endphp
+                        <span title="{{ $disabilityDesc[$key] }}" class="badge awareness_badge disability-tooltip {{ $obj['disabilityBadge'] }}">{{  $obj['disability'] }}</span>
+                    {{-- @else
+                        <span title="{{ $disabilityDesc[$key] }}">{{ $obj['disability'] }}</span> --}}
+                    @endif
                 </div>
                 <div class="col-2 flex-center">
                     <button type="button" data-learner-id="{{ $obj['learnerId'] }}" class="btn btn-sm btn-secondary row-button btn-learner-details-popover">Details</button>
@@ -138,7 +151,7 @@
     <script src="{{ asset('assets/js/utils.js') }}"></script>
     <script src="{{ asset('assets/lib/waitingfor/bootstrap-waitingfor.min.js') }}"></script>
     <script>
-        $(() => initFluencyTooltips());
+        // $(() => initFluencyTooltips());
     </script>
 @endpush
 

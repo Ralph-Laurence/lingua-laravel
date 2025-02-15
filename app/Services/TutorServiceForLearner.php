@@ -82,7 +82,7 @@ class TutorServiceForLearner
         // Apply fluency filter if provided
         if (array_key_exists('select-fluency', $options) && $options['select-fluency'] != -1) {
             $tutors = $tutors->whereHas('profile', function($query) use ($options) {
-                $query->where(ProfileFields::Fluency, $options['select-fluency']);
+                $query->where(ProfileFields::Disability, $options['select-fluency']);
             });
         }
 
@@ -102,7 +102,7 @@ class TutorServiceForLearner
                 $tutorId = $request->id;
                 $isHired = !empty($hiredTutors) && in_array($tutorId, $hiredTutors);
 
-                $fluencyLevel = FluencyLevels::Tutor[$request->profile->{ProfileFields::Fluency}];
+                $fluencyLevel = FluencyLevels::Tutor[$request->profile->{ProfileFields::Disability}];
 
                 // Transform the data to the desired structure..
                 // Meaning, we only get those we need

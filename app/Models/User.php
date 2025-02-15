@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Http\Utils\Constants;
 use App\Models\FieldNames\BookingFields;
 use App\Models\FieldNames\BookingRequestFields;
 use App\Models\FieldNames\ProfileFields;
@@ -162,6 +163,51 @@ class User extends Authenticatable
     //---------------------------------------------------
     //
     // Other model methods and properties
+
+    /**
+     * Get the mapping of disability / impairments
+     */
+    public static function getDisabilityFilters($mode = 'all', $viewer = 'public')
+    {
+        $mapping = [
+            'public' => Constants::DisabilitiesPublic,
+            'admin'  => Constants::DisabilitiesAdmin
+        ];
+
+        switch ($mode)
+        {
+            case 'keys':
+                return array_keys($mapping[$viewer]);
+                break;
+
+            case 'values':
+                return array_values($mapping[$viewer]);
+                break;
+
+            case 'describe':
+                return Constants::DisabilitiesDescription;
+                break;
+
+            case 'all':
+            default:
+                return $mapping[$viewer];
+                break;
+        }
+    }
+
+    public static function getDisabilitiesDefinition()
+    {
+        $descriptions = User::getDisabilityFilters('describe');
+        $disabilities = User::getDisabilityFilters();
+        $disabilityDesc = [];
+
+        foreach ($descriptions as $k => $v)
+        {
+            $disabilityDesc[$disabilities[$k]] = $v;
+        }
+
+        return $disabilityDesc;
+    }
 
     /* Get the short abbreviated name */
     public static function toShortName($firstName, $lastName)

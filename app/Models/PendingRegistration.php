@@ -12,7 +12,7 @@ class PendingRegistration extends Model
 
     protected $fillable = [
         ProfileFields::UserId,
-        ProfileFields::Fluency,
+        ProfileFields::Disability,
         ProfileFields::Bio,
         ProfileFields::About,
         ProfileFields::Education,

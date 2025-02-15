@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Utils\Constants;
 use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
 use App\Mail\RegistrationApprovedMail;
@@ -66,7 +67,7 @@ class TutorService
             $tutorId      = $decodedId[0];
             $tutor        = User::findOrFail($tutorId);
             $pending      = PendingRegistration::where(ProfileFields::UserId, $tutorId)->firstOrFail();
-            $fluencyLevel = FluencyLevels::Tutor[$pending->{ProfileFields::Fluency}];
+            $fluencyLevel = FluencyLevels::Tutor[$pending->{ProfileFields::Disability}];
             $skills       = [];
 
             if ($pending->{ProfileFields::Skills})
@@ -180,7 +181,8 @@ class TutorService
         }
 
         $tutors = $result['tutorsSet'];
-        $fluencyFilter = $result['fluencyFilter'];
+        $disabilityFilter = $result['disabilityFilter'];
+        $disabilityDesc   = $result['disabilityDesc'];
 
         if ($request->session()->has('inputs'))
         {
@@ -192,10 +194,10 @@ class TutorService
             $inputs = $request->session()->get('inputs');
             $hasFilter = true;
 
-            return view('admin.tutors', compact('tutors', 'fluencyFilter', 'inputs', 'hasFilter'));
+            return view('admin.tutors', compact('tutors', 'disabilityFilter', 'disabilityDesc', 'inputs', 'hasFilter'));
         }
 
-        return view('admin.tutors', compact('tutors', 'fluencyFilter'));
+        return view('admin.tutors', compact('tutors', 'disabilityFilter', 'disabilityDesc'));
     }
 
     public function showTutorDetails($id)
@@ -213,7 +215,7 @@ class TutorService
             // Fetch the tutor along with their profile
             $tutorId      = $decodedId[0];
             $tutor        = User::with('profile')->findOrFail($tutorId);
-            $fluencyLevel = FluencyLevels::Tutor[$tutor->profile->{ProfileFields::Fluency}];
+            $fluencyLevel = FluencyLevels::Tutor[$tutor->profile->{ProfileFields::Disability}];
 
             $photo = $tutor->{UserFields::Photo};
             $profilePic = asset('assets/img/default_avatar.png');
@@ -280,7 +282,7 @@ class TutorService
             UserFields::Photo,
             UserFields::Role,
             UserFields::IsVerified,
-            ProfileFields::Fluency
+            ProfileFields::Disability
         ];
 
         // Build the query
@@ -313,9 +315,9 @@ class TutorService
                     }])
                     ->orderBy(UserFields::Firstname, 'ASC');
 
-        if (array_key_exists('fluency', $options) && $options['fluency'] != -1)
+        if (array_key_exists('disability', $options) && $options['disability'] != -1)
         {
-            $tutors = $tutors->where(ProfileFields::Fluency, $options['fluency']);
+            $tutors = $tutors->where(ProfileFields::Disability, $options['disability']);
         }
 
         // if (array_key_exists('search', $options))
@@ -324,21 +326,20 @@ class TutorService
         //     $tutors = $tutors->where(UserFields::Firstname, 'LIKE', "%$searchWord%")
         //             ->orWhere(UserFields::Lastname, 'LIKE', "%$searchWord%");
         // }
-        if (array_key_exists('search', $options))
-        {
-            $searchWord = $options['search'];
-            $learners = $tutors->where(function ($query) use ($searchWord)
-            {
-                $query->where(UserFields::Firstname, 'LIKE', "%$searchWord%")
-                      ->orWhere(UserFields::Lastname, 'LIKE', "%$searchWord%");
-            });
-        }
+        // if (array_key_exists('search', $options))
+        // {
+        //     $searchWord = $options['search'];
+        //     $learners = $tutors->where(function ($query) use ($searchWord)
+        //     {
+        //         $query->where(UserFields::Firstname, 'LIKE', "%$searchWord%")
+        //               ->orWhere(UserFields::Lastname, 'LIKE', "%$searchWord%");
+        //     });
+        // }
 
         // Get the results
         $tutors = $tutors->paginate($options['min_entries']);
-
-        $defaultPic     = asset('assets/img/default_avatar.png');
-        $fluencyFilter  = $this->getFluencyFilters();
+        $disabilityFilter = User::getDisabilityFilters();
+        $badges           = Constants::DisabilitiesBadge;
 
         foreach ($tutors as $key => $obj)
         {
@@ -360,27 +361,20 @@ class TutorService
                 $obj['verified']    = false;
             }
 
-            $obj->name = implode(' ', [$obj->{UserFields::Firstname}, $obj->{UserFields::Lastname}]);
-            $obj['hashedId'] = $this->tutorHashIds->encode($obj->id);
+            $obj['hashedId']     = $this->tutorHashIds->encode($obj->id);
+            $disability          = $obj->{ProfileFields::Disability};
+            $obj['disabilityId'] = $disability;
+            $obj->disability     = $disabilityFilter[$disability];
 
-            $fluency = $obj->{ProfileFields::Fluency};
-            $obj['fluencyStr']   = $fluencyFilter[$fluency];
-            $obj['fluencyBadge'] = FluencyLevels::Tutor[$fluency]['Badge Color'];
-            $obj['fluencyDesc'] = FluencyLevels::Tutor[$fluency]['Description'];
-
-            $photo = $obj->{UserFields::Photo};
-            $obj['photo'] = $defaultPic;
-
-            if (!empty($photo))
-            {
-                $obj['photo'] = Storage::url("public/uploads/profiles/$photo");
-            }
+            if (array_key_exists($disability, $badges))
+                $obj['disabilityBadge'] = $badges[$disability];
         }
 
         return [
             'tutorsSet'     => $tutors,
-            'fluencyFilter' => $fluencyFilter,
-            'options'       => $options
+            'options'       => $options,
+            'disabilityFilter'  => $disabilityFilter,
+            'disabilityDesc'    => Constants::DisabilitiesDescription
         ];
     }
 
@@ -454,7 +448,7 @@ class TutorService
                 ProfileFields::UserId           => $userId,
                 ProfileFields::About            => $pending->{ProfileFields::About},
                 ProfileFields::Bio              => $pending->{ProfileFields::Bio},
-                ProfileFields::Fluency          => $pending->{ProfileFields::Fluency},
+                ProfileFields::Disability          => $pending->{ProfileFields::Disability},
                 ProfileFields::Education        => $pending->{ProfileFields::Education},
                 ProfileFields::Experience       => $pending->{ProfileFields::Experience},
                 ProfileFields::Certifications   => $pending->{ProfileFields::Certifications},
@@ -632,7 +626,7 @@ class TutorService
 
             $selectProfileFields = implode(',', [
                 'profile:id',
-                ProfileFields::Fluency.' as fluency',
+                ProfileFields::Disability.' as fluency',
                 ProfileFields::UserId .' as user_id'
             ]);
 

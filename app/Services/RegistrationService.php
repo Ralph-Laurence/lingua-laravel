@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
 use App\Models\FieldNames\DocProofFields;
 use App\Models\FieldNames\ProfileFields;
@@ -45,9 +44,9 @@ class RegistrationService
         $viewData = [
             'softSkills'        => User::SOFT_SKILLS,
             'currentYear'       =>  date('Y'),
-            'fluencyOptions'    => FluencyLevels::Tutor,
+            'disabilityOptions' => User::getDisabilityFilters(),
             'guestRegistration' => false,
-
+            'disabilityDesc'    => User::getDisabilitiesDefinition(),
             'showConvertAccWarning' => false
         ];
 
@@ -64,15 +63,16 @@ class RegistrationService
      */
     public function getUserValidationRules(array $exclude = []) : array
     {
+        $disabilities = User::getDisabilityFilters('keys');
         $rules = [
-            'firstname' => 'required|string|max:32',
-            'lastname'  => 'required|string|max:32',
-            'contact'   => 'required|string|max:20',
-            'address'   => 'required|string|max:255',
-            'fluency'   => 'required|integer|max:3|in:' . implode(',', array_keys(FluencyLevels::Learner)),
-            'email'     => 'required|string|email|max:255|unique:users',
-            'username'  => 'required|string|max:32|unique:users',
-            'password'  => 'required|string|min:4|confirmed',
+            'firstname'     => 'required|string|max:32',
+            'lastname'      => 'required|string|max:32',
+            'contact'       => 'required|string|max:20',
+            'address'       => 'required|string|max:255',
+            'disability'    => 'required|integer|max:3|in:' . implode(',', $disabilities),
+            'email'         => 'required|string|email|max:255|unique:users',
+            'username'      => 'required|string|max:32|unique:users',
+            'password'      => 'required|string|min:4|confirmed',
         ];
 
         // Remove rules for fields in the exclude array
@@ -106,7 +106,7 @@ class RegistrationService
         $rules = [
             'bio'               => 'required|string|max:180',
             'about'             => 'required|string|max:2000',
-            'fluency'           => 'required|integer|max:3|in:' . implode(',', array_keys(FluencyLevels::Tutor)),
+            'disability'        => 'required|integer|max:3|in:' . implode(',', User::getDisabilityFilters('keys')),
             'skills-arr' => [
                 'nullable',
                 'json',
@@ -289,6 +289,12 @@ class RegistrationService
 
         if ($validator->fails())
         {
+            error_log('stops here');
+            foreach ($validator->errors()->toArray() as $field => $errors) {
+                foreach ($errors as $error) {
+                    error_log($error);
+                }
+            }
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
@@ -409,7 +415,7 @@ class RegistrationService
                 ProfileFields::UserId           => $userId,
                 ProfileFields::Bio              => $inputs['bio'],
                 ProfileFields::About            => $about,
-                ProfileFields::Fluency          => $inputs['fluency'],
+                ProfileFields::Disability       => $inputs['disability'],
                 ProfileFields::Education        => $educ,
                 ProfileFields::Certifications   => $cert,
                 ProfileFields::Experience       => $work,
@@ -439,14 +445,14 @@ class RegistrationService
         $inputs = $validator->validated();
 
         return [
-            UserFields::Firstname   => $inputs['firstname'],
-            UserFields::Lastname    => $inputs['lastname'],
-            UserFields::Contact     => $inputs['contact'],
-            UserFields::Address     => $inputs['address'],
-            UserFields::Username    => $inputs['username'],
-            ProfileFields::Fluency  => $inputs['fluency'],
-            'email'                 => $inputs['email'],
-            'password'              => Hash::make($inputs['password'])
+            UserFields::Firstname       => $inputs['firstname'],
+            UserFields::Lastname        => $inputs['lastname'],
+            UserFields::Contact         => $inputs['contact'],
+            UserFields::Address         => $inputs['address'],
+            UserFields::Username        => $inputs['username'],
+            ProfileFields::Disability   => $inputs['disability'],
+            'email'                     => $inputs['email'],
+            'password'                  => Hash::make($inputs['password'])
         ];
     }
 
@@ -474,8 +480,8 @@ class RegistrationService
             ]);
 
             $profile = Profile::create([
-                ProfileFields::UserId   => $user->id,
-                ProfileFields::Fluency  => $data['fluency']
+                ProfileFields::UserId       => $user->id,
+                ProfileFields::Disability   => $data['disability']
             ]);
 
             DB::commit();
@@ -537,7 +543,7 @@ class RegistrationService
 
             $profileModel = Profile::create([
                 ProfileFields::UserId  => $userModel->id,
-                ProfileFields::Fluency => $profileEntries['profileModel']['fluency']
+                ProfileFields::Disability => $profileEntries['profileModel']['disability']
             ]);
 
             //===================================
@@ -559,6 +565,7 @@ class RegistrationService
         }
         catch (Exception $ex)
         {
+            error_log($ex->getMessage());
             DB::rollBack();
 
             // Delete uploaded files if any
@@ -570,26 +577,6 @@ class RegistrationService
                 'createdProfile'  => null
             ];
         }
-
-        // Execute the action then get the status code
-        // $register = $this->createUser($data); //($profileModel, $upload);
-
-        // if ($register == RegistrationService::STATUS_CODE_SUCCESS)
-        // {
-        //     // We will use this to guard the registration success screen
-        //     // so that it can only be visited once if ONLY there is a
-        //     // successful registration.
-        //     $request->session()->put('registration_success', true);
-
-        //     // Redirect to the registration success screen
-        //     return redirect()->route('become-tutor.success');
-        // }
-        // else
-        // {
-        //     // If there is an error in the database or fileupload during
-        //     // the registration, we abort the execution
-        //     return response()->view('errors.500', [], 500);
-        // }
     }
 
     public function upgradeLearnerToTutor(Request $request)
@@ -620,7 +607,7 @@ class RegistrationService
 
             $profileModel = Profile::create([
                 ProfileFields::UserId  => $userId,
-                ProfileFields::Fluency => $profileEntries['profileModel']['fluency']
+                ProfileFields::Disability => $profileEntries['profileModel']['disability']
             ]);
 
             //===================================

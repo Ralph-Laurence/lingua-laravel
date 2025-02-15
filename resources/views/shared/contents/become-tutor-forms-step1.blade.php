@@ -63,23 +63,32 @@
             </div>
 
             <div class="fluency-options mb-3">
-                <p class="form-label fw-bold">ASL Fluency *</p>
-                <p for="fluency" class="text-14">How fluent are you with American Sign Language?</p>
+                <p class="form-label fw-bold">Accessibility Needs *</p>
+                <p class="text-14">Indicate your hearing and speech preferences for better accessibility.</p>
                 <div class="alert alert-secondary text-12 px-1">
-                    <ul class="mb-0">
-                        @foreach ($fluencyOptions as $key => $obj)
-                            <li>
-                                <span class="fw-bold" style="width: 90px; display: inline-block;">{{ $obj['Level'] }}</span> - {{ $obj['Description'] }}
-                            </li>
-                        @endforeach
-
-                    </ul>
+                    @foreach ($disabilityDesc as $k => $v)
+                        <div class="row mx-auto mb-1">
+                            <div class="col-4">
+                                <span class="fw-bold">
+                                    <i class="fas fa-circle-chevron-right"></i> {{ $k }}
+                                </span>
+                            </div>
+                            <div class="col-8">{{ $v }}</div>
+                        </div>
+                    @endforeach
                 </div>
-                <select id="fluency" name="fluency">
-                    @foreach ($fluencyOptions as $key => $obj)
-                        <option data-description="{{ $obj['Description'] }}" value="{{ $key }}">{{ $obj['Level'] }}</option>
+                <select id="disability" name="disability">
+                    @foreach ($disabilityOptions as $key => $label)
+                        @if (old('disability') == $key)
+                            <option value="{{ $key }}" selected>{{ $label }}</option>
+                        @else
+                            <option value="{{ $key }}">{{ $label }}</option>
+                        @endif
                     @endforeach
                 </select>
+                @if($errors->any() && $errors->has('disability'))
+                    <div class="text-danger text-13">{{ $errors->first('disability') }}</div>
+                @endif
             </div>
         </div>
 

@@ -16,7 +16,7 @@ class Constants {
         '0' => 'No Impairments',
         '1' => 'Deaf or Hard of Hearing',
         '2' => 'Non-Verbal',
-        '3' => 'Both Deaf and Non-Verbal'
+        '3' => 'Deaf and Non-Verbal'
     ];
     const DocPathEducation      = 'public/documentary_proofs/education/';
     const DocPathWorkExp        = 'public/documentary_proofs/work_experience/';
@@ -31,13 +31,32 @@ class Constants {
         '0' => 'No Impairments',
         '1' => 'Deaf or Hard of Hearing',
         '2' => 'Non-Verbal',
-        '3' => 'Both Deaf and Non-Verbal'
+        '3' => 'Deaf and Non-Verbal'
     ];
 
     const DisabilitiesAdmin = [
         '0' => 'None',
         '1' => 'Deaf',
         '2' => 'Mute',
-        '3' => 'Both Mute & Deaf'
+        '3' => 'Mute & Deaf'
+    ];
+
+    const DisabilitiesDescription = [
+        '0' => 'No hearing or speech impairments.',
+        '1' => 'Difficulty hearing or completely deaf.',
+        '2' => 'Difficulty speaking or do not speak at all.',
+        '3' => 'Difficulty hearing and speaking, or do not hear and speak at all.'
+    ];
+    // [
+    //     '0' => 'You do not have any hearing or speech impairments.',
+    //     '1' => 'You have difficulty hearing or are completely deaf.',
+    //     '2' => 'You have difficulty speaking or do not speak at all.',
+    //     '3' => 'You have difficulty hearing and speaking, or do not hear or speak at all.'
+    // ];
+
+    const DisabilitiesBadge = [
+        '1' => 'badge_deaf',
+        '2' => 'badge_mute',
+        '3' => 'badge_deafmute'
     ];
 }

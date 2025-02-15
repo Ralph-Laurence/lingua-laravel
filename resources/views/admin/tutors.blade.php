@@ -46,17 +46,17 @@ $statusOptions = [
                 </div>
                 <div class="row mb-3">
                     <div class="col col-4 text-13">
-                        <div class="h-100 flex-start">Fluency</div>
+                        <div class="h-100 flex-start">Disability</div>
                     </div>
                     <div class="col text-13">
-                        <select class="form-select p-1 text-13" name="select-fluency" id="select-fluency">
+                        <select class="form-select p-1 text-13" name="select-disability" id="select-disability">
                             {{-- <option class="text-14" value="-1">All</option> --}}
                             @php
-                                $fluencyFilter = ['-1' => 'All'] + $fluencyFilter;
+                                $disabilityFilter = ['-1' => 'All'] + $disabilityFilter;
                             @endphp
-                            @foreach ($fluencyFilter as $k => $v)
+                            @foreach ($disabilityFilter as $k => $v)
                                 @php
-                                    $isSelected = ($inputs['select-fluency'] ?? -1) == $k  ? 'selected' : '';
+                                    $isSelected = ($inputs['select-disability'] ?? -1) == $k  ? 'selected' : '';
                                 @endphp
                                 <option class="text-14" {{ $isSelected }} value="{{ $k }}">{{ $v }}</option>
                             @endforeach
@@ -90,7 +90,7 @@ $statusOptions = [
         <div id="breadcrumb">
             <a><i class="fas fa-filter me-1"></i>Filter</a>
             <a href="#">Status: {{ $statusOptions[$inputs['select-status']] }} </a>
-            <a href="#">Fluency: {{ $fluencyFilter[$inputs['select-fluency']] }}</a>
+            <a href="#">Disability: {{ $disabilityFilter[$inputs['select-disability']] }}</a>
             <a href="#">Entries: {{ $inputs['select-entries'] }} per page</a>
             <a href="#">Keyword: {{ $inputs['search-keyword'] ?? 'None' }}</a>
             {{-- Product --}}
@@ -100,8 +100,8 @@ $statusOptions = [
             <div class="table-content-item row user-select-none">
                 <div class="col-1">#</div>
                 <div class="col-5">Tutor</div>
-                <div class="col-2 flex-center">Fluency</div>
-                <div class="col-2 flex-center">Status</div>
+                <div class="col-3 flex-center">Disability</div>
+                <div class="col-1 flex-center">Status</div>
                 <div class="col-2 flex-center">Actions</div>
             </div>
             <div class="rect-mask"></div>
@@ -112,7 +112,7 @@ $statusOptions = [
                 <div class="col-1 flex-start text-secondary">{{ ($tutors->currentPage() - 1) * $tutors->perPage() + $loop->index + 1 }}</div>
                 <div class="col-5">
                     <div class="profile-info w-100 flex-start">
-                        <img class="rounded profile-pic" src="{{ $obj['photo'] }}" alt="profile-pic">
+                        <img class="rounded profile-pic" src="{{ $obj->photoUrl }}" alt="profile-pic">
                         <div class="ms-3 flex-fill">
                             <h6 class="profile-name text-truncate  mb-2 text-13">{{ $obj->name }}</h6>
                             @if ($obj['totalStudents'] > 0)
@@ -127,10 +127,12 @@ $statusOptions = [
                         </div>
                     </div>
                 </div>
-                <div class="col-2 flex-center">
-                    <span title="{{ $obj['fluencyDesc'] }}" class="fluency-tooltip badge {{ $obj['fluencyBadge'] }}">{{ $obj['fluencyStr'] }}</span>
+                <div class="col-3 flex-center gx-1">
+                    @if (!empty($obj['disabilityBadge']))
+                        <span title="{{ $disabilityDesc[$obj['disabilityId']] }}" class="badge awareness_badge disability-tooltip {{ $obj['disabilityBadge'] }}">{{  $obj['disability'] }}</span>
+                    @endif
                 </div>
-                <div class="col-2 flex-center">
+                <div class="col-1 flex-center gx-0">
                     @if ($obj['verified'])
                         <span class="text-12 text-primary">
                             <i class="fas fa-check me-2"></i>
@@ -174,7 +176,7 @@ $statusOptions = [
 @push('scripts')
     <script src="{{ asset('assets/js/utils.js') }}"></script>
     <script>
-        $(() => initFluencyTooltips());
+        // $(() => initFluencyTooltips());
     </script>
 @endpush
 

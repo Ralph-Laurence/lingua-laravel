@@ -46,33 +46,6 @@ class LearnerServiceForTutor extends LearnerService
         return redirect()->route('mylearners');
     }
 
-    public function listAllLearners(Request $request, $tutorId)
-    {
-        $result = null;
-        $filter = ['exceptConnected' => $tutorId];
-
-        if ($request->session()->has('learner-filter-except'))
-        {
-            $dataSetFilters = $request->session()->get('learner-filter-except');
-            $filter = array_merge($filter, $dataSetFilters);
-        }
-
-        $result = $result = $this->getLearners($filter);
-
-        $learners = $result['learnersSet'];
-        $fluencyFilter = $result['fluencyFilter'];
-
-        if ($request->session()->has('learner-filter-inputs-for-tutor'))
-        {
-            $learnerFilterInputs = $request->session()->get('learner-filter-inputs-for-tutor');
-            $hasFilter = true;
-
-            return view('tutor.find-learners', compact('learners', 'fluencyFilter', 'learnerFilterInputs', 'hasFilter'));
-        }
-
-        return view('tutor.find-learners', compact('learners', 'fluencyFilter'));
-    }
-
     public function listMyLearners(Request $request, $tutorId)
     {
         $result = null;

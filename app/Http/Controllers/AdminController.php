@@ -72,7 +72,7 @@ class AdminController extends Controller
     //
     public function learners_index(Request $request)
     {
-        return $this->learnerServiceForAdmin->listAllLearnersForAdmin($request);
+        return $this->learnerServiceForAdmin->listAllLearners($request);
     }
 
     public function learners_filter(Request $request)

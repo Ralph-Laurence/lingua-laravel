@@ -17,10 +17,10 @@
                     <a href="{{ route('admin.dashboard') }}" class="nav-link px-2 {{ $dashboardIsActive }}">Dashboard</a>
                 </li>
                 <li>
-                    <a href="{{route('admin.tutors-index')}}" class="nav-link px-2 {{ Request::is('admin/tutors') ? 'link-active' : '' }}">Tutors</a>
+                    <a href="{{route('admin.tutors-index')}}" class="nav-link px-2 {{ (Request::is('admin/tutors') ? 'link-active' : '') }}">Tutors</a>
                 </li>
                 <li>
-                    <a href="{{ route('admin.learners-index') }}" class="nav-link px-2 {{ Request::is('admin/learners') ? 'link-active' : '' }}">Learners</a>
+                    <a href="{{ route('admin.learners-index') }}" class="nav-link px-2 {{ (request()->routeIs('admin.learners-index')) ? 'link-active' : '' }}">Learners</a>
                 </li>
             </ul>
 

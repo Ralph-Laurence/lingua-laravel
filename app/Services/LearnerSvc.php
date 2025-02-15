@@ -3,9 +3,7 @@
 namespace App\Services;
 
 use App\Http\Utils\Constants;
-use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
-use App\Models\Booking;
 use App\Models\FieldNames\BookingFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\RatingsAndReviewFields;
@@ -16,7 +14,6 @@ use Exception;
 use Hashids\Hashids;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
 class LearnerSvc extends CommonModelService
 {
@@ -24,10 +21,6 @@ class LearnerSvc extends CommonModelService
 
     private static $hashids = null;
 
-    public function getLearnersListForAdmin()
-    {
-
-    }
     //
     //==========================================
     //      Q U E R Y  B U I L D E R S
@@ -46,14 +39,14 @@ class LearnerSvc extends CommonModelService
             UserFields::Lastname,
             UserFields::Photo,
             UserFields::Role,
-            ProfileFields::Fluency
+            ProfileFields::Disability
         ];
 
         if (isset($options['extraFields']))
             $fields = array_merge($fields, $options['extraFields']);
 
         // Filter transformations
-        $hasFluencyFilter = array_key_exists('fluency', $options) && $options['fluency'] != -1;
+        $hasDisabilityFilter = array_key_exists('disability', $options) && $options['disability'] != -1;
 
         // Build the query
         $builder = User::select($fields)
@@ -67,9 +60,9 @@ class LearnerSvc extends CommonModelService
                     $query->where(UserFields::Role, User::ROLE_TUTOR);
                 });
             }])
-            ->when($hasFluencyFilter, function($query) use($options)
+            ->when($hasDisabilityFilter, function($query) use($options)
             {
-                $query->where(ProfileFields::Fluency, $options['fluency']);
+                $query->where(ProfileFields::Disability, $options['disability']);
             })
             ->when(!empty($options['search']), function($query) use($options)
             {
@@ -97,18 +90,23 @@ class LearnerSvc extends CommonModelService
     {
         return $query->paginate($minEntries)->through(function($result)
         {
-            $fluency = FluencyLevels::Learner[$result->{ProfileFields::Fluency}];
+            $badges = Constants::DisabilitiesBadge;
+            $disability = $result->{ProfileFields::Disability};
+            $impairments = User::getDisabilityFilters();
 
             $returnData = [
                 'learnerId'     => self::toHashedId($result->id),
                 'name'          => implode(' ', [$result->{UserFields::Firstname}, $result->{UserFields::Lastname}]),
                 'photo'         => User::getPhotoUrl($result->{UserFields::Photo}),
                 'email'         => $result->email,
-                'fluencyStr'    => $fluency['Level'],
-                'fluencyBadge'  => $fluency['Badge Color'],
-                'fluencyDesc'   => $fluency['Description'],
-                'totalTutors'   => $result->totalTutors
+                'totalTutors'   => $result->totalTutors,
+                'disabilityBadge' => '',
+                'disability'      => $impairments[$disability],
+                'disabilityId'    => $disability
             ];
+
+            if (array_key_exists($disability, $badges))
+                $returnData['disabilityBadge'] = $badges[$disability];
 
             if (isset($result->contact))
                 $returnData['contact'] = $result->{UserFields::Contact};
@@ -143,6 +141,18 @@ class LearnerSvc extends CommonModelService
                 $subquery->where(BookingFields::TutorId, $options['tutorId']);
             });
         }
+
+        return $this->mapLearnersQueryResult($query, $options['minEntries']);
+    }
+
+    public function getLearnersListForAdmin($options)
+    {
+        // If min entries is not defined, give the fallback value
+        if (!isset($options['minEntries']))
+            $options['minEntries'] = Constants::MinPageEntries;
+
+        // Retrieve all learners (fallback default)
+        $query = $this->query_GetLearners($options);
 
         return $this->mapLearnersQueryResult($query, $options['minEntries']);
     }
@@ -195,7 +205,7 @@ class LearnerSvc extends CommonModelService
             UserFields::Lastname,
             UserFields::Contact,
             UserFields::Photo,
-            ProfileFields::Fluency
+            ProfileFields::Disability
         ];
 
         try

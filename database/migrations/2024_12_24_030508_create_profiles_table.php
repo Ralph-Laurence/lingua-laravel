@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('profiles', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger(ProfileFields::UserId);
-            $table->integer(ProfileFields::Fluency);
+            $table->integer(ProfileFields::Disability);
             $table->text(ProfileFields::Bio)->nullable();
             $table->text(ProfileFields::About)->nullable();
             $table->json(ProfileFields::Education)->nullable();

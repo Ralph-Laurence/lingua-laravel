@@ -28,16 +28,16 @@
                 <h6 class="text-13 text-secondary">What to include:</h6>
                 <div class="row mb-3">
                     <div class="col col-4 text-13">
-                        <div class="h-100 flex-start">Fluency</div>
+                        <div class="h-100 flex-start">Accessibility</div>
                     </div>
                     <div class="col text-13">
-                        <select class="form-select p-1 text-13" name="fluency">
+                        <select class="form-select p-1 text-13" name="disability">
                             @php
-                                $fluencyFilter = ['-1' => 'All'] + $fluencyFilter;
+                                $disabilityFilter = ['-1' => 'All'] + $disabilityFilter;
                             @endphp
-                            @foreach ($fluencyFilter as $k => $v)
+                            @foreach ($disabilityFilter as $k => $v)
                                 @php
-                                    $isSelected = (session('fluency') ?? -1) == $k  ? 'selected' : '';
+                                    $isSelected = (session('disability') ?? -1) == $k  ? 'selected' : '';
                                 @endphp
                                 <option class="text-14" {{ $isSelected }} value="{{ $k }}">{{ $v }}</option>
                             @endforeach
@@ -77,7 +77,7 @@
         @if ($filtersApplied)
         <div id="breadcrumb">
             <a><i class="fas fa-filter me-1"></i>Filter</a>
-            <a href="#">Fluency: {{ $fluencyFilter[session('fluency')] }}</a>
+            <a href="#">Accessibility: {{ $disabilityFilter[session('disability')] }}</a>
             <a href="#">Entries: {{ session('minEntries') }} per page</a>
             <a href="#">Keyword: {{ session('search') ?? 'None' }}</a>
             {{-- Product --}}

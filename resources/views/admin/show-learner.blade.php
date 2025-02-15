@@ -25,7 +25,7 @@
                     <div class="tutor-name flex-start gap-2 mb-3">
                         <h2 class="mb-0 darker-text">{{ $learnerDetails['fullname'] }}</h2>
                     </div>
-    
+
                     <div class="tutor-address text-secondary mb-2">
                         <i class="fas fa-location-dot me-2"></i>
                         {{ $learnerDetails['address'] }}
@@ -39,10 +39,10 @@
                         {{ $learnerDetails['contact'] }}
                     </div>
                     <div class="tutor-badges flex-start">
-                        <span class="badge {{ $learnerDetails['fluencyBadgeColor'] }}">
+                        {{-- <span class="badge {{ $learnerDetails['fluencyBadgeColor'] }}">
                             <i class="fas {{ $learnerDetails['fluencyBadgeIcon'] }} me-2"></i>
                             {{ $learnerDetails['fluencyLevelText'] }}
-                        </span>
+                        </span> --}}
                     </div>
                 </div>
             </div>

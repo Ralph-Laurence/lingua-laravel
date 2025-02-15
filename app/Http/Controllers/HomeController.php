@@ -2,23 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Utils\FluencyLevels;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
 use App\Models\PendingRegistration;
 use App\Models\User;
-use App\Services\LearnerService;
-use App\Services\RegistrationService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
-    //protected $learnerService;
-    public function index(Request $request)
+    public function index()
     {
-        // return view('welcome');
-
         $viewData = [
             'currentRole' => 'guest',
             'headerData'  => [],
@@ -62,6 +55,6 @@ class HomeController extends Controller
             $viewData['isPendingAccount'] = $hasPendingRegistration;
         }
 
-        return view('shared.contents.home-page', $viewData); //compact('currentRole', 'headerData', 'showJoinCommunity'));
+        return view('shared.contents.home-page', $viewData);
     }
 }

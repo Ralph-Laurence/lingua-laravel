@@ -226,6 +226,51 @@ footer {
     background-color: var(--accent-dark);
     color: #FFAE3B;
 }
+
+.badge.awareness_badge {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.badge.awareness_badge::before {
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    content: '';
+    display: inline-block;
+    vertical-align: middle; /* Optional: align the image vertically */
+    margin-right: 4px;
+}
+
+.badge.awareness_badge.badge_mute {
+    background-color: #F6F6FB;
+    color: #2E2A9F;
+}
+
+.badge.awareness_badge.badge_mute::before {
+    background-image: url('../img/awareness_mute_s.png');
+}
+
+
+.badge.awareness_badge.badge_deaf {
+    background-color: #FEFAF6;
+    color: #FE851F;
+}
+
+.badge.awareness_badge.badge_deaf::before {
+    background-image: url('../img/awareness_deaf_s.png');
+}
+
+.badge.awareness_badge.badge_deafmute {
+    background-color: #F5F9F9;
+    color: #007E7E;
+}
+
+.badge.awareness_badge.badge_deafmute::before {
+    background-image: url('../img/awareness_deafmute_s.png');
+}
 /*
 .form-control.sign-lingua-input-field:focus {
     color: #212529;

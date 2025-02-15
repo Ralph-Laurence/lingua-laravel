@@ -5,6 +5,7 @@
 @extends('shared.base-members')
 
 @section('content')
+{{-- <x-error-blade-display /> --}}
 <div class="forms-card m-auto py-4">
         <div class="logo-wrapper flex-center mb-4">
             <img id="logo" src="{{ asset('assets/img/logo-brand-sm.png') }}" alt="" srcset="">
@@ -86,13 +87,13 @@
                         </div>
                         <div class="row">
                             <div class="col">
-                                <div class="text-12 h-100 flex-start">How fluent are you with ASL?</div>
+                                <div class="text-12 h-100 flex-start">Accessibility Needs (hearing & speech)</div>
                             </div>
                             <div class="col">
-                                <select class="form-select px-1 text-13" name="fluency" id="fluency" style="padding-top: 6px; padding-bottom: 6px;">
-                                    @foreach ($fluencyFilter as $k => $v)
+                                <select class="form-select px-1 text-13" name="disability" style="padding-top: 6px; padding-bottom: 6px;">
+                                    @foreach ($disabilityFilter as $k => $v)
                                         @php
-                                            $isSelected = old('fluency') == $k ? 'selected' : '';
+                                            $isSelected = old('disability') == $k ? 'selected' : '';
                                         @endphp
                                         <option class="text-14" {{ $isSelected }} value="{{ $k }}">{{ $v }}</option>
                                     @endforeach

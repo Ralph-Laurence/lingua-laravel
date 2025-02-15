@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Utils\Constants;
 use Illuminate\Http\Request;
 
 class LearnerServiceForAdmin extends LearnerService
@@ -18,7 +19,7 @@ class LearnerServiceForAdmin extends LearnerService
 
         $filter = $filterLearners['filterOptions'];
         $inputs = $filterLearners['filterInputs'];
-            
+
         $request->session()->put('learner-filter-inputs-for-admin', $inputs);
         $request->session()->put('learner-filter-for-admin', $filter);
 
@@ -33,7 +34,7 @@ class LearnerServiceForAdmin extends LearnerService
         return redirect()->route('admin.learners-index');
     }
 
-    public function listAllLearnersForAdmin(Request $request)
+    public function listAllLearners(Request $request)
     {
         $result = null;
 
@@ -47,18 +48,19 @@ class LearnerServiceForAdmin extends LearnerService
             $result = $this->getLearners();
         }
 
-        $learners = $result['learnersSet'];
-        $fluencyFilter = $result['fluencyFilter'];
+        $learners         = $result['learnersSet'];
+        $disabilityFilter = $result['disabilityFilter'];
+        $disabilityDesc   = Constants::DisabilitiesDescription;
 
         if ($request->session()->has('learner-filter-inputs-for-admin'))
         {
             $learnerFilterInputs = $request->session()->get('learner-filter-inputs-for-admin');
             $hasFilter = true;
 
-            return view('admin.learners', compact('learners', 'fluencyFilter', 'learnerFilterInputs', 'hasFilter'));
+            return view('admin.learners', compact('learners', 'disabilityFilter', 'disabilityDesc', 'learnerFilterInputs', 'hasFilter'));
         }
 
-        return view('admin.learners', compact('learners', 'fluencyFilter'));
+        return view('admin.learners', compact('learners', 'disabilityFilter', 'disabilityDesc'));
     }
 
     //

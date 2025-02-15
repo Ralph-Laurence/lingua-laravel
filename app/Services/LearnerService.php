@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Utils\Constants;
 use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
 use App\Models\Booking;
@@ -45,7 +46,8 @@ class LearnerService
             // Fetch the learner's details
             $learnerId    = $decodedId[0];
             $learner      = User::findOrFail($learnerId);
-            $fluencyLevel = FluencyLevels::Learner[$learner->profile->{ProfileFields::Fluency}];
+            //$fluencyLevel = FluencyLevels::Learner[$learner->profile->{ProfileFields::Disability}];
+            $disability   = Constants::Disabilities[$learner->profile->{ProfileFields::Disability}];
 
             $photo = $learner->{UserFields::Photo};
             $profilePic = asset('assets/img/default_avatar.png');
@@ -59,9 +61,9 @@ class LearnerService
                 'contact'            => $learner->{UserFields::Contact},
                 'address'            => $learner->{UserFields::Address},
                 'photo'              => $profilePic,
-                'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],
-                'fluencyBadgeColor'  => $fluencyLevel['Badge Color'],
-                'fluencyLevelText'   => $fluencyLevel['Level'],
+                // 'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],
+                // 'fluencyBadgeColor'  => $fluencyLevel['Badge Color'],
+                // 'fluencyLevelText'   => $fluencyLevel['Level'],
             ];
 
             return $learnerDetails;
@@ -89,23 +91,13 @@ class LearnerService
             UserFields::Lastname,
             UserFields::Photo,
             UserFields::Role,
-            ProfileFields::Fluency
+            ProfileFields::Disability
         ];
 
         // Build the query
         $learners = User::select($fields)
             ->join('profiles', 'users.id', '=', 'profiles.'.ProfileFields::UserId)
             ->where(UserFields::Role, User::ROLE_LEARNER)
-            // ->whereHas('bookingsAsLearner', function($query) use($options)
-            // {
-            //     // If there is a key "forTutor", that means we only
-            //     // select specific learners connected to that tutor,
-            //     // identified by tutor id
-            //     if (array_key_exists("forTutor", $options))
-            //     {
-            //         $query->where(BookingFields::TutorId, $options['forTutor']);
-            //     }
-            // })
             ->when(array_key_exists("forTutor", $options), function($query) use($options)
             {
                 $query->whereHas('bookingsAsLearner', function($subquery) use($options)
@@ -132,33 +124,8 @@ class LearnerService
             }])
             ->orderBy(UserFields::Firstname, 'ASC');
 
-        // if (array_key_exists('exceptConnected', $options))
-        // {
-        //     $learners = $learners->whereDoesntHave('bookingsAsLearner', function($query) use($options)
-        //     {
-        //         $query->where(BookingFields::TutorId, $options['exceptConnected']);
-        //     });
-        // }
-        // if (array_key_exists("forTutor", $options))
-        // {
-        //     $learners = $learners->whereHas('bookingsAsLearner', function($query) use($options)
-        //     {
-        //         // If there is a key "forTutor", that means we only
-        //         // select specific learners connected to that tutor,
-        //         // identified by tutor id
-        //         $query->where(BookingFields::TutorId, $options['forTutor']);
-        //     });
-        // }
-        // else if (array_key_exists('exceptConnected', $options))
-        // {
-        //     $learners = $learners->whereDoesntHave('bookingsAsLearner', function($query) use($options)
-        //     {
-        //         $query->where(BookingFields::TutorId, $options['exceptConnected']);
-        //     });
-        // }
-
-        if (array_key_exists('fluency', $options) && $options['fluency'] != -1) {
-            $learners = $learners->where(ProfileFields::Fluency, $options['fluency']);
+        if (array_key_exists('disability', $options) && $options['disability'] != -1) {
+            $learners = $learners->where(ProfileFields::Disability, $options['disability']);
         }
 
         if (array_key_exists('search', $options))
@@ -172,32 +139,24 @@ class LearnerService
 
         // Get the results
         $learners = $learners->paginate($options['min_entries']);
-
-        $defaultPic     = asset('assets/img/default_avatar.png');
-        $fluencyFilter  = $this->getFluencyFilters();
+        $disabilityFilter = User::getDisabilityFilters();
 
         foreach ($learners as $key => $obj)
         {
-            $obj->name = implode(' ', [$obj->{UserFields::Firstname}, $obj->{UserFields::Lastname}]);
-            $obj['hashedId'] = $this->learnerHashIds->encode($obj->id);
+            $obj['hashedId']     = $this->learnerHashIds->encode($obj->id);
+            $badges              = Constants::DisabilitiesBadge;
+            $disability          = $obj->{ProfileFields::Disability};
+            $obj['disabilityId'] = $disability;
+            $obj->disability     = $disabilityFilter[$disability];
 
-            $fluency = $obj->{ProfileFields::Fluency};
-            $obj['fluencyStr']   = $fluencyFilter[$fluency];
-            $obj['fluencyBadge'] = FluencyLevels::Learner[$fluency]['Badge Color'];
-            $obj['fluencyDesc'] = FluencyLevels::Learner[$fluency]['Description'];
-
-            $photo = $obj->{UserFields::Photo};
-            $obj['photo'] = $defaultPic;
-
-            if (!empty($photo))
-            {
-                $obj['photo'] = Storage::url("public/uploads/profiles/$photo");
-            }
+            if (array_key_exists($disability, $badges))
+                $obj['disabilityBadge'] = $badges[$disability];
         }
 
         return [
-            'learnersSet'   => $learners,
-            'fluencyFilter' => $fluencyFilter
+            'learnersSet'       => $learners,
+            'disabilityFilter'  => $disabilityFilter,
+            'disabilityDesc'    => Constants::DisabilitiesDescription
         ];
     }
     //
@@ -244,7 +203,7 @@ class LearnerService
         $rules = [
             'search-keyword' => 'nullable|string|max:64',
             'select-entries' => 'required|integer|in:10,25,50,100',
-            'select-fluency' => 'required|integer|in:-1,' . implode(',', array_keys($this->getFluencyFilters()))
+            'select-disability' => 'required|integer|in:-1,' . implode(',', User::getDisabilityFilters('keys'))
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -257,7 +216,7 @@ class LearnerService
         $inputs = $validator->validated();
         $filter = [
             'min_entries' => $inputs['select-entries'],
-            'fluency'     => $inputs['select-fluency'],
+            'disability'     => $inputs['select-disability'],
         ];
 
         // The admin side mostly doesnt need these.

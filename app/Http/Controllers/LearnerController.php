@@ -3,14 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Utils\Constants;
-use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
-use App\Models\Booking;
-use App\Models\FieldNames\BookingFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\RatingsAndReviewFields;
 use App\Models\FieldNames\UserFields;
 use App\Models\RatingsAndReview;
+use App\Models\User;
 use App\Services\LearnerBookingRequestService;
 use App\Services\LearnerService;
 use App\Services\LearnerSvc;
@@ -57,8 +55,9 @@ class LearnerController extends Controller
      */
     public function registerLearner_create()
     {
-        $fluencyFilter = $this->learnerService->getFluencyFilters();
-        return view('learner.registration', compact('fluencyFilter'));
+        $disabilityFilter = User::getDisabilityFilters();
+
+        return view('learner.registration', compact('disabilityFilter'));
     }
 
     /**
@@ -111,7 +110,7 @@ class LearnerController extends Controller
     {
         $availableFilters = [
             'search'  => '',
-            'fluency' => -1,
+            'disability' => -1,
             'exceptConnected' => Auth::user()->id
             // Add other filters here with default values
         ];
@@ -131,13 +130,13 @@ class LearnerController extends Controller
         $options['includeDateJoined'] = true;
 
         $tutors = $this->tutorSvc->getTutorsListForLearner($options);
-        $fluencyFilter = FluencyLevels::ToSelectOptions(FluencyLevels::SELECT_OPTIONS_LEARNER);
+        $disabilityFilter = User::getDisabilityFilters();
 
         // Determine if any filters are applied
         $filtersApplied = $this->tutorSvc->areFiltersApplied($options, $availableFilters);
 
         session()->flash('search', $options['search']);
-        session()->flash('fluency', $options['fluency']);
+        session()->flash('disability', $options['disability']);
         // ...Flash other filters as needed
 
         $entriesOptions = Constants::PageEntries;
@@ -146,7 +145,7 @@ class LearnerController extends Controller
 
         return view('learner.find-tutors', compact(
             'tutors',
-            'fluencyFilter',
+            'disabilityFilter',
             'filtersApplied',
             'entriesOptions',
             'totalTutors'
@@ -394,8 +393,3 @@ class LearnerController extends Controller
         return $this->learnerSvc->deleteTutorReview($request->input('tutor_id'));
     }
 }
-
-
-// $inputs = $model;
-// return view('test.test', compact('inputs'));
-

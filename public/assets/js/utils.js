@@ -6,7 +6,7 @@ function sleep(ms)
 
 function initFluencyTooltips()
 {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('.fluency-tooltip'));
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('.disability-tooltip'));
 
     tooltipTriggerList.map(function (tooltipTriggerEl)
     {

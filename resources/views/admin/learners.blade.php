@@ -1,6 +1,6 @@
 @php $includeFooter = false; @endphp
 @extends('shared.base-admin')
-
+{{-- @dd($learners) --}}
 @section('content')
 <main class="workspace-wrapper">
     <aside class="workspace-sidepane">
@@ -20,23 +20,16 @@
                 <h6 class="text-13 text-secondary">What to include:</h6>
                 <div class="row mb-3">
                     <div class="col col-4 text-13">
-                        <div class="h-100 flex-start">Fluency</div>
+                        <div class="h-100 flex-start">Disability</div>
                     </div>
                     <div class="col text-13">
-                        <select class="form-select p-1 text-13" name="select-fluency" id="select-fluency">
-                            {{-- <option class="text-14" value="-1">All</option>
-                            @foreach ($fluencyFilter as $k => $v)
-                                @php
-                                    $isSelected = ($learnerFilterInputs['select-fluency'] ?? -1) == $k  ? 'selected' : '';
-                                @endphp
-                                <option class="text-14" {{ $isSelected }} value="{{ $k }}">{{ $v }}</option>
-                            @endforeach --}}
+                        <select class="form-select p-1 text-13" name="select-disability" id="select-disability">
                             @php
-                                $fluencyFilter = ['-1' => 'All'] + $fluencyFilter;
+                                $disabilityFilter = ['-1' => 'All'] + $disabilityFilter;
                             @endphp
-                            @foreach ($fluencyFilter as $k => $v)
+                            @foreach ($disabilityFilter as $k => $v)
                                 @php
-                                    $isSelected = ($learnerFilterInputs['select-fluency'] ?? -1) == $k  ? 'selected' : '';
+                                    $isSelected = ($learnerFilterInputs['select-disability'] ?? -1) == $k  ? 'selected' : '';
                                 @endphp
                                 <option class="text-14" {{ $isSelected }} value="{{ $k }}">{{ $v }}</option>
                             @endforeach
@@ -69,7 +62,7 @@
         @if (isset($hasFilter))
         <div id="breadcrumb">
             <a><i class="fas fa-filter me-1"></i>Filter</a>
-            <a href="#">Fluency: {{ $fluencyFilter[$learnerFilterInputs['select-fluency']] }}</a>
+            <a href="#">Disability: {{ $disabilityFilter[$learnerFilterInputs['select-disability']] }}</a>
             <a href="#">Entries: {{ $learnerFilterInputs['select-entries'] }} per page</a>
             <a href="#">Keyword: {{ $learnerFilterInputs['search-keyword'] ?? 'None' }}</a>
             {{-- Product --}}
@@ -78,8 +71,8 @@
         <div class="workarea-table-header mb-4">
             <div class="table-content-item row user-select-none">
                 <div class="col-1">#</div>
-                <div class="col-7">Learner</div>
-                <div class="col-2 flex-center">Fluency</div>
+                <div class="col-5">Learner</div>
+                <div class="col-4 flex-center">Disability</div>
                 <div class="col-2 flex-center">Actions</div>
             </div>
             <div class="rect-mask"></div>
@@ -88,9 +81,9 @@
             @forelse ($learners as $key => $obj)
             <div class="table-content-item row user-select-none mb-3">
                 <div class="col-1 flex-start text-secondary">{{ ($learners->currentPage() - 1) * $learners->perPage() + $loop->index + 1 }}</div>
-                <div class="col-7">
+                <div class="col-5">
                     <div class="profile-info w-100 flex-start">
-                        <img class="rounded profile-pic" src="{{ $obj['photo'] }}" alt="profile-pic">
+                        <img class="rounded profile-pic" src="{{ $obj->photoUrl }}" alt="profile-pic">
                         <div class="ms-3 flex-fill">
                             <h6 class="profile-name text-truncate  mb-2 text-13">{{ $obj->name }}</h6>
                             @if ($obj->totalTutors > 0)
@@ -101,8 +94,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-2 flex-center">
-                    <span title="{{ $obj['fluencyDesc'] }}" class="fluency-tooltip badge {{ $obj['fluencyBadge'] }}">{{ $obj['fluencyStr'] }}</span>
+                <div class="col-4 flex-center">
+                    @if (!empty($obj['disabilityBadge']))
+                        <span title="{{ $disabilityDesc[$obj['disabilityId']] }}" class="badge awareness_badge disability-tooltip {{ $obj['disabilityBadge'] }}">{{  $obj['disability'] }}</span>
+                    @endif
                 </div>
                 <div class="col-2 flex-center">
                     @if ($obj['needsReview'])
@@ -136,6 +131,6 @@
 @push('scripts')
     <script src="{{ asset('assets/js/utils.js') }}"></script>
     <script>
-        $(() => initFluencyTooltips());
+        //$(() => initFluencyTooltips());
     </script>
 @endpush

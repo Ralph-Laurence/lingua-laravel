@@ -3,17 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Utils\Constants;
-use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
-use App\Http\Utils\Helper;
 use App\Models\Booking;
-use App\Models\BookingRequest;
 use App\Models\FieldNames\BookingFields;
-use App\Models\FieldNames\BookingRequestFields;
-use App\Models\FieldNames\ProfileFields;
-use App\Models\FieldNames\RatingsAndReviewFields;
 use App\Models\FieldNames\UserFields;
-use App\Models\RatingsAndReview;
 use App\Models\User;
 use App\Services\LearnerServiceForTutor;
 use App\Services\LearnerSvc;
@@ -23,11 +16,9 @@ use App\Services\TutorService;
 use App\Services\TutorSvc;
 use Exception;
 use Hashids\Hashids;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class TutorController extends Controller
 {
@@ -106,7 +97,7 @@ class TutorController extends Controller
     {
         $availableFilters = [
             'search'  => '',
-            'fluency' => -1,
+            'disability' => -1,
             'exceptConnected' => Auth::user()->id
             // Add other filters here with default values
         ];
@@ -122,29 +113,29 @@ class TutorController extends Controller
         }
 
         $learners = $this->learnerSvc->getLearnersListForTutor($options);
-        $fluencyFilter = FluencyLevels::ToSelectOptions(FluencyLevels::SELECT_OPTIONS_LEARNER);
+        $disabilityFilter = User::getDisabilityFilters();
 
         // Determine if any filters are applied
         $filtersApplied = $this->learnerSvc->areFiltersApplied($options, $availableFilters);
 
         session()->flash('search', $options['search']);
-        session()->flash('fluency', $options['fluency']);
+        session()->flash('disability', $options['disability']);
         // ...Flash other filters as needed
 
         $entriesOptions = Constants::PageEntries;
 
-        return view('tutor.find-learners', compact('learners', 'fluencyFilter', 'filtersApplied', 'entriesOptions'));
+        return view('tutor.find-learners', compact('learners', 'disabilityFilter', 'filtersApplied', 'entriesOptions'));
     }
 
     public function find_learners_clear_filter()
     {
-        session()->forget('fluency', 'search');
+        session()->forget('disability', 'search');
         return redirect()->route('tutor.find-learners');
     }
 
     public function my_learners_clear_filter()
     {
-        session()->forget('fluency', 'search');
+        session()->forget('disability', 'search');
         return redirect()->route('tutor.my-learners');
     }
 
@@ -152,7 +143,7 @@ class TutorController extends Controller
     {
         $availableFilters = [
             'search'  => '',
-            'fluency' => -1,
+            'disability' => -1,
             'mode'    => 'myLearners',
             'tutorId' => Auth::user()->id
             // Add other filters here with default values
@@ -169,41 +160,19 @@ class TutorController extends Controller
         }
 
         $learners = $this->learnerSvc->getLearnersListForTutor($options);
-        $fluencyFilter = FluencyLevels::ToSelectOptions(FluencyLevels::SELECT_OPTIONS_LEARNER);
+        $disabilityFilter = User::getDisabilityFilters();
+        $disabilityDesc   = Constants::DisabilitiesDescription;
 
         // Determine if any filters are applied
         $filtersApplied = $this->learnerSvc->areFiltersApplied($options, $availableFilters);
 
         session()->flash('search', $options['search']);
-        session()->flash('fluency', $options['fluency']);
+        session()->flash('disability', $options['disability']);
         // ...Flash other filters as needed
 
         $entriesOptions = Constants::PageEntries;
 
-        return view('tutor.mylearners', compact('learners', 'fluencyFilter', 'filtersApplied', 'entriesOptions'));
-
-
-
-
-
-
-        // $options = [
-        //     'search'  => $request->input('search', ''),
-        //     'mode'    => 'myLearners',
-        //     'tutorId' => Auth::user()->id
-        // ];
-
-        // $minEntries = $request->input('min-entries');
-
-        // if (in_array($minEntries, Constants::PageEntries))
-        //     $options['minEntries'] = $minEntries;
-
-        // $learners       = $this->learnerSvc->getLearnersListForTutor($options);
-        // $fluencyFilter  = FluencyLevels::ToSelectOptions(FluencyLevels::SELECT_OPTIONS_LEARNER);
-
-        // return view('tutor.mylearners', compact('learners', 'fluencyFilter'));
-        // $tutorId = Auth::user()->id;
-        // return $this->learnerServiceForTutor->listMyLearners($request, $tutorId);
+        return view('tutor.mylearners', compact('learners', 'disabilityFilter', 'disabilityDesc', 'filtersApplied', 'entriesOptions'));
     }
     //
     //..............................................

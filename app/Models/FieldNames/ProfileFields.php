@@ -5,7 +5,7 @@ namespace App\Models\FieldNames;
 class ProfileFields
 {
     const UserId            = 'user_id';
-    const Fluency           = 'fluency';
+    const Disability        = 'disability';
     const Bio               = 'bio';
     const About             = 'about';
     const Education         = 'education';
