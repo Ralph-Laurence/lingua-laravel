@@ -14,7 +14,6 @@ use App\Models\FieldNames\BookingRequestFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\RatingsAndReviewFields;
 use App\Models\FieldNames\UserFields;
-use App\Models\RatingsAndReview;
 use App\Models\User;
 use Exception;
 use Hashids\Hashids;
@@ -22,7 +21,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class TutorSvc extends CommonModelService
 {
@@ -302,30 +300,30 @@ class TutorSvc extends CommonModelService
 
             // Final transformed data
             $tutorDetails = [
-                'hashedId'           => $hashedId,
-                'firstname'          => $tutor->{UserFields::Firstname},
-                'possessiveName'     => $tutor->possessiveFirstName, //User::toPossessiveName($tutor->{UserFields::Firstname}),
-                'fullname'           => $tutor->name,//implode(' ', [$tutor->{UserFields::Firstname}, $tutor->{UserFields::Lastname}]),
-                'email'              => $tutor->email,
-                'contact'            => $tutor->{UserFields::Contact},
-                'address'            => $tutor->{UserFields::Address},
-                'verified'           => $tutor->{UserFields::IsVerified} == 1,
-                'work'               => $tutor->profile->{ProfileFields::Experience},
-                'bio'                => $tutor->profile->{ProfileFields::Bio},
-                'about'              => $tutor->profile->{ProfileFields::About},
-                'education'          => $tutor->profile->{ProfileFields::Education},
-                'certs'              => $tutor->profile->{ProfileFields::Certifications},
-                'skills'             => $skills,
-                'photo'              => $tutor->photoUrl,//User::getPhotoUrl($tutor->{UserFields::Photo}),
-                'hireStatus'         => $hireStatus,
-                'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],
-                'fluencyBadgeColor'  => $fluencyLevel['Badge Color'],
-                'fluencyLevelText'   => $fluencyLevel['Level'],
-                'averageRating'      => $tutor->averageRating,
-                'totalReviews'       => $totalReviews,
-                'ratingsAndReviews'  => $receivedRatings,
-                'totalIndividualRatings'  => $totalIndividualRatings,
-                'highestIndividualRating' => $highestIndivRating
+                'hashedId'                  => $hashedId,
+                'firstname'                 => $tutor->{UserFields::Firstname},
+                'possessiveName'            => $tutor->possessiveFirstName,
+                'fullname'                  => $tutor->name,
+                'email'                     => $tutor->email,
+                'contact'                   => $tutor->{UserFields::Contact},
+                'address'                   => $tutor->{UserFields::Address},
+                'verified'                  => $tutor->{UserFields::IsVerified} == 1,
+                'work'                      => $tutor->profile->{ProfileFields::Experience},
+                'bio'                       => $tutor->profile->{ProfileFields::Bio},
+                'about'                     => $tutor->profile->{ProfileFields::About},
+                'education'                 => $tutor->profile->{ProfileFields::Education},
+                'certs'                     => $tutor->profile->{ProfileFields::Certifications},
+                'skills'                    => $skills,
+                'photo'                     => $tutor->photoUrl,
+                'hireStatus'                => $hireStatus,
+                'fluencyBadgeIcon'          => $fluencyLevel['Badge Icon'],
+                'fluencyBadgeColor'         => $fluencyLevel['Badge Color'],
+                'fluencyLevelText'          => $fluencyLevel['Level'],
+                'averageRating'             => $tutor->averageRating,
+                'totalReviews'              => $totalReviews,
+                'ratingsAndReviews'         => $receivedRatings,
+                'totalIndividualRatings'    => $totalIndividualRatings,
+                'highestIndividualRating'   => $highestIndivRating
             ];
 
             // Return the view with the tutor data

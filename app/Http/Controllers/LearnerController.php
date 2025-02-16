@@ -13,7 +13,6 @@ use App\Services\LearnerBookingRequestService;
 use App\Services\LearnerService;
 use App\Services\LearnerSvc;
 use App\Services\RegistrationService;
-use App\Services\TutorServiceForLearner;
 use App\Services\TutorSvc;
 use Exception;
 use Hashids\Hashids;
@@ -27,7 +26,6 @@ class LearnerController extends Controller
         private LearnerService $learnerService,
         private RegistrationService $registrationService,
         private LearnerBookingRequestService $lrnBookingReqSvc,
-        private TutorServiceForLearner $tutorSvcForLearner,
         private LearnerSvc $learnerSvc,
         private TutorSvc $tutorSvc
     )
@@ -150,12 +148,6 @@ class LearnerController extends Controller
             'entriesOptions',
             'totalTutors'
         ));
-    }
-
-    // OBSOLETE: Make a new function from tutorSvc class instead
-    public function filterTutors(Request $request)
-    {
-        return $this->tutorSvcForLearner->listAllTutorsWithFilter($request, Auth::user()->id);
     }
 
     public function clearFilterTutors()

@@ -17,8 +17,6 @@ use Illuminate\Support\Facades\Auth;
 
 class LearnerSvc extends CommonModelService
 {
-    const MinEntries = 10;
-
     private static $hashids = null;
 
     //
@@ -141,18 +139,6 @@ class LearnerSvc extends CommonModelService
                 $subquery->where(BookingFields::TutorId, $options['tutorId']);
             });
         }
-
-        return $this->mapLearnersQueryResult($query, $options['minEntries']);
-    }
-
-    public function getLearnersListForAdmin($options)
-    {
-        // If min entries is not defined, give the fallback value
-        if (!isset($options['minEntries']))
-            $options['minEntries'] = Constants::MinPageEntries;
-
-        // Retrieve all learners (fallback default)
-        $query = $this->query_GetLearners($options);
 
         return $this->mapLearnersQueryResult($query, $options['minEntries']);
     }

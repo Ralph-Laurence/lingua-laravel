@@ -124,7 +124,7 @@
                             @if (!empty($tutorDetails['certs']))
                                 @foreach ($tutorDetails['certs'] as $obj)
                                     <div class="row mb-3">
-                                        <div class="col-2 text-secondary">{{ $obj['year'] }}</div>
+                                        <div class="col-2 text-secondary">{{ $obj['from'] }}</div>
                                         <div class="col">
                                             <p class="mb-1">{{ $obj['certification'] }}</p>
                                             <small class="text-secondary">{{ $obj['description'] }}</small>

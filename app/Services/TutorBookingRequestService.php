@@ -131,10 +131,4 @@ class TutorBookingRequestService
             return $error500;
         }
     }
-
-    // Add an 's or not. This is depending on the name's last letter.
-    // function toPossessiveName($name)
-    // {
-    //     return $name . (substr($name, -1) === 's' ? "'" : "'s");
-    // }
 }

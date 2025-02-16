@@ -71,6 +71,11 @@ body {
 .text-14 { font-size: 14px; }
 .text-16 { font-size: 16px; }
 .text-64 { font-size: 64px; }
+.field-no-focus {
+    pointer-events: none;
+    outline: none;
+}
+.bg-readonly { background-color: #e9ecef; }
 
 .msw-justify
 {
@@ -271,16 +276,6 @@ footer {
 .badge.awareness_badge.badge_deafmute::before {
     background-image: url('../img/awareness_deafmute_s.png');
 }
-/*
-.form-control.sign-lingua-input-field:focus {
-    color: #212529;
-    background-color: #fff;
-    outline: 0;
-    / * border-color: #7952b3;
-    box-shadow: 0 0 0 4px rgba(121, 82, 179, 0.25); * /
-    border-color: #FDC057;
-    box-shadow: 0 0 0 4px rgba(255, 174, 59, 0.25);
-} */
 
 .btn.sign-lingua-dropdown-button {
     background: white !important;

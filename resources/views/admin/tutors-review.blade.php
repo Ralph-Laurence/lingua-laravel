@@ -1,7 +1,6 @@
 @php $includeFooter = false; @endphp
 @extends('shared.base-admin')
 @section('title')Review Registration Details @endsection
-
 @section('content')
     <main class="workspace-wrapper">
         <aside class="workspace-sidepane" style="width: fit-content; overflow-x: hidden; overflow-y: auto;">
@@ -15,22 +14,29 @@
                 </h6>
                 <div class="readonly-field">
                     <label class="text-secondary text-12" for="applicant-name">Name</label>
-                    <input type="text" class="form-control text-13" id="applicant-name" readonly
+                    <input type="text" class="form-control text-13 field-no-focus" id="applicant-name" readonly
                         value="{{ $applicantDetails['fullname'] }}">
                 </div>
+                @if (!empty($applicantDetails['disability']))
+                    <div class="readonly-field">
+                        <label class="text-secondary text-12">Disability</label>
+                        <input type="text" class="form-control text-13 field-no-focus" readonly
+                            value="{{ $applicantDetails['disability'] }}">
+                    </div>
+                @endif
                 <div class="readonly-field">
                     <label class="text-secondary text-12" for="applicant-email">Email</label>
-                    <input type="text" class="form-control text-13" id="applicant-email" readonly
+                    <input type="text" class="form-control text-13 field-no-focus" id="applicant-email" readonly
                         value="{{ $applicantDetails['email'] }}">
                 </div>
                 <div class="readonly-field">
                     <label class="text-secondary text-12" for="applicant-contact">Contact</label>
-                    <input type="text" class="form-control text-13" id="applicant-contact" readonly
+                    <input type="text" class="form-control text-13 field-no-focus" id="applicant-contact" readonly
                         value="{{ $applicantDetails['contact'] }}">
                 </div>
                 <div class="readonly-field mb-2">
                     <label class="text-secondary text-12" for="applicant-address">Address</label>
-                    <textarea id="address" class="form-control no-resize text-12" readonly>{{ $applicantDetails['address'] }}</textarea>
+                    <textarea id="address" class="form-control no-resize text-12 field-no-focus" readonly>{{ $applicantDetails['address'] }}</textarea>
                 </div>
                 <a type="button" id="btn-approve" href="{{ route('admin.tutors-approve-registration', $applicantDetails['hashedId']) }}"
                     class="btn btn-sm btn-danger w-100 action-button btn-accept">Approve</a>

@@ -23,7 +23,14 @@
                 <div class="tutor-name flex-start gap-2 mb-3">
                     <h2 class="mb-0 darker-text">{{ $tutorDetails['fullname'] }}</h2>
                 </div>
-
+                <div class="tutor-badges">
+                    @if (!empty($tutorDetails['disabilityBadge']))
+                        <div class="tutor-badges flex-start mb-2">
+                            <span title="{{ $tutorDetails['disabilityDesc'] }}" class="badge awareness_badge disability-tooltip {{ $tutorDetails['disabilityBadge'] }}">{{ $tutorDetails['disability'] }}</span>
+                        </div>
+                        <hr class="border border-1" />
+                    @endif
+                </div>
                 <h6 class="tutor-bio darker-text text-14 mb-3">
                     @foreach (explode("\n", $tutorDetails['bio']) as $line)
                         {{ $line }}<br>
@@ -40,12 +47,6 @@
                 <div class="tutor-contact text-secondary mb-3">
                     <i class="fas fa-phone me-2"></i>
                     {{ $tutorDetails['contact'] }}
-                </div>
-                <div class="tutor-badges flex-start">
-                    <span class="badge {{ $tutorDetails['fluencyBadgeColor'] }} mb-3">
-                        <i class="fas {{ $tutorDetails['fluencyBadgeIcon'] }} me-2"></i>
-                        {{ $tutorDetails['fluencyLevelText'] }}
-                    </span>
                 </div>
             </div>
         </div>
@@ -116,7 +117,7 @@
                 @if (!empty($tutorDetails['certs']))
                     @foreach ($tutorDetails['certs'] as $obj)
                         <div class="row mb-3">
-                            <div class="col-2 text-secondary">{{ $obj['year'] }}</div>
+                            <div class="col-2 text-secondary">{{ $obj['from'] }}</div>
                             <div class="col">
                                 <p class="mb-1">{{ $obj['certification'] }}</p>
                                 <small class="text-secondary">{{ $obj['description'] }}</small>

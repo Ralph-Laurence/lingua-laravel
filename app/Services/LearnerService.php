@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Http\Utils\Constants;
-use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
 use App\Models\Booking;
 use App\Models\FieldNames\BookingFields;
@@ -19,8 +18,6 @@ use Illuminate\Support\Facades\Validator;
 
 class LearnerService
 {
-    const Role = User::ROLE_LEARNER;
-
     private $learnerHashIds;
 
     function __construct()
@@ -44,39 +41,37 @@ class LearnerService
                 return 500;
 
             // Fetch the learner's details
-            $learnerId    = $decodedId[0];
-            $learner      = User::findOrFail($learnerId);
-            //$fluencyLevel = FluencyLevels::Learner[$learner->profile->{ProfileFields::Disability}];
-            $disability   = Constants::Disabilities[$learner->profile->{ProfileFields::Disability}];
-
-            $photo = $learner->{UserFields::Photo};
-            $profilePic = asset('assets/img/default_avatar.png');
-
-            if (!empty($photo))
-                $profilePic = asset(Storage::url("public/uploads/profiles/$photo"));
+            $learnerId  = $decodedId[0];
+            $learner    = User::findOrFail($learnerId);
+            $disability = $learner->profile->{ProfileFields::Disability};
 
             $learnerDetails = [
-                'fullname'           => implode(' ', [$learner->{UserFields::Firstname}, $learner->{UserFields::Lastname}]),
+                'fullname'           => $learner->name,
                 'email'              => $learner->email,
                 'contact'            => $learner->{UserFields::Contact},
                 'address'            => $learner->{UserFields::Address},
-                'photo'              => $profilePic,
-                // 'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],
-                // 'fluencyBadgeColor'  => $fluencyLevel['Badge Color'],
-                // 'fluencyLevelText'   => $fluencyLevel['Level'],
+                'photo'              => $learner->photoUrl,
             ];
+
+            if (!empty($disability))
+            {
+                $learnerDetails['disability'     ] = Constants::Disabilities[$disability];
+                $learnerDetails['disabilityDesc' ] = Constants::DisabilitiesDescription[$disability];
+                $learnerDetails['disabilityBadge'] = Constants::DisabilitiesBadge[$disability];
+            }
 
             return $learnerDetails;
         }
         catch (ModelNotFoundException $e)
         {
             // Return custom 404 page
-            return 400; // view('errors.404');
+            return 400;
         }
         catch (Exception $e)
         {
+            error_log($e->getMessage());
             // Return custom 404 page
-            return 500; // view('errors.500');
+            return 500;
         }
     }
 
@@ -245,20 +240,5 @@ class LearnerService
         // $request->session()->put('learner-filter', $filter);
 
         // return redirect()->route('admin.learners-index');
-    }
-
-    /**
-     * Create a key-value pair of Fluencies that can be used in a <select> options
-     */
-    public function getFluencyFilters()
-    {
-        $fluencyFilter = [];
-
-        foreach (FluencyLevels::Learner as $key => $obj)
-        {
-            $fluencyFilter[$key] = $obj['Level'];
-        }
-
-        return $fluencyFilter;
     }
 }

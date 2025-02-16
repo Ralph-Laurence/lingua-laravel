@@ -7,10 +7,7 @@ use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
 use App\Mail\RegistrationApprovedMail;
 use App\Mail\RegistrationDeclinedMail;
-use App\Models\Booking;
 use App\Models\BookingRequest;
-use App\Models\FieldNames\BookingFields;
-use App\Models\FieldNames\BookingRequestFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
 use App\Models\PendingRegistration;
@@ -27,8 +24,6 @@ use Illuminate\Support\Facades\Validator;
 
 class TutorService
 {
-    const Role = User::ROLE_TUTOR;
-
     private $tutorHashIds;
     private $learnerHashIds;
 
@@ -36,19 +31,6 @@ class TutorService
     {
         $this->tutorHashIds   = new Hashids(HashSalts::Tutors, 10);
         $this->learnerHashIds = new Hashids(HashSalts::Learners, 10);
-    }
-
-    public static function FindById($id)
-    {
-        try
-        {
-            $tutor = User::where('id', $id)->where('role', self::Role)->firstOrFail();
-            return $tutor;
-        }
-        catch (ModelNotFoundException $e)
-        {
-            return null;
-        }
     }
 
     public function showReviewRegistration($id)
@@ -67,7 +49,7 @@ class TutorService
             $tutorId      = $decodedId[0];
             $tutor        = User::findOrFail($tutorId);
             $pending      = PendingRegistration::where(ProfileFields::UserId, $tutorId)->firstOrFail();
-            $fluencyLevel = FluencyLevels::Tutor[$pending->{ProfileFields::Disability}];
+            $disability   = $tutor->profile->{ProfileFields::Disability};
             $skills       = [];
 
             if ($pending->{ProfileFields::Skills})
@@ -129,7 +111,7 @@ class TutorService
 
             $applicantDetails = [
                 'hashedId'           => $id,
-                'fullname'           => implode(' ', [$tutor->{UserFields::Firstname}, $tutor->{UserFields::Lastname}]),
+                'fullname'           => $tutor->name,
                 'email'              => $tutor->email,
                 'contact'            => $tutor->{UserFields::Contact},
                 'address'            => $tutor->{UserFields::Address},
@@ -139,16 +121,16 @@ class TutorService
                 'work'               => $workProof,
                 'education'          => $educationProof,
                 'certs'              => $certProof,
-                'skills'             => $skills,
-                'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],
-                'fluencyBadgeColor'  => $fluencyLevel['Badge Color'],
-                'fluencyLevelText'   => $fluencyLevel['Level'],
+                'skills'             => $skills
             ];
 
-            $fluencyFilter = $this->getFluencyFilters();
+            if (!empty($disability))
+            {
+                $applicantDetails['disability'] = Constants::Disabilities[$disability];
+            }
 
             // Return the view with the tutor data
-            return view('admin.tutors-review', compact('applicantDetails', 'fluencyFilter'));
+            return view('admin.tutors-review', compact('applicantDetails'));
         }
         catch (ModelNotFoundException $e)
         {
@@ -215,15 +197,8 @@ class TutorService
             // Fetch the tutor along with their profile
             $tutorId      = $decodedId[0];
             $tutor        = User::with('profile')->findOrFail($tutorId);
-            $fluencyLevel = FluencyLevels::Tutor[$tutor->profile->{ProfileFields::Disability}];
-
-            $photo = $tutor->{UserFields::Photo};
-            $profilePic = asset('assets/img/default_avatar.png');
-
-            if (!empty($photo))
-                $profilePic = Storage::url("public/uploads/profiles/$photo");
-
-            $skills = [];
+            $disability   = $tutor->profile->{ProfileFields::Disability};
+            $skills       = [];
 
             if ($tutor->profile->{ProfileFields::Skills})
             {
@@ -235,7 +210,7 @@ class TutorService
 
             $tutorDetails = [
                 'firstname'          => $tutor->{UserFields::Firstname},
-                'fullname'           => implode(' ', [$tutor->{UserFields::Firstname}, $tutor->{UserFields::Lastname}]),
+                'fullname'           => $tutor->name,
                 'email'              => $tutor->email,
                 'contact'            => $tutor->{UserFields::Contact},
                 'address'            => $tutor->{UserFields::Address},
@@ -246,11 +221,15 @@ class TutorService
                 'education'          => $tutor->profile->{ProfileFields::Education},
                 'certs'              => $tutor->profile->{ProfileFields::Certifications},
                 'skills'             => $skills,
-                'photo'              => $profilePic,
-                'fluencyBadgeIcon'   => $fluencyLevel['Badge Icon'],
-                'fluencyBadgeColor'  => $fluencyLevel['Badge Color'],
-                'fluencyLevelText'   => $fluencyLevel['Level'],
+                'photo'              => $tutor->photoUrl
             ];
+
+            if (!empty($disability))
+            {
+                $tutorDetails['disability'     ] = Constants::Disabilities[$disability];
+                $tutorDetails['disabilityDesc' ] = Constants::DisabilitiesDescription[$disability];
+                $tutorDetails['disabilityBadge'] = Constants::DisabilitiesBadge[$disability];
+            }
 
             // Return the view with the tutor data
             return view('admin.show-tutor', compact('tutorDetails'));
@@ -384,7 +363,7 @@ class TutorService
             'search-keyword' => 'nullable|string|max:64',
             'select-status'  => 'required|integer|in:0,1,2',
             'select-entries' => 'required|integer|in:10,25,50,100',
-            'select-fluency' => 'required|integer|in:-1,' . implode(',', array_keys($this->getFluencyFilters()))
+            'select-disability' => 'required|integer|in:-1,' . implode(',', User::getDisabilityFilters('keys'))
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -398,7 +377,7 @@ class TutorService
         $filter = [
             'status'        => $inputs['select-status'],
             'min_entries'   => $inputs['select-entries'],
-            'fluency'       => $inputs['select-fluency']
+            'disability'    => $inputs['select-disability']
         ];
 
         if (!empty($inputs['search-keyword']))
@@ -408,7 +387,6 @@ class TutorService
 
         $request->session()->put('inputs', $inputs);
         $request->session()->put('filter', $filter);
-        // $request->session()->put('result', $this->tutorService->getTutors($filter));
 
         return redirect()->route('admin.tutors-index');
     }
@@ -611,7 +589,7 @@ class TutorService
     //=======================================
     public function getHireRequests($tutorId)
     {
-        $hashids = $this->learnerHashIds;//new Hashids(HashSalts::Learners, 10);
+        $hashids = $this->learnerHashIds;
         $hireRequests = BookingRequest::with(['sender' => function($query)
         {
             // (aliasing not necessary anyway)
@@ -640,10 +618,7 @@ class TutorService
             // Meaning, we only get those we need
 
             return  [
-                //'id'       => $request->sender->id,
-                // 'firstname'  => $request->sender->fname,
-                // 'lastname'   => $request->sender->lname,
-                'name'       => implode(' ', [$request->sender->fname, $request->sender->lname]),
+                'name'       => $request->sender->name,
                 'photo'      => User::getPhotoUrl($request->sender->photo),
                 'contact'    => $request->sender->contact,
                 'email'      => $request->sender->email,

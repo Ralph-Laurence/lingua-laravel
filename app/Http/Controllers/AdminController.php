@@ -9,15 +9,11 @@ use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    protected $tutorService;
-    protected $learnerServiceForAdmin;
-    protected $adminService;
-
-    function __construct(TutorService $tutService, LearnerServiceForAdmin $lrnService, AdminDashboardService $adminSvc)
+    function __construct(
+        private TutorService $tutorService,
+        private LearnerServiceForAdmin $learnerService,
+        private AdminDashboardService $adminService)
     {
-        $this->tutorService = $tutService;
-        $this->adminService = $adminSvc;
-        $this->learnerServiceForAdmin  = $lrnService;
     }
 
     function index()
@@ -72,21 +68,21 @@ class AdminController extends Controller
     //
     public function learners_index(Request $request)
     {
-        return $this->learnerServiceForAdmin->listAllLearners($request);
+        return $this->learnerService->listAllLearners($request);
     }
 
     public function learners_filter(Request $request)
     {
-        return $this->learnerServiceForAdmin->filterLearnersForAdmin($request);
+        return $this->learnerService->filterResults($request);
     }
 
     public function learners_clear_filter(Request $request)
     {
-        return $this->learnerServiceForAdmin->clearFiltersForAdmin($request);
+        return $this->learnerService->clearFilters($request);
     }
 
     public function learners_show($id)
     {
-        return $this->learnerServiceForAdmin->showLearnerDetailsForAdmin($id);
+        return $this->learnerService->showLearnerDetails($id);
     }
 }

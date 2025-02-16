@@ -8,7 +8,6 @@ use App\Models\Booking;
 use App\Models\FieldNames\BookingFields;
 use App\Models\FieldNames\UserFields;
 use App\Models\User;
-use App\Services\LearnerServiceForTutor;
 use App\Services\LearnerSvc;
 use App\Services\RegistrationService;
 use App\Services\TutorBookingRequestService;
@@ -27,7 +26,6 @@ class TutorController extends Controller
     // Property Promotion
     public function __construct(
         private RegistrationService         $registrationService,
-        private LearnerServiceForTutor      $learnerServiceForTutor,
         private TutorService                $tutorService,
         private TutorBookingRequestService  $tutorBookingRequestService,
         private LearnerSvc $learnerSvc,

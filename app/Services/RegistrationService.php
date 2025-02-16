@@ -23,9 +23,6 @@ use Illuminate\Support\Facades\Hash;
 
 class RegistrationService
 {
-    const STATUS_CODE_SUCCESS = 1;
-    const STATUS_CODE_FAILED = -1;
-
     /**
      * Check if there is still a pending registration for the tutor
      */

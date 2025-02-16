@@ -13,7 +13,7 @@ class LearnerServiceForAdmin extends LearnerService
     //    These route controllers are specific to the administrators
     //===================================================================//
 
-    public function filterLearnersForAdmin(Request $request)
+    public function filterResults(Request $request)
     {
         $filterLearners = $this->filterLearners($request);
 
@@ -26,7 +26,7 @@ class LearnerServiceForAdmin extends LearnerService
         return redirect()->route('admin.learners-index');
     }
 
-    public function clearFiltersForAdmin(Request $request)
+    public function clearFilters(Request $request)
     {
         // Forget multiple session variables in one line
         $request->session()->forget(['learner-filter-for-admin', 'learner-filter-inputs-for-admin']);
@@ -66,7 +66,7 @@ class LearnerServiceForAdmin extends LearnerService
     //
     // This must be accessed via Standard HTTP GET
     //
-    public function showLearnerDetailsForAdmin($id)
+    public function showLearnerDetails($id)
     {
         $learnerDetails = $this->getLearnerDetails($id);
 

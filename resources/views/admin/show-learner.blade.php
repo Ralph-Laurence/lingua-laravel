@@ -1,6 +1,7 @@
 @php $includeFooter = false; @endphp
 @extends('shared.base-admin')
 @section('content')
+{{-- @dd($learnerDetails) --}}
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/css/tutor-details.css') }}">
 @endpush
@@ -22,10 +23,15 @@
                     <img src="{{ $learnerDetails['photo'] }}" alt="profile-photo" height="160">
                 </div>
                 <div class="profile-captions ps-4">
-                    <div class="tutor-name flex-start gap-2 mb-3">
-                        <h2 class="mb-0 darker-text">{{ $learnerDetails['fullname'] }}</h2>
+                    <div class="tutor-name flex-start gap-2 mb-2">
+                        <h4 class="mb-0 darker-text">{{ $learnerDetails['fullname'] }}</h4>
                     </div>
-
+                    @if (!empty($learnerDetails['disabilityBadge']))
+                    <div class="tutor-badges flex-start mb-2">
+                        <span title="{{ $learnerDetails['disabilityDesc'] }}" class="badge awareness_badge disability-tooltip {{ $learnerDetails['disabilityBadge'] }}">{{  $learnerDetails['disability'] }}</span>
+                    </div>
+                    <hr class="border-light border-1">
+                    @endif
                     <div class="tutor-address text-secondary mb-2">
                         <i class="fas fa-location-dot me-2"></i>
                         {{ $learnerDetails['address'] }}
@@ -37,12 +43,6 @@
                     <div class="tutor-contact text-secondary mb-3">
                         <i class="fas fa-phone me-2"></i>
                         {{ $learnerDetails['contact'] }}
-                    </div>
-                    <div class="tutor-badges flex-start">
-                        {{-- <span class="badge {{ $learnerDetails['fluencyBadgeColor'] }}">
-                            <i class="fas {{ $learnerDetails['fluencyBadgeIcon'] }} me-2"></i>
-                            {{ $learnerDetails['fluencyLevelText'] }}
-                        </span> --}}
                     </div>
                 </div>
             </div>
