@@ -217,7 +217,27 @@
 
                         </div>
 
-                        @if ($isCurrentlyHired)
+                        <div class="w-100 d-flex align-items-center button-wrapper gap-2 pt-3">
+                            <x-sl-button
+                                type="button"
+                                style="secondary"
+                                text="Message"
+                                icon="fa-message"
+                                class="p-2 btn-message-tutor flex-fill"
+                                action="{{ route('user', $tutorDetails['chatUserId']) }}"/>
+
+                            @if ($isCurrentlyHired)
+                                <x-sl-button type="button" style="danger" text="Leave Tutor" icon="fa-link-slash" class="p-2 btn-leave-tutor flex-fill"/>
+                            @else
+                                @if ($isHireRequested)
+                                    <x-sl-button type="button" style="secondary" text="Cancel Request" icon="fa-times" class="p-2 btn-cancel-hire-req flex-fill"/>
+                                @else
+                                    <x-sl-button type="button" style="primary" text="Hire Tutor" icon="fa-user-plus" class="p-2 btn-hire-tutor flex-fill"/>
+                                @endif
+                            @endif
+                        </div>
+
+                        {{-- @if ($isCurrentlyHired)
                             <div class="w-100 flex-center button-wrapper">
                                 <button class="btn btn-danger sign-lingua-red-button mt-4 mx-2 w-100 btn-leave-tutor">
                                     <i class="fa-solid fa-link-slash me-2"></i>Leave Tutor
@@ -235,7 +255,7 @@
                                     </button>
                                 @endif
                             </div>
-                        @endif
+                        @endif --}}
 
                     </div>
                 </div>
@@ -261,19 +281,6 @@
                                 </button>
                                 @endif
                             </div>
-
-                            {{-- @if ($errors->any())
-                                <div class="alert alert-danger text-13 my-2" role="alert">
-                                    <ul class="list-unstyled mb-0">
-                                        @error('rating')
-                                            <li>{{ $message }}</li>
-                                        @enderror
-                                        @error('review')
-                                            <li>{{ $message }}</li>
-                                        @enderror
-                                    </ul>
-                                </div>
-                            @endif --}}
 
                             <small class="text-muted text-13 msw">On a scale of 1 to 5 stars, how satisfied are you with
                                 {{ $tutorDetails['possessiveName'] }} teaching?</small>

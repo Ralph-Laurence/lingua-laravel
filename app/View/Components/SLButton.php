@@ -10,16 +10,18 @@ use Illuminate\Support\Str;
 class SLButton extends Component
 {
     private $classList = 'btn btn-sm sl-button';
+    private $elementTag = 'button';
 
     /**
      * Create a new component instance.
      */
     public function __construct(
-        public $id    = '',
-        public $type  = 'button',
-        public $text  = 'Button',
-        public $style = 'primary',
-        public $icon  = ''
+        public $id     = '',
+        public $type   = 'button',
+        public $text   = 'Button',
+        public $style  = 'primary',
+        public $icon   = '',
+        public $action = '',        // When the button has an action attribute, it is converted to <a>
     )
     {
         if (empty($this->id))
@@ -40,6 +42,9 @@ class SLButton extends Component
                 $this->classList .= " btn-secondary sign-lingua-gray-button";
                 break;
         }
+
+        if (!empty($action))
+            $this->elementTag = 'a';
     }
 
     /**
@@ -47,6 +52,8 @@ class SLButton extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('x-components.sl-button')->with('classList', $this->classList);
+        return view('x-components.sl-button')
+            ->with('classList', $this->classList)
+            ->with('elementTag', $this->elementTag);
     }
 }

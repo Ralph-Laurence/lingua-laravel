@@ -322,7 +322,8 @@ class TutorSvc extends CommonModelService
                 'totalReviews'              => $totalReviews,
                 'ratingsAndReviews'         => $receivedRatings,
                 'totalIndividualRatings'    => $totalIndividualRatings,
-                'highestIndividualRating'   => $highestIndivRating
+                'highestIndividualRating'   => $highestIndivRating,
+                'chatUserId'                => ChatifyUtils::toHashedChatId($tutorId)
             ];
 
             if (!empty($disability))
