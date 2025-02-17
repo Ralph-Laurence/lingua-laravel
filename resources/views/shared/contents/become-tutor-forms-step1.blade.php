@@ -62,7 +62,7 @@
                 </div>
             </div>
 
-            <div class="fluency-options mb-3">
+            <div class="disability-options mb-3">
                 <p class="form-label fw-bold">Accessibility Needs *</p>
                 <p class="text-14">Indicate your hearing and speech preferences for better accessibility.</p>
                 <div class="alert alert-secondary text-12 px-1">

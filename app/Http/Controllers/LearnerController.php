@@ -376,8 +376,6 @@ class LearnerController extends Controller
 
             return redirect()->back();
         }
-
-        return view('test.test', compact('inputs'));
     }
 
     public function deleteTutorReview(Request $request)

@@ -26,11 +26,12 @@
 
                         <h2 class=" mb-3 darker-text tutor-name ">{{ $tutorDetails['fullname'] }}</h2>
 
-                        <div class="tutor-badges flex-start mb-3 gap-2">
-                            <span class="badge {{ $tutorDetails['fluencyBadgeColor'] }}">
-                                <i class="fas {{ $tutorDetails['fluencyBadgeIcon'] }} me-2"></i>
-                                {{ $tutorDetails['fluencyLevelText'] }}
-                            </span>
+                        <div class="tutor-badges flex-start align-items-center mb-3 gap-2">
+                            @if (!empty($tutorDetails['disabilityBadge']))
+                                <div class="tutor-badges flex-start">
+                                    <span data-bs-toggle="tooltip" title="{{ $tutorDetails['disabilityDesc'] }}" class="badge awareness_badge disability-tooltip {{ $tutorDetails['disabilityBadge'] }}">{{ $tutorDetails['disability'] }}</span>
+                                </div>
+                            @endif
                             @if ($tutorDetails['hireStatus'] == 1)
                                 <span class="d-inline-block sign-lingua-red-text cursor-pointer">
                                     <i class="fas fa-link"></i>
@@ -261,7 +262,7 @@
                                 @endif
                             </div>
 
-                            @if ($errors->any())
+                            {{-- @if ($errors->any())
                                 <div class="alert alert-danger text-13 my-2" role="alert">
                                     <ul class="list-unstyled mb-0">
                                         @error('rating')
@@ -272,7 +273,7 @@
                                         @enderror
                                     </ul>
                                 </div>
-                            @endif
+                            @endif --}}
 
                             <small class="text-muted text-13 msw">On a scale of 1 to 5 stars, how satisfied are you with
                                 {{ $tutorDetails['possessiveName'] }} teaching?</small>

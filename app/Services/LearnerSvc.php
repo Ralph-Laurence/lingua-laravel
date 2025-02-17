@@ -209,7 +209,7 @@ class LearnerSvc extends CommonModelService
                 }])
                 ->firstOrFail();
 
-            return [
+            $data = [
                 'learnerId'     => self::toHashedId($learner->id),
                 'name'          => implode(' ', [$learner->{UserFields::Firstname}, $learner->{UserFields::Lastname}]),
                 'photo'         => User::getPhotoUrl($learner->{UserFields::Photo}),
@@ -217,6 +217,17 @@ class LearnerSvc extends CommonModelService
                 'contact'       => $learner->{UserFields::Contact},
                 'address'       => $learner->{UserFields::Address}
             ];
+
+            $disability = $learner->{ProfileFields::Disability};
+
+            if (!empty($disability))
+            {
+                $data['disability'     ] = Constants::Disabilities[$disability];
+                $data['disabilityDesc' ] = Constants::DisabilitiesDescription[$disability];
+                $data['disabilityBadge'] = Constants::DisabilitiesBadge[$disability];
+            }
+
+            return $data;
         }
         catch (ModelNotFoundException $ex)
         {

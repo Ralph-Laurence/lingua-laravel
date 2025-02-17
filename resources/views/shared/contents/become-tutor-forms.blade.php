@@ -79,8 +79,6 @@
 
         function repopulateOldInput()
         {
-            $('#fluency').val(oldInput['fluency']).selectmenu('refresh');
-
             if ('education-year-from-0' in oldInput)
             {
                 let currentYr = new Date().getFullYear();

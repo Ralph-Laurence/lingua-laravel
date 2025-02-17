@@ -28,7 +28,7 @@
                     </div>
                     @if (!empty($learnerDetails['disabilityBadge']))
                     <div class="tutor-badges flex-start mb-2">
-                        <span title="{{ $learnerDetails['disabilityDesc'] }}" class="badge awareness_badge disability-tooltip {{ $learnerDetails['disabilityBadge'] }}">{{  $learnerDetails['disability'] }}</span>
+                        <span data-bs-toggle="tooltip" title="{{ $learnerDetails['disabilityDesc'] }}" class="badge awareness_badge disability-tooltip {{ $learnerDetails['disabilityBadge'] }}">{{  $learnerDetails['disability'] }}</span>
                     </div>
                     <hr class="border-light border-1">
                     @endif

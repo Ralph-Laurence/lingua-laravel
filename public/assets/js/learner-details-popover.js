@@ -164,9 +164,19 @@ function renderLearnerDetails(sender, data)
     $(template).find('.learner-details-email').text(data.email);
     $(template).find('.learner-details-contact').text(data.contact);
     $(template).find('.learner-details-address').text(data.address);
-    $(template).find('.learner-details-proficiency')
-               .text(data.fluencyLevelText)
-               .addClass(data.fluencyBadgeColor);
+
+    if ('disability' in data && data.disability)
+    {
+        $(template).find('.learner-details-disability .awareness_badge')
+               .text(data.disability)
+               .addClass(data.disabilityBadge)
+               .attr('title', data.disabilityDesc)
+               .show();
+    }
+    else
+    {
+        $(template).find('.learner-details-disability .awareness_badge').hide();
+    }
 
     handleShowPopOver(sender, template);
 }

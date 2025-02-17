@@ -178,20 +178,16 @@ class User extends Authenticatable
         {
             case 'keys':
                 return array_keys($mapping[$viewer]);
-                break;
 
             case 'values':
                 return array_values($mapping[$viewer]);
-                break;
 
             case 'describe':
                 return Constants::DisabilitiesDescription;
-                break;
 
             case 'all':
             default:
                 return $mapping[$viewer];
-                break;
         }
     }
 

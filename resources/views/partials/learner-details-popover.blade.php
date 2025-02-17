@@ -7,8 +7,10 @@
             <img class="learner-details-photo position-absolute top-0 left-0 centered-image shadow" src="{{ asset('assets/img/default_avatar.png') }}"/>
             <div class="learner-details-name position-absolute text-center p-2"></div>
         </div>
-        <div class="learner-fluency-container text-center p-2 w-100">
-            <span class="badge learner-details-proficiency"></span>
+        <div class="learner-details-disability flex-center my-2">
+            <div class="tutor-badges flex-start">
+                <span data-bs-toggle="tooltip" title="" class="badge awareness_badge disability-tooltip"></span>
+            </div>
         </div>
         <div class="learner-information text-secondary d-flex flex-column align-items-center gap-1 text-13">
             <p class="mb-0 text-center">

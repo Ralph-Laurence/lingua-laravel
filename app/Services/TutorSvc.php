@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Http\Utils\ChatifyUtils;
 use App\Http\Utils\Constants;
-use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
 use App\Http\Utils\Helper;
 use App\Models\Booking;
@@ -56,7 +55,7 @@ class TutorSvc extends CommonModelService
             $fields = array_merge($fields, $options['extraFields']);
 
         // Filter transformations
-        $hasFluencyFilter = array_key_exists('fluency', $options) && $options['fluency'] != -1;
+        $hasDisabilityFilter = array_key_exists('disability', $options) && $options['disability'] != -1;
 
         // Build the query
         $builder = User::select($fields)
@@ -85,9 +84,9 @@ class TutorSvc extends CommonModelService
                 // Format date as 'date_joined'
                 $query->addSelect(DB::raw("DATE_FORMAT(users.created_at, '%Y-%m-%d') as date_joined"));
             })
-            ->when($hasFluencyFilter, function($query) use($options)
+            ->when($hasDisabilityFilter, function($query) use($options)
             {
-                $query->where(ProfileFields::Disability, $options['fluency']);
+                $query->where(ProfileFields::Disability, $options['disability']);
             })
             ->when(!empty($options['search']), function($query) use($options)
             {
@@ -197,17 +196,11 @@ class TutorSvc extends CommonModelService
     {
         return $query->paginate($minEntries)->through(function($result)
         {
-            //$fluency = FluencyLevels::Tutor[$result->{ProfileFields::Disability}];
-
             $returnData = [
                 'tutorId'       => self::toHashedId($result->id),
                 'chatUserId'    => ChatifyUtils::toHashedChatId($result->id),
-                'name'          => implode(' ', [$result->{UserFields::Firstname}, $result->{UserFields::Lastname}]),
+                'name'          => $result->name,
                 'photo'         => User::getPhotoUrl($result->{UserFields::Photo}),
-                //'email'         => $result->email,
-                // 'fluencyStr'    => $fluency['Level'],
-                // 'fluencyBadge'  => $fluency['Badge Color'],
-                // 'fluencyDesc'   => $fluency['Description'],
                 'totalLearners' => $result->totalLearners
             ];
 
@@ -225,6 +218,15 @@ class TutorSvc extends CommonModelService
 
             if (isset($result->contact))
                 $returnData['contact'] = $result->{UserFields::Contact};
+
+            $disability = $result->{ProfileFields::Disability};
+
+            if (!empty($disability))
+            {
+                $returnData['disability'     ] = Constants::Disabilities[$disability];
+                $returnData['disabilityDesc' ] = Constants::DisabilitiesDescription[$disability];
+                $returnData['disabilityBadge'] = Constants::DisabilitiesBadge[$disability];
+            }
 
             return $returnData;
         });
@@ -247,7 +249,7 @@ class TutorSvc extends CommonModelService
             $tutor      = $this->query_ShowTutor($tutorId)->firstOrFail();
 
             // Statistics (Both numeric and non-numeric)
-            $fluencyLevel   = FluencyLevels::Tutor[$tutor->profile->{ProfileFields::Disability}];
+            $disability     = $tutor->profile->{ProfileFields::Disability};
             $totalLearners  = $tutor->totalLearners;
             $starRatings    = Constants::StarRatings;
             $learnerReview  = $this->learnerSvc->getReviewOnTutor($tutorId, $learnerId);
@@ -316,15 +318,19 @@ class TutorSvc extends CommonModelService
                 'skills'                    => $skills,
                 'photo'                     => $tutor->photoUrl,
                 'hireStatus'                => $hireStatus,
-                'fluencyBadgeIcon'          => $fluencyLevel['Badge Icon'],
-                'fluencyBadgeColor'         => $fluencyLevel['Badge Color'],
-                'fluencyLevelText'          => $fluencyLevel['Level'],
                 'averageRating'             => $tutor->averageRating,
                 'totalReviews'              => $totalReviews,
                 'ratingsAndReviews'         => $receivedRatings,
                 'totalIndividualRatings'    => $totalIndividualRatings,
                 'highestIndividualRating'   => $highestIndivRating
             ];
+
+            if (!empty($disability))
+            {
+                $tutorDetails['disability'     ] = Constants::Disabilities[$disability];
+                $tutorDetails['disabilityDesc' ] = Constants::DisabilitiesDescription[$disability];
+                $tutorDetails['disabilityBadge'] = Constants::DisabilitiesBadge[$disability];
+            }
 
             // Return the view with the tutor data
             return view('tutor.show', compact('tutorDetails', 'totalLearners', 'starRatings', 'learnerReview'));

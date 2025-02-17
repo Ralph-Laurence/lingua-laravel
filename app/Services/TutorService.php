@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Http\Utils\Constants;
-use App\Http\Utils\FluencyLevels;
 use App\Http\Utils\HashSalts;
 use App\Mail\RegistrationApprovedMail;
 use App\Mail\RegistrationDeclinedMail;
@@ -572,18 +571,6 @@ class TutorService
         }
     }
 
-    private function getFluencyFilters()
-    {
-        $fluencyFilter = [];
-
-        foreach (FluencyLevels::Tutor as $key => $obj)
-        {
-            $fluencyFilter[$key] = $obj['Level'];
-        }
-
-        return $fluencyFilter;
-    }
-
     //=======================================
     // HIRE REQUESTS
     //=======================================
@@ -604,7 +591,7 @@ class TutorService
 
             $selectProfileFields = implode(',', [
                 'profile:id',
-                ProfileFields::Disability.' as fluency',
+                ProfileFields::Disability.' as impairment',
                 ProfileFields::UserId .' as user_id'
             ]);
 
@@ -617,14 +604,21 @@ class TutorService
             // Transform the data to the desired structure..
             // Meaning, we only get those we need
 
-            return  [
-                'name'       => $request->sender->name,
+            error_log($request);
+            $name = implode(' ', [
+                $request->sender->fname,
+                $request->sender->lname
+            ]);
+
+            $data = [
+                'name'       => $name,
                 'photo'      => User::getPhotoUrl($request->sender->photo),
                 'contact'    => $request->sender->contact,
                 'email'      => $request->sender->email,
-                //'fluency'    => FluencyLevels::Learner[$request->sender->profile->fluency],
                 'user_id'    => $hashids->encode($request->sender->profile->user_id),
             ];
+
+            return $data;
         });
 
         return view('tutor.hire-requests', compact('hireRequests'));

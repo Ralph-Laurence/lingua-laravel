@@ -96,7 +96,7 @@
                 </div>
                 <div class="col-4 flex-center">
                     @if (!empty($obj['disabilityBadge']))
-                        <span title="{{ $disabilityDesc[$obj['disabilityId']] }}" class="badge awareness_badge disability-tooltip {{ $obj['disabilityBadge'] }}">{{  $obj['disability'] }}</span>
+                        <span data-bs-toggle="tooltip" title="{{ $disabilityDesc[$obj['disabilityId']] }}" class="badge awareness_badge disability-tooltip {{ $obj['disabilityBadge'] }}">{{  $obj['disability'] }}</span>
                     @endif
                 </div>
                 <div class="col-2 flex-center">
@@ -131,6 +131,6 @@
 @push('scripts')
     <script src="{{ asset('assets/js/utils.js') }}"></script>
     <script>
-        //$(() => initFluencyTooltips());
+        $(() => initDisabilityTooltips());
     </script>
 @endpush

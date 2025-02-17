@@ -4,7 +4,7 @@ function sleep(ms)
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function initFluencyTooltips()
+function initDisabilityTooltips()
 {
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('.disability-tooltip'));
 

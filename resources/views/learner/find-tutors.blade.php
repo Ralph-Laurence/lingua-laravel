@@ -140,9 +140,9 @@
                                 {{ $obj['name']}}
                             </div>
                             <div class="flex-start gap-2 mt-3 mb-2">
-                                <div class="tutor-disability text-14 flex-center">
-                                    {{-- <span title="{{ $obj['fluencyDesc'] }}" class="disability-tooltip badge {{ $obj['fluencyBadge'] }} ">{{ $obj['fluencyStr'] }}</span> --}}
-                                </div>
+                                @if (!empty($obj['disabilityBadge']))
+                                    <img data-bs-toggle="tooltip" title="{{ $obj['disabilityDesc'] }}" class="{{ $obj['disabilityBadge'] }} disability-icon disability-tooltip" disability-name="{{ $obj['disability'] }}" />
+                                @endif
                                 <div class="total-students px-3">
                                     @if ($obj['totalLearners'] == 1)
                                         {{ __("1 Learner") }}
@@ -211,7 +211,7 @@
     <script src="{{ asset('assets/js/utils.js') }}"></script>
     <script src="{{ asset('assets/lib/waitingfor/bootstrap-waitingfor.min.js') }}"></script>
     <script>
-        // $(() => initFluencyTooltips());
+        $(() => initDisabilityTooltips());
     </script>
 @endpush
 @push('styles')

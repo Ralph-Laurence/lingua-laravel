@@ -110,14 +110,8 @@
                     </div>
                 </div>
                 <div class="col-4 flex-center">
-
                     @if (!empty($obj['disabilityBadge']))
-                        @php
-
-                        @endphp
-                        <span title="{{ $disabilityDesc[$key] }}" class="badge awareness_badge disability-tooltip {{ $obj['disabilityBadge'] }}">{{  $obj['disability'] }}</span>
-                    {{-- @else
-                        <span title="{{ $disabilityDesc[$key] }}">{{ $obj['disability'] }}</span> --}}
+                        <span data-bs-toggle="tooltip" title="{{ $disabilityDesc[$key] }}" class="badge awareness_badge disability-tooltip {{ $obj['disabilityBadge'] }}">{{  $obj['disability'] }}</span>
                     @endif
                 </div>
                 <div class="col-2 flex-center">
@@ -151,7 +145,7 @@
     <script src="{{ asset('assets/js/utils.js') }}"></script>
     <script src="{{ asset('assets/lib/waitingfor/bootstrap-waitingfor.min.js') }}"></script>
     <script>
-        // $(() => initFluencyTooltips());
+        $(() => initDisabilityTooltips());
     </script>
 @endpush
 

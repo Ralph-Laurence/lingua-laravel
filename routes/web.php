@@ -64,7 +64,10 @@ require __DIR__.'/auth.php';
 
 $RoleMw = 'role-mw:'; // Role middleware
 
-Route::controller(MyProfileController::class)->prefix('/signlingua/my-profile')->middleware('auth')->group(function()
+Route::controller(MyProfileController::class)
+    ->prefix('/signlingua/my-profile')
+    ->middleware(['auth', 'ensureNotPending'])
+    ->group(function()
 {
     Route::get('/edit',                     'index')->name('myprofile.edit');
     Route::put('/update-photo',             'updatePhoto')->name('myprofile.update-photo');
