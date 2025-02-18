@@ -31,7 +31,9 @@ Route::controller(HomeController::class)->group(function()
         return redirect('/');
     });
 });
-
+//
+// Override this so that after login we redirect to the approrpriate route
+//
 Route::get('/dashboard', function ()
 {
     // return view('dashboard');
@@ -112,6 +114,7 @@ Route::middleware(['auth', $RoleMw . User::ROLE_ADMIN])->group(function ()
         Route::get('/admin/tutors/registration/approve/{id}',   'tutors_approve_registration')->name('admin.tutors-approve-registration');
         Route::get('/admin/tutors/registration/decline/{id}',   'tutors_decline_registration')->name('admin.tutors-decline-registration');
         Route::get('/admin/tutors/details/{id}',                'tutors_show')->name('admin.tutors-show');
+        Route::get('/admin/tutors/pending',                     'dashboard_view_pending_registration')->name('admin.dashboard.view-pending');
         Route::post('/admin/tutors/filter',                     'tutors_filter')->name('admin.tutors-filter');
 
         Route::get('/admin/learners/list',                      'learners_index')->name('admin.learners-index');

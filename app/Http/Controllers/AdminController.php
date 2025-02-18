@@ -12,13 +12,13 @@ class AdminController extends Controller
     function __construct(
         private TutorService $tutorService,
         private LearnerServiceForAdmin $learnerService,
-        private AdminDashboardService $adminService)
+        private AdminDashboardService $adminDashboardSvc)
     {
     }
 
     function index()
     {
-        $totals = $this->adminService->getTotals();
+        $totals = $this->adminDashboardSvc->getTotals();
 
         return view('admin.dashboard', compact('totals'));
     }
@@ -60,6 +60,11 @@ class AdminController extends Controller
     public function tutors_show($id)
     {
         return $this->tutorService->showTutorDetails($id);
+    }
+
+    public function dashboard_view_pending_registration(Request $request)
+    {
+        return $this->adminDashboardSvc->viewDashboardPendingRegistration($request);
     }
     //
     //..............................................

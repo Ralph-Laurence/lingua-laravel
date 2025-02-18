@@ -147,10 +147,13 @@ class TutorService
 
     public function listAllTutors(Request $request)
     {
+        if (session()->has('remove_admin_temporary_filter_tutors'))
+        {
+            return $this->clearFilters($request);
+        }
+
         $result = null;
 
-        // if ($request->session()->has('result'))
-        //     $result = $request->session()->get('result');
         if ($request->session()->has('filter'))
         {
             $filter = $request->session()->get('filter');
@@ -298,21 +301,15 @@ class TutorService
             $tutors = $tutors->where(ProfileFields::Disability, $options['disability']);
         }
 
-        // if (array_key_exists('search', $options))
-        // {
-        //     $searchWord = $options['search'];
-        //     $tutors = $tutors->where(UserFields::Firstname, 'LIKE', "%$searchWord%")
-        //             ->orWhere(UserFields::Lastname, 'LIKE', "%$searchWord%");
-        // }
-        // if (array_key_exists('search', $options))
-        // {
-        //     $searchWord = $options['search'];
-        //     $learners = $tutors->where(function ($query) use ($searchWord)
-        //     {
-        //         $query->where(UserFields::Firstname, 'LIKE', "%$searchWord%")
-        //               ->orWhere(UserFields::Lastname, 'LIKE', "%$searchWord%");
-        //     });
-        // }
+        if (array_key_exists('search', $options))
+        {
+            $searchWord = $options['search'];
+            $tutors = $tutors->where(function ($query) use ($searchWord)
+            {
+                $query->where(UserFields::Firstname, 'LIKE', "%$searchWord%")
+                      ->orWhere(UserFields::Lastname, 'LIKE', "%$searchWord%");
+            });
+        }
 
         // Get the results
         $tutors = $tutors->paginate($options['min_entries']);
@@ -358,6 +355,8 @@ class TutorService
 
     public function filterTutors(Request $request)
     {
+        // $inputs = $request->all();
+        // return view('test.test', compact('inputs'));
         $rules = [
             'search-keyword' => 'nullable|string|max:64',
             'select-status'  => 'required|integer|in:0,1,2',
@@ -369,7 +368,17 @@ class TutorService
         $error500  = response()->view('errors.500', [], 500);
 
         if ($validator->fails())
+        {
+            // http://127.0.0.1:8000/admin/tutors/pending
+            error_log('stops here');
+
+            foreach ($validator->errors()->toArray() as $field => $errors) {
+                foreach ($errors as $error) {
+                    error_log($error);
+                }
+            }
             return $error500;
+        }
 
         // Select Options validation
         $inputs = $validator->validated();
@@ -387,13 +396,20 @@ class TutorService
         $request->session()->put('inputs', $inputs);
         $request->session()->put('filter', $filter);
 
+        if ($request->has('temporary_filter') &&
+            $request->temporary_filter === true)
+        {
+            // Useful when accessed from dashboard
+            $request->session()->put('admin_temporary_filter_tutors', true);
+        }
+
         return redirect()->route('admin.tutors-index');
     }
 
     public function clearFilters(Request $request)
     {
         // Forget multiple session variables in one line
-        $request->session()->forget(['result', 'filter', 'inputs']);
+        $request->session()->forget(['result', 'filter', 'inputs', 'remove_admin_temporary_filter_tutors']);
 
         return redirect()->route('admin.tutors-index');
     }

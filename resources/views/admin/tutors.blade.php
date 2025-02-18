@@ -6,6 +6,8 @@ $statusOptions = [
     '1' => 'Pending',
     '2' => 'Verified'
 ];
+
+$hasAdminTemporaryFilterTutors = session()->has('admin_temporary_filter_tutors');
 @endphp
 @extends('shared.base-admin')
 
@@ -77,7 +79,13 @@ $statusOptions = [
                         </select>
                     </div>
                 </div>
-                <button class="btn btn-sm btn-danger w-100 action-button">Find Results</button>
+                <button class="btn btn-sm btn-danger w-100 action-button"
+                    @if ($hasAdminTemporaryFilterTutors)
+                        {{ 'disabled' }}
+                    @endif>
+                    Find Results
+                </button>
+
                 @if (isset($hasFilter))
                     <a role="button" href="{{ route('admin.tutors-clear-filter') }}"
                       class="btn btn-sm btn-outline-secondary w-100 mt-2 btn-clear-results">Clear Filters</a>
@@ -162,6 +170,12 @@ $statusOptions = [
                 @endif
             @endforelse
 
+            @if ($hasAdminTemporaryFilterTutors)
+                @php
+                    session()->forget('admin_temporary_filter_tutors');
+                    session()->put('remove_admin_temporary_filter_tutors', true);
+                @endphp
+            @endif
             {{ $tutors->links() }}
         </div>
 

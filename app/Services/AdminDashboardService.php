@@ -9,11 +9,12 @@ use App\Models\PendingRegistration;
 use App\Models\User;
 use Hashids\Hashids;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use Exception;
+use Session;
 
 class AdminDashboardService
 {
-    const Role = User::ROLE_TUTOR;
-
     private $tutorHashIds;
     private $learnerHashIds;
 
@@ -23,7 +24,7 @@ class AdminDashboardService
         $this->learnerHashIds = new Hashids(HashSalts::Learners, 10);
     }
 
-    public function getTotals()
+    public function getTotals(): array
     {
         $strRoleTutor    = User::ROLE_TUTOR;
         $strRoleLearner  = User::ROLE_LEARNER;
@@ -131,5 +132,34 @@ class AdminDashboardService
         $viewData['totalPending']  = $totalPending;
 
         return $viewData;
+    }
+
+    public function viewDashboardPendingRegistration(Request $request)
+    {
+        try
+        {
+            // Create a new request with the data you want to pass
+            $data = [
+                'search-keyword'    => '',
+                'select-status'     => '1',
+                'select-entries'    => '10',
+                'select-disability' => -1,
+                'temporary_filter'  => true
+            ];
+
+            $request = Request::create(route('admin.tutors-filter'), 'POST', $data);
+
+            // Set the session on the request
+            $request->setLaravelSession(Session::getFacadeRoot());
+
+            // Call the filterTutors method and pass the request
+            $response = app()->call('App\Http\Controllers\AdminController@tutors_filter', ['request' => $request]);
+
+            return $response;
+        }
+        catch (Exception $e)
+        {
+            return response()->view('errors.500', [], 500);
+        }
     }
 }

@@ -110,7 +110,7 @@ body {
 .poppins-medium   { font-family: 'Poppins-Medium'; }
 .w-0 { width: 0; }
 .w-15 { width: 15% !important;}
-
+.opacity-85 { opacity: 0.85; }
 /*============= OVERRIDDEN CLASSES ============*/
 .was-validated .form-control:valid {
     border-color: #9A7FB7 !important;

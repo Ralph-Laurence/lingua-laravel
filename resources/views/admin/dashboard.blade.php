@@ -5,7 +5,7 @@
 @section('content')
 <section class="container">
 
-    <div class="row mb-3">
+    <div class="row mb-3 counter-cards-container">
         <div class="col-3">
             <div class="card bg-primary">
                 <div class="card-body text-white">
@@ -50,7 +50,12 @@
                         <h5 class="fw-bold m-0">{{ $totals['totalPending'] }}</h5>
                     </div>
                     <hr class="my-1">
-                    <small class="flex-fill text-danger-accent m-0 text-12">*All unapproved tutors</small>
+                    <div class="d-flex align-items-center gap-2">
+                        <small class="flex-fill text-white fw-normal opacity-85 m-0 text-12">* Unapproved tutors</small>
+                        @if (!empty($totals['totalPending']))
+                            <a class="btn btn-sm btn-light text-12" href="{{ route('admin.dashboard.view-pending') }}">View</a>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -161,9 +166,7 @@
         .text-orange-accent {
             color: #fcd5b4;
         }
-        .text-danger-accent {
-            color: #f3a5ad;
-        }
+
         .photo-item {
             width: fit-content;
         }
@@ -178,6 +181,10 @@
             width: 80px;
             height: 80px;
             border-radius: .25rem;
+        }
+        .counter-cards-container .card {
+            max-height: 90px;
+            height: 90px;
         }
     </style>
 @endpush
