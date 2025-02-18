@@ -4,7 +4,7 @@
     @endpush
 @endonce
 
-<div id="pdf-viewer" class="modal" data-bs-backdrop="static">
+<div id="pdf-viewer" class="modal fade" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">

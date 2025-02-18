@@ -109,7 +109,7 @@ const resetFormOnModalClosed = function(modalSelector, options)
 
 $(document).ready(function()
 {
-    docViewerEvt = DocumentViewerDialog.events;
+    let docViewerEvt = DocumentViewerDialog.events;
 
     $(document).on(docViewerEvt.NotFound, function()
     {

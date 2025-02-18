@@ -21,6 +21,10 @@ class DocumentViewerDialog
 
     static async show(src)
     {
+        // this turns off the editor toolbar for pdf iframe
+        if (!src.endsWith('#toolbar=0'))
+            src = `${src}#toolbar=0`;
+
         if (this.pdfIframe == undefined)
             return;
 

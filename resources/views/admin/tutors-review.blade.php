@@ -218,7 +218,7 @@
 
         </section>
     </main>
-    <div id="pdf-viewer" class="modal" tabindex="-1">
+    {{-- <div id="pdf-viewer" class="modal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -233,9 +233,11 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 @endsection
-
+@push('dialogs')
+    <x-document-viewer-dialog />
+@endpush
 @push('style')
     <style>
         textarea#address {
@@ -249,11 +251,14 @@
 
 @push('scripts')
     <script src="{{ asset('assets/lib/waitingfor/bootstrap-waitingfor.min.js') }}"></script>
+    <script src="{{ asset('assets/js/utils.js') }}"></script>
     <script>
         function autoResize(textarea) {
             textarea.style.height = 'auto';
             textarea.style.height = textarea.scrollHeight + 'px';
         }
+
+        let docViewerEvt = DocumentViewerDialog.events;
 
         $(document).ready(function()
         {
@@ -267,8 +272,10 @@
             $('.btn-view-doc-proof').on('click', function()
             {
                 let pdfUrl = $(this).data('pdf-url');
-                $('#pdf-iframe').attr('src', pdfUrl);
-                $('#pdf-viewer').modal('show');
+                // $('#pdf-iframe').attr('src', pdfUrl);
+                // $('#pdf-viewer').modal('show');
+
+                DocumentViewerDialog.show(pdfUrl);
             });
 
             $('#btn-approve').on('click', function(e)
@@ -294,6 +301,15 @@
                 });
                 window.location.href = $(this).attr('href');
             });
-        });
+        })
+        .on(docViewerEvt.NotFound, function()
+        {
+            MsgBox.showError("Sorry, we're unable to find the document. It might have already been removed.");
+        })
+        .on(docViewerEvt.LoadStarted,  () => showWaiting())
+        .on(docViewerEvt.LoadFinished, () => waitingDialog.hide())
+        .on('showWaitingDialog', () => showWaiting())
+        .on('hideWaitingDialog', () => waitingDialog.hide());
+
     </script>
 @endpush
