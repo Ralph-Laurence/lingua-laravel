@@ -20,7 +20,7 @@ class EditSectionWorkExp
         $('#btn-add-workexp').on('click', () => this.upsertModal.showCreate());
 
         $('.btn-remove-workexp').on('click', (e) => {
-            let that = $(e.target);
+            let that = $(e.currentTarget);
             let docId = that.data('doc-id');
 
             if (docId.trim() === '')

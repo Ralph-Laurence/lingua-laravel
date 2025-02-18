@@ -15,7 +15,8 @@
                 <iframe id="pdf-iframe" src="" style="width: 100%; min-height: 400px;" frameborder="0"></iframe>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-primary px-3" data-bs-dismiss="modal">OK, Close</button>
+                {{-- <button type="button" class="btn btn-sm btn-primary px-3" data-bs-dismiss="modal">OK, Close</button> --}}
+                <x-slbutton type="button" style="primary" data-bs-dismiss="modal" text="OK, Close"/>
             </div>
         </div>
     </div>

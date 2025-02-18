@@ -23,7 +23,7 @@ class EditSectionCertification
         $('#btn-add-certification').on('click', () => this.upsertModal.showCreate());
 
         $('.btn-remove-certification').on('click', (e) => {
-            let that = $(e.target);
+            let that = $(e.currentTarget);
             let docId = that.data('doc-id');
 
             if (docId.trim() === '')

@@ -43,7 +43,8 @@
                 {{ $preRenderContent }}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary btn-ok text-14 px-3" data-bs-dismiss="modal">OK</button>
+                {{-- <button type="button" class="btn btn-primary btn-ok text-14 px-3" data-bs-dismiss="modal">OK</button> --}}
+                <x-slbutton type="button" style="primary" class="btn-ok px-3" text="OK" data-bs-dismiss="modal" />
             </div>
         </div>
     </div>

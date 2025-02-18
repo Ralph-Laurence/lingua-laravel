@@ -15,8 +15,10 @@
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-cancel text-14 px-3" data-bs-dismiss="modal">No</button>
-                <button type="button" class="btn btn-primary btn-ok text-14 px-3" data-bs-dismiss="modal">Yes</button>
+                {{-- <button type="button" class="btn btn-secondary btn-cancel text-14 px-3" data-bs-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary btn-ok text-14 px-3" data-bs-dismiss="modal">Yes</button> --}}
+                <x-slbutton type="button" style="secondary" class="btn-cancel px-3" text="No" data-bs-dismiss="modal" />
+                <x-slbutton type="button" style="primary" class="btn-ok px-3" text="Yes" data-bs-dismiss="modal" />
             </div>
         </div>
     </div>
