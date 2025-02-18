@@ -99,18 +99,27 @@
                             class="border border-2 bg-white border-dark rounded-circle">
                     </a>
                     <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
-                        <li>
-                            <a class="dropdown-item text-14 text-secondary" href="{{ route('myprofile.edit') }}">
-                                <i class="fas fa-user me-2"></i>My Profile
-                            </a>
-                        </li>
+                        @if ($isPendingAccount)
+                            <div class="text-12 text-muted py-2 px-3" style="max-width: 250px;">
+                                <img src="{{ asset('assets/img/icn_badge_pending.png') }}" width="20" height="20" alt="warning" class="d-inline">
+                                <strong>Note:</strong> We are currently reviewing your registration, so you cannot make changes to your profile at the moment.<br><br/>
+                                You will be able to make changes once your account has been approved by our administrators. Thank you for your patience!
+                            </div>
+                        @else
+
+                            <li>
+                                <a class="dropdown-item text-14 text-secondary" href="{{ route('myprofile.edit') }}">
+                                    <i class="fas fa-user me-2"></i>My Profile
+                                </a>
+                            </li>
+                        @endif
                         <li>
                             <hr class="dropdown-divider">
                         </li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <a class="dropdown-item text-14 text-secondary"
+                                <a class="dropdown-item text-14 text-secondary cursor-pointer"
                                     onclick="event.preventDefault(); this.closest('form').submit();">
                                     <i class="fas fa-power-off me-2"></i>Sign Out
                                 </a>

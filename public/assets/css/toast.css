@@ -31,3 +31,7 @@
 .primary-toast .toast-body {
     color: #dbcbff;
 }
+
+.toast-container .toast:not(.showing):not(.show) {
+    display: none;
+}

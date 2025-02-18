@@ -36,9 +36,10 @@
                 </a>
                 <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
                     <li>
-                        <a class="dropdown-item text-14" href="#">
-                            <i class="fas fa-user me-2"></i>My Profile
-                        </a>
+                        <div class="text-12 text-muted py-2 px-3">
+                            <img src="{{ asset('assets/img/icn_badge_pending.png') }}" width="20" height="20" alt="warning" class="d-inline">
+                            Your profile is managed by your IT department.
+                        </div>
                     </li>
                     <li>
                         <hr class="dropdown-divider">
@@ -46,7 +47,7 @@
                     <li>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <a class="dropdown-item text-14"  onclick="event.preventDefault(); this.closest('form').submit();">
+                            <a class="dropdown-item text-14 cursor-pointer"  onclick="event.preventDefault(); this.closest('form').submit();">
                                 <i class="fas fa-power-off me-2"></i>Sign Out
                             </a>
                         </form>
