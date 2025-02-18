@@ -111,7 +111,20 @@ body {
 .w-0 { width: 0; }
 .w-15 { width: 15% !important;}
 .opacity-85 { opacity: 0.85; }
+
+
 /*============= OVERRIDDEN CLASSES ============*/
+
+.form-check-input:checked {
+    background-color: #FE9424;
+    border-color: #FE9424;
+}
+.form-check-input:focus {
+    border-color: #fee886;
+    outline: 0;
+    box-shadow: 0 0 0 .25rem rgba(253, 169, 13, 0.25);
+}
+
 .was-validated .form-control:valid {
     border-color: #9A7FB7 !important;
     box-shadow: 0 0 0 .25rem rgba(44, 26, 78, .25) !important;

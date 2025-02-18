@@ -90,7 +90,7 @@
             </div>
         </div>
 
-        <div class="card shadow-sm mb-3">
+        <div class="card shadow-sm mb-5">
             <div class="card-body p-5">
                 <div class="row mx-auto">
                     <div class="col-12 col-md-5">
@@ -101,6 +101,31 @@
                     </div>
                     <div class="col-12 col-md-5">
                         @include('myprofile.edit-section-password')
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-5">
+                <div class="row mx-auto">
+                    <div class="col-12 col-md-5">
+                        <h6 class="poppins-semibold flex-fill mb-3">Community Inclusivity</h6>
+                        <div class="text-13 msw-justify">
+                            We at <strong><i>SignLingua ASL</i></strong>, are dedicated to promoting inclusivity and ensuring that everyone
+                            feels welcome and valued. Regardless of any impairments or disabilities you may have, you are an
+                            important part of our community. We embrace and celebrate diversity, and we are committed to providing
+                            a supportive and accessible environment for all individuals.
+                        </div>
+                        <div class="alert alert-secondary text-13 mt-3">
+                            We encourage you to share your preferred way of communicating by selecting an option from the choices in the section to the right labeled "<strong>Ways You Communicate.</strong>"
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-2 gx-0 flex-center">
+                        <div class="border-end h-100 w-0"></div>
+                    </div>
+                    <div class="col-12 col-md-5">
+                        @include('myprofile.edit-section-disability')
                     </div>
                 </div>
             </div>
@@ -121,7 +146,6 @@
                             <div class="border-end h-100 w-0"></div>
                         </div>
                         <div class="col">
-                            @include('myprofile.edit-section-disability')
                         </div>
                         {{-- <div class="col">
                             @include('myprofile.edit-section-about-me')

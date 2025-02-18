@@ -55,6 +55,11 @@ class MyProfileController extends Controller
         return $this->myProfileService->updateBio($request);
     }
 
+    public function updateDisability(Request $request)
+    {
+        return $this->myProfileService->updateDisability($request);
+    }
+
     public function revertEmailUpdate()
     {
         return $this->myProfileService->revertEmailUpdate();

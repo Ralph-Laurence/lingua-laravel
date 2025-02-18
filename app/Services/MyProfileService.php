@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Http\Utils\Constants;
 use App\Http\Utils\HashSalts;
 use App\Mail\RevertEmailUpdateMail;
-use App\Models\FieldNames\DocProofFields;
 use App\Models\FieldNames\PendingEmailUpdateFields;
 use App\Models\FieldNames\ProfileFields;
 use App\Models\FieldNames\UserFields;
@@ -13,7 +12,6 @@ use App\Models\PendingEmailUpdate;
 use App\Models\Profile;
 use App\Models\User;
 use App\Rules\CheckCurrentPassword;
-use App\Rules\CheckOldPassword;
 use App\Rules\PreventPasswordReuse;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -85,7 +83,8 @@ class MyProfileService
             'photoExists'   => $photoExists,
             'contact'       => $phone,
             'address'       => $userObj->{UserFields::Address},
-            'role'          => $role
+            'role'          => $role,
+            'disability'    => $userObj->{ProfileFields::Disability}
         ];
 
         //
@@ -257,6 +256,40 @@ class MyProfileService
         {
             DB::rollBack();
             session()->flash('profile_update_message', "An error occurred while trying to update your bio. Please try again later.");
+        }
+
+        return redirect()->route('myprofile.edit');
+    }
+
+    public function updateDisability(Request $request)
+    {
+        $rules    = ['disability' => 'required|integer|in:0,1,2,3' ];
+        $messages = ['disability.required' => 'Please select your preferred way of communicating'];
+
+        $validator = Validator::make($request->only('disability'), $rules, $messages);
+
+        if ($validator->fails())
+        {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        DB::beginTransaction();
+
+        try
+        {
+            $profile = Profile::where(ProfileFields::UserId, Auth::id())->firstOrFail();
+
+            // Update the bio
+            $profile->{ProfileFields::Disability} = $request->disability;
+            $profile->save();
+
+            DB::commit();
+            session()->flash('profile_update_message', "Your mode of communication has been successfully updated.");
+        }
+        catch (Exception $ex)
+        {
+            DB::rollBack();
+            session()->flash('profile_update_message', "An error occurred while trying to update your profile. Please try again later.");
         }
 
         return redirect()->back();

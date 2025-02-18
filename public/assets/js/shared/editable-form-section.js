@@ -96,7 +96,10 @@ function makeFieldsReadonly(targetForm, makeReadonly)
         $(this).attr('readonly', makeReadonly);
     });
 
-    $(document).trigger('')
+    $(document).trigger('formSectionUnlocked', {
+        'scope': targetForm,
+        'madeReadOnly': makeReadonly
+    });
 }
 
 function handleOriginalDataReset()
