@@ -110,7 +110,10 @@
             <div class="card-body p-5">
                 <div class="row mx-auto">
                     <div class="col-12 col-md-5">
-                        <h6 class="poppins-semibold flex-fill mb-3">Community Inclusivity</h6>
+                        <div class="d-flex align-items-center mb-3 gap-2">
+                            <img src="{{ asset('assets/img/logo-s.png') }}" alt="logo" width="28" height="28">
+                            <h6 class="poppins-semibold flex-fill mb-0">Community Inclusivity</h6>
+                        </div>
                         <div class="text-13 msw-justify">
                             We at <strong><i>SignLingua ASL</i></strong>, are dedicated to promoting inclusivity and ensuring that everyone
                             feels welcome and valued. Regardless of any impairments or disabilities you may have, you are an
@@ -146,10 +149,8 @@
                             <div class="border-end h-100 w-0"></div>
                         </div>
                         <div class="col">
-                        </div>
-                        {{-- <div class="col">
                             @include('myprofile.edit-section-about-me')
-                        </div> --}}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -163,12 +164,14 @@
 @endsection
 
 @push('scripts')
+    <script src="{{ asset('assets/lib/dompurify/purify.min.js') }}"></script>
     <script src="{{ asset('assets/js/my-profile/my-profile.js') }}"></script>
     <script src="{{ asset("assets/js/shared/editable-form-section.js") }}"></script>
     <script src="{{ asset('assets/js/my-profile/edit-section-education.js') }}"></script>
     <script src="{{ asset('assets/js/my-profile/edit-section-workexp.js') }}"></script>
     <script src="{{ asset('assets/js/my-profile/edit-section-certification.js') }}"></script>
     <script src="{{ asset('assets/js/my-profile/edit-section-skills.js') }}"></script>
+    <script src="{{ asset('assets/js/my-profile/edit-section-about.js') }}"></script>
 
     @if (session()->has('profile_update_err_alert'))
         <script>

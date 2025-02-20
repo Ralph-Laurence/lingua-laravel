@@ -54,6 +54,10 @@ class MyProfileController extends Controller
     {
         return $this->myProfileService->updateBio($request);
     }
+    public function updateAbout(Request $request)
+    {
+        return $this->myProfileService->updateAbout($request);
+    }
 
     public function updateDisability(Request $request)
     {

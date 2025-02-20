@@ -78,6 +78,7 @@ Route::controller(MyProfileController::class)
     Route::post('/update-identity',         'updateIdentity')->name('profile.update-identity');
     Route::post('/update-account',          'updateAccount')->name('profile.update-account');
     Route::post('/update-bio',              'updateBio')->name('profile.update-bio');
+    Route::post('/update-about',            'updateAbout')->name('profile.update-about');
     Route::post('/update-disability',       'updateDisability')->name('myprofile.update-disability');
 
     Route::post('/revert-email',            'revertEmailUpdate')->name('myprofile.revert-email');

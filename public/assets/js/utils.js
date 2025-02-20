@@ -57,3 +57,22 @@ function decodeHtmlEntities(str)
     const decodedString = parser.parseFromString(`<!doctype html><body>${str}`, 'text/html').body.textContent;
     return decodedString;
 }
+
+function htmlToPlainText(html) {
+    // Sanitize the HTML first
+    const sanitized = DOMPurify.sanitize(html);
+
+    // Replace specific tags with line breaks
+    let plainText = sanitized
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>/gi, '\n')
+        // .replace(/<\/p>/gi, '\n\n')
+        .replace(/<p>/gi, '');
+
+    // Strip all remaining HTML tags
+    plainText = plainText.replace(/<[^>]*>/g, '');
+
+    // Trim extra whitespace
+    return plainText.trim();
+}
+

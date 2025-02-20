@@ -24,6 +24,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
 use Hashids\Hashids;
+use HTMLPurifier_Config;
+use HTMLPurifier;
 
 class MyProfileService
 {
@@ -261,6 +263,46 @@ class MyProfileService
         return redirect()->route('myprofile.edit');
     }
 
+    public function updateAbout(Request $request)
+    {
+        $rules    = ['input-about-me' => 'required|string|max:2000' ];
+        $messages = ['input-about-me.required' => "Please share what makes you unique and what you're most proud of."];
+
+        $validator = Validator::make($request->only('input-about-me'), $rules, $messages);
+
+        if ($validator->fails())
+        {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        DB::beginTransaction();
+
+        try
+        {
+            $profile = Profile::where(ProfileFields::UserId, Auth::id())->firstOrFail();
+
+            $config     = HTMLPurifier_Config::createDefault();
+            $purifier   = new HTMLPurifier($config);
+            $about      = $purifier->purify($validator->validated()['input-about-me']);
+
+            // $inputs = $about;
+            // return view('test.test', compact('inputs'));
+
+            $profile->{ProfileFields::About} = $about;
+            $profile->save();
+
+            DB::commit();
+            session()->flash('profile_update_message', "Your profile has been successfully updated.");
+        }
+        catch (Exception $ex)
+        {
+            error_log($ex->getMessage());
+            DB::rollBack();
+            session()->flash('profile_update_message', "An error occurred while trying to update your profile. Please try again later.");
+        }
+
+        return redirect()->route('myprofile.edit');
+    }
     public function updateDisability(Request $request)
     {
         $rules    = ['disability' => 'required|integer|in:0,1,2,3' ];
